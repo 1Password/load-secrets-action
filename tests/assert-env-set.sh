@@ -8,6 +8,8 @@ assert_env_equals() {
 
 assert_env_equals "SECRET" "RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLCB0aGlzIGlzIGp1c3QgYSBkdW1teSBzZWNyZXQuIFBsZWFzZSBkb24ndCByZXBvcnQgaXQu"
 
+assert_env_equals "SECRET_IN_SECTION" "RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLCB0aGlzIGlzIGp1c3QgYSBkdW1teSBzZWNyZXQuIFBsZWFzZSBkb24ndCByZXBvcnQgaXQu"
+
 assert_env_equals "MULTILINE_SECRET" "$(cat << EOF
 -----BEGIN PRIVATE KEY-----
 RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLApXaGls

@@ -7,4 +7,5 @@ assert_env_unset() {
 }
 
 assert_env_unset "SECRET"
+assert_env_unset "SECRET_IN_SECTION"
 assert_env_unset "MULTILINE_SECRET"
