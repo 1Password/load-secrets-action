@@ -1,0 +1,14 @@
+name: configure-action
+inputs:
+  connect-host:
+    description: Your 1Password Connect instance URL
+  connect-token:
+    description: Token to authenticate to your 1Password Connect instance
+runs:
+  using: composite
+  steps: 
+    - run: |
+        export INPUT_CONNECT_HOST=${{ inputs.connect-host }}
+        export INPUT_CONNECT_TOKEN=${{ inputs.connect-token }}
+        ${{ github.action_path }}/entrypoint.sh
+      shell: bash
