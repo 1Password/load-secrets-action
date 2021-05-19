@@ -1,0 +1,77 @@
+on: push
+name: Run acceptance tests
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Launch 1Password Connect instance
+        env:
+          OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
+        run: |
+          echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
+          docker-compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
+      - name: Load secrets
+        uses: ./
+        env:
+          OP_CONNECT_HOST: http://localhost:8080
+          OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
+          SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
+          MULTILINE_SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
+      - name: Print environment variables with masked secrets
+        run: printenv
+      - name: Assert test secret values
+        env:
+          EXPECTED_SECRET: RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLCB0aGlzIGlzIGp1c3QgYSBkdW1teSBzZWNyZXQuIFBsZWFzZSBkb24ndCByZXBvcnQgaXQu
+          EXPECTED_MULTILINE_SECRET: |-
+            -----BEGIN PRIVATE KEY-----
+            RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLApXaGls
+            ZSB3ZSBkZWVwbHkgYXBwcmVjaWF0ZSB5b3VyIHZp
+            Z2lsYW5jZSBhbmQgZWZmb3J0cyB0byBtYWtlIHRo
+            ZSB3b3JsZCBtb3JlIHNlY3VyZSwgSSdtIGFmcmFp
+            ZCBJIG11c3QgdGVsbCB5b3UgdGhhdCB0aGlzIHZh
+            bHVlIGlzIG5vdCBhIGFjdHVhbCBwcml2YXRlIGtl
+            eS4gCkl0J3MgYSBqdXN0IGEgZHVtbXkgc2VjcmV0
+            IHRoYXQgd2UgdXNlIHRvIHRlc3QgdmFyaW91cyAx
+            UGFzc3dvcmQgc2VjcmV0cyBpbnRlZ3JhdGlvbnMu
+            IApTbyBwbGVhc2UgZG9uJ3QgcmVwb3J0IGl0IQo=
+            -----END PRIVATE KEY-----
+        run: |
+          if [ "$SECRET" != "$EXPECTED_SECRET" ]; then
+            echo -e "Expected test SECRET to be set to:\n$EXPECTED_SECRET\nBut got:\n$SECRET"
+            exit 1
+          fi
+
+          if [ "$MULTILINE_SECRET" != "$EXPECTED_MULTILINE_SECRET" ]; then
+            echo -e "Expected MULTILINE_SECRET to be set to:\n$EXPECTED_MULTILINE_SECRET\nBut got:\n$MULTILINE_SECRET"
+            exit 1
+          fi
+      - name: Remove secrets
+        uses: ./
+        with:
+          unset-previous: true
+      - name: Print environment variables with secrets removed
+        run: printenv
+      - name: Assert removed secrets
+        run: |
+          if [ -n "$SECRET" ] || [ -n "$MULTILINE_SECRET" ]; then
+            echo "Expected secrets from 1Password to be unset"
+            exit 1
+          fi
+      - name: Load secret again
+        uses: ./
+        env:
+          OP_CONNECT_HOST: http://localhost:8080
+          OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
+          SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
+      - name: Print environment variables with masked secrets
+        run: printenv
+      - name: Assert test secret value
+        env:
+          EXPECTED_SECRET: RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLCB0aGlzIGlzIGp1c3QgYSBkdW1teSBzZWNyZXQuIFBsZWFzZSBkb24ndCByZXBvcnQgaXQu
+        run: |
+          if [ "$SECRET" != "$EXPECTED_SECRET" ]; then
+            echo -e "Expected test SECRET to be set to:\n$EXPECTED_SECRET\nBut got:\n$SECRET"
+            exit 1
+          fi
