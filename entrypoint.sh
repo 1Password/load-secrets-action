@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2046,SC2001,SC2086
 set -e
 
 managed_by_statement="Managed by 1Password"

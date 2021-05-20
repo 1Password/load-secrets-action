@@ -1,4 +1,7 @@
 #!/bin/bash
+# shellcheck disable=SC2086
+set -e
+
 assert_env_equals() {
   if [ "$(printenv $1)" != "$2" ]; then
     echo -e "Expected $1 to be set to:\n$2\nBut got:\n$(printenv $1)"

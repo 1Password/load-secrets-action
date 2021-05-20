@@ -1,4 +1,7 @@
 #!/bin/bash
+# shellcheck disable=SC2086
+set -e
+
 assert_env_unset() {
   if [ -n "$(printenv $1)" ]; then
     echo "Expected secret $1 to be unset"
