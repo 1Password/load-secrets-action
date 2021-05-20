@@ -1,4 +1,4 @@
-name: env-export-action
+name: Load secrets from 1Password
 inputs:
   unset-previous:
     description: Whether to unset environment variables populated by 1Password in earlier job steps
