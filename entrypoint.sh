@@ -3,6 +3,11 @@ set -e
 
 managed_by_statement="Managed by 1Password"
 
+if [ -z "$OP_CONNECT_TOKEN" ] || [ -z "$OP_CONNECT_HOST" ]; then
+  echo "\$OP_CONNECT_TOKEN and \$OP_CONNECT_HOST must be set"
+  exit 1
+fi
+
 # Unset all secrets managed by 1Password if `unset-previous` is set.
 if [ "$INPUT_UNSET_PREVIOUS" == "true" ]; then
   echo "Unsetting previous values..."
