@@ -1,4 +1,9 @@
 name: Load secrets from 1Password
+description: Make secrets from 1Password Connect available as environment variables in the next steps.
+author: 1Password
+branding:
+  icon: lock
+  color: blue
 inputs:
   unset-previous:
     description: Whether to unset environment variables populated by 1Password in earlier job steps

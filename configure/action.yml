@@ -1,4 +1,6 @@
-name: configure-action
+name: Configure 1Password Connect
+description: Persist 1Password Connect host and token for use in next steps.
+author: 1Password
 inputs:
   connect-host:
     description: Your 1Password Connect instance URL
