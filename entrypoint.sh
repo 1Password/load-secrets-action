@@ -2,22 +2,20 @@
 # shellcheck disable=SC2046,SC2001,SC2086
 set -e
 
-managed_by_statement="Managed by 1Password"
-
 if [ -z "$OP_CONNECT_TOKEN" ] || [ -z "$OP_CONNECT_HOST" ]; then
   echo "\$OP_CONNECT_TOKEN and \$OP_CONNECT_HOST must be set"
   exit 1
 fi
 
+managed_variables_var="OP_MANAGED_VARIABLES"
+IFS=',' read -r -a managed_variables <<< "$(printenv $managed_variables_var)"
+
 # Unset all secrets managed by 1Password if `unset-previous` is set.
 if [ "$INPUT_UNSET_PREVIOUS" == "true" ]; then
   echo "Unsetting previous values..."
 
-  # Iterate over 'Managed by 1Password' comments in environment.
-  printenv | grep "$managed_by_statement" | while read -r comment; do
-    # Extract env var name and heredoc identifier from comment.
-    env_var=$(echo "$comment" | sed -e "s/.*$managed_by_statement: \(.*\)=.*/\1/")
-
+  # Find environment variables that are managed by 1Password.
+  for env_var in "${managed_variables[@]}"; do
     echo "Unsetting $env_var"
     unset $env_var
 
@@ -25,11 +23,14 @@ if [ "$INPUT_UNSET_PREVIOUS" == "true" ]; then
 
     # Keep the masks, just in case.
   done
+
+  managed_variables=()
 fi
 
 # Iterate over environment varables to find 1Password references, load the secret values, 
 # and make them available as environment variables in the next steps.
-printenv | grep "=op://" | grep -v "^#" | while read -r possible_ref; do
+IFS=$'\n'
+for possible_ref in $(printenv | grep "=op://" | grep -v "^#"); do
   env_var=$(echo "$possible_ref" | cut -d '=' -f1)
   ref=$(printenv $env_var)
 
@@ -104,11 +105,17 @@ printenv | grep "=op://" | grep -v "^#" | while read -r possible_ref; do
   random_heredoc_identifier=$(openssl rand -hex 16)
 
   {
-    # Add 'Managed by 1Password' comment, so in a later step it the secret can be unset again.
-    echo "# $managed_by_statement: $env_var=$ref"
     # Populate env var, using heredoc syntax with generated identifier
     echo "$env_var<<${random_heredoc_identifier}"
     echo "$secret_value"
     echo "${random_heredoc_identifier}"
   } >> $GITHUB_ENV
+
+  managed_variables+=("$env_var")
 done
+unset IFS
+
+# Add extra env var that lists which secrets are managed by 1Password so that in a later step
+# these can be unset again.
+managed_variables_str=$(IFS=','; echo "${managed_variables[*]}")
+echo "$managed_variables_var=$managed_variables_str" >> $GITHUB_ENV

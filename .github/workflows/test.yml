@@ -22,6 +22,9 @@ jobs:
         env:
           SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
           SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/test-section/password
+      - name: Load multiline secret
+        uses: ./ # 1password/load-secrets-action@<version>
+        env:
           MULTILINE_SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
       - name: Print environment variables with masked secrets
         run: printenv
