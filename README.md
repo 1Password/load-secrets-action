@@ -1,6 +1,6 @@
 # Load Secrets from 1Password - GitHub Action
 
-The action to load secrets from 1Password Connect into GitHub Actions.
+The action to load secrets from [1Password Connect](https://1password.com/secrets/) into GitHub Actions.
 
 Specify right from your workflow YAML which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
 
