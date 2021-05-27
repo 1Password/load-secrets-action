@@ -4,9 +4,6 @@ The action to load secrets from [1Password Connect](https://1password.com/secret
 
 Specify right from your workflow YAML which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
 
-Just like regular GitHub repository secrets, every secret from 1Password will automatically be masked from the GitHub Actions logs too.
-So if they accidentally get printed, they'll get replaced with `***`.
-
 ## Usage
 
 ```yml
@@ -107,6 +104,13 @@ So for example, the reference URI `op://app-cicd/aws/secret-access-key` would be
   * **Item:** `aws`
   * **Section:** default section
   * **Field:** `secret-access-key`
+
+## Masking
+
+Just like regular GitHub repository secrets, secrets loaded from 1Password will automatically be masked from the GitHub Actions logs too.
+If they accidentally get printed, they'll get replaced with `***`.
+
+To avoid unnecessary masks (like a username field), masks are only applied on fields marked as concealed (which show as `•••••` in the 1Password GUI) and on secure notes.
 
 ## Supported Runners
 
