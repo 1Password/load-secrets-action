@@ -73,18 +73,19 @@ for possible_ref in $(printenv | grep "=op://" | grep -v "^#"); do
   echo "Loading item $item from vault $vault..."
   item_json=$(curl -sSf -H "Content-Type: application/json" -H "Authorization: Bearer $OP_CONNECT_TOKEN" "$OP_CONNECT_HOST/v1/vaults/$vault/items/$item")
   jq_field_selector=".id == \"$field\" or .label == \"$field\""
+  jq_section_selector=".section == null"
 
   # If the reference contains a section, edit the jq selector to take that into account.
   if [ -n "$section" ]; then
     echo "Looking for section: $section"
     section_id=$(echo "$item_json" | jq -r ".sections[] | select(.id == \"$section\" or .label == \"$section\") | .id")
-    jq_field_selector=".section.id == \"$section_id\" and ($jq_field_selector)"
-  else
-    jq_field_selector=".section == null"
+    jq_section_selector=".section.id == \"$section_id\""
   fi
 
+  jq_secret_selector="$jq_section_selector and ($jq_field_selector)"
+
   echo "Looking for field: $field"
-  secret_field_json=$(echo "$item_json" | jq -r "first(.fields[] | select($jq_field_selector))")
+  secret_field_json=$(echo "$item_json" | jq -r "first(.fields[] | select($jq_secret_selector))")
 
   field_type=$(echo "$secret_field_json" | jq -r '.type')
   field_purpose=$(echo "$secret_field_json" | jq -r '.purpose')
