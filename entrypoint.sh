@@ -84,20 +84,27 @@ for possible_ref in $(printenv | grep "=op://" | grep -v "^#"); do
   fi
 
   echo "Looking for field: $field"
-  secret_value=$(echo "$item_json" | jq -r "first(.fields[] | select($jq_field_selector) | .value)")
+  secret_field_json=$(echo "$item_json" | jq -r "first(.fields[] | select($jq_field_selector))")
 
-  # Register a mask for the secret to prevent accidental log exposure.
-  # To support multiline secrets, escape percent signs and add a mask per line.
-  escaped_mask_value=$(echo "$secret_value" | sed -e 's/%/%25/g')
-  IFS=$'\n'
-  for line in $escaped_mask_value; do
-    if [ "${#line}" -lt 3 ]; then
-      # To avoid false positives and unreadable logs, omit mask for lines that are too short.
-      continue
-    fi
-    echo "::add-mask::$line"
-  done
-  unset IFS
+  field_type=$(echo "$secret_field_json" | jq -r '.type')
+  field_purpose=$(echo "$secret_field_json" | jq -r '.purpose')
+  secret_value=$(echo "$secret_field_json" | jq -r '.value')
+
+  # If the field is marked as concealed or is a note, register a mask
+  # for the secret to prevent accidental log exposure.
+  if [ "$field_type" == "CONCEALED" ] || [ "$field_purpose" == "NOTES" ]; then
+    # To support multiline secrets, escape percent signs and add a mask per line.
+    escaped_mask_value=$(echo "$secret_value" | sed -e 's/%/%25/g')
+    IFS=$'\n'
+    for line in $escaped_mask_value; do
+      if [ "${#line}" -lt 3 ]; then
+        # To avoid false positives and unreadable logs, omit mask for lines that are too short.
+        continue
+      fi
+      echo "::add-mask::$line"
+    done
+    unset IFS
+  fi
 
   # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
   # As the heredoc identifier, we'll use a randomly generated 64-character string,

@@ -22,6 +22,7 @@ jobs:
         env:
           SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
           SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/test-section/password
+          UNMASKED_VALUE: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/test-section/username
       - name: Load multiline secret
         uses: ./ # 1password/load-secrets-action@<version>
         env:
