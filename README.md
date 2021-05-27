@@ -13,12 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Load secret
         uses: 1password/load-secrets-action@v1
         env:
           OP_CONNECT_HOST: <Your Connect instance URL>
           OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
           SECRET: op://app-cicd/hello-world/secret
+
       - name: Print masked secret
         run: echo "Secret: $SECRET"
         # Prints: Secret: ***
@@ -83,13 +85,11 @@ jobs:
 ```
 </details>
 
-## 1Password Connect
+## Action Inputs
 
-To use the action, you need to have a [1Password Connect](https://support.1password.com/secrets-automation/#step-1-set-up-a-secrets-automation-workflow) instance deployed somewhere.
-To configure the action with your Connect URL and a Connect token, you can set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` variables.
-
-If you're using the `load-secrets` action more than once in a single job, you can use the `configure` action to avoid duplicate configuration. 
-Expand the usage snippet above to see an example of this.
+| Name | Default | Description |
+|---|---|---|
+| `unset-previous` | `false` | Whether to unset environment variables populated by 1Password in earlier job steps |
 
 ## Secrets Reference Syntax
 
@@ -112,19 +112,40 @@ If they accidentally get printed, they'll get replaced with `***`.
 
 To avoid unnecessary masks (like a username field), masks are only applied on fields marked as concealed (which show as `•••••` in the 1Password GUI) and on secure notes.
 
-## Supported Runners
+## 1Password Connect Configuration
 
-You can run the action on Linux and macOS runners. Windows is currently not supported.
+To use the action, you need to have a [1Password Connect](https://support.1password.com/secrets-automation/#step-1-set-up-a-secrets-automation-workflow) instance deployed somewhere.
+To configure the action with your Connect URL and a Connect token, you can set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` variables.
 
-## Action Inputs
+If you're using the `load-secrets` action more than once in a single job, you can use the `configure` action to avoid duplicate configuration:
 
-| Name | Default | Description |
-|---|---|---|
-| `unset-previous` | `false` | Whether to unset environment variables populated by 1Password in earlier job steps |
+```yml
+on: push
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-### Inputs for the `configure` action
+      - name: Configure 1Password Connect
+        uses: 1password/load-secrets-action/configure@v1
+        with:
+          connect-host: <Your Connect instance URL>
+          connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
+
+      - name: Load secret
+        uses: 1password/load-secrets-action@v1
+        env:
+          SECRET: op://app-cicd/hello-world/secret
+```
+
+### `configure` Action Inputs
 
 | Name | Default | Environment variable | Description |
 |---|---|---|---|
 | `connect-host` | | `OP_CONNECT_HOST` | Your 1Password Connect instance URL |
 | `connect-token` | | `OP_CONNECT_TOKEN` | Token to authenticate to your 1Password Connect instance |
+
+## Supported Runners
+
+You can run the action on Linux and macOS runners. Windows is currently not supported.
