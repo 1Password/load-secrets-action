@@ -107,10 +107,11 @@ So for example, the reference URI `op://app-cicd/aws/secret-access-key` would be
 
 ## Masking
 
-Just like regular GitHub repository secrets, secrets loaded from 1Password will automatically be masked from the GitHub Actions logs too.
-If they accidentally get printed, they'll get replaced with `***`.
+Similar to regular GitHub repository secrets, secret fields from 1Password will automatically be masked from the GitHub Actions logs too.
+A 1Password field is considered 'secret' when it's marked as concealed (which shows as `•••••••` in the 1Password GUI) or when it's a secure note.
+So if one of these values accidentally gets printed, it'll get replaced with `***`.
 
-To avoid unnecessary masks (like a username field), masks are only applied on fields marked as concealed (which show as `•••••` in the 1Password GUI) and on secure notes.
+This means that a username or port field for example will not get masked.
 
 ## 1Password Connect Configuration
 
