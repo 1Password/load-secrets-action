@@ -90,6 +90,11 @@ for possible_ref in $(printenv | grep "=op://" | grep -v "^#"); do
   field_purpose=$(echo "$secret_field_json" | jq -r '.purpose')
   secret_value=$(echo "$secret_field_json" | jq -r '.value')
 
+  if [ -z "$secret_value" ]; then
+    echo "Could not find or access secret $ref"
+    exit 1
+  fi
+
   # If the field is marked as concealed or is a note, register a mask
   # for the secret to prevent accidental log exposure.
   if [ "$field_type" == "CONCEALED" ] || [ "$field_purpose" == "NOTES" ]; then
