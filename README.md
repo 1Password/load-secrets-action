@@ -108,6 +108,10 @@ So for example, the reference URI `op://app-cicd/aws/secret-access-key` would be
   * **Section:** default section
   * **Field:** `secret-access-key`
 
+## Supported Runners
+
+You can run the action on Linux and macOS runners. Windows is currently not supported.
+
 ## Action Inputs
 
 | Name | Default | Description |
