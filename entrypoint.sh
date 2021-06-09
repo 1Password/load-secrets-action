@@ -27,6 +27,8 @@ if [ "$INPUT_UNSET_PREVIOUS" == "true" ]; then
   managed_variables=()
 fi
 
+curl_headers=(-H "Content-Type: application/json" -H "Authorization: Bearer $OP_CONNECT_TOKEN")
+
 # Iterate over environment varables to find 1Password references, load the secret values, 
 # and make them available as environment variables in the next steps.
 IFS=$'\n'
@@ -70,8 +72,27 @@ for possible_ref in $(printenv | grep "=op://" | grep -v "^#"); do
     section=""
   fi
 
+  if [[ $(echo -n $(echo $vault | grep "^[a-z0-9]*$") | wc -c) -ne 26 ]]; then
+    echo "Getting vault ID from vault name: $vault"
+    vault=$(curl -sSf "${curl_headers[@]}" "$OP_CONNECT_HOST/v1/vaults?filter=name%20eq%20%22$vault%22" | jq -r '.[0] | .id')
+    if [ -z "$vault" ]; then
+      echo "Could not find vault ID for vault: $vault"
+      exit 1
+    fi
+  fi
+
+  if [[ $(echo -n $(echo $item | grep "^[a-z0-9]*$") | wc -c) -ne 26 ]]; then
+    echo "Getting item ID from vault $vault..."
+    item=$(curl -sSf "${curl_headers[@]}" "$OP_CONNECT_HOST/v1/vaults/$vault/items?filter=title%20eq%20%22$item%22" | jq -r '.[0] | .id')
+    if [ -z "$item" ]; then
+      echo "Could not find item ID for item: $item"
+      exit 1
+    fi
+  fi
+
   echo "Loading item $item from vault $vault..."
-  item_json=$(curl -sSf -H "Content-Type: application/json" -H "Authorization: Bearer $OP_CONNECT_TOKEN" "$OP_CONNECT_HOST/v1/vaults/$vault/items/$item")
+  item_json=$(curl -sSf "${curl_headers[@]}" "$OP_CONNECT_HOST/v1/vaults/$vault/items/$item")
+
   jq_field_selector=".id == \"$field\" or .label == \"$field\""
   jq_section_selector=".section == null"
 

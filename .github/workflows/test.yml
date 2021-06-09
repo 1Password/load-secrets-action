@@ -39,12 +39,12 @@ jobs:
         run: printenv
       - name: Assert removed secrets
         run: ./tests/assert-env-unset.sh
-      - name: Load secret again
+      - name: Load secrets by vault and item titles
         uses: ./ # 1password/load-secrets-action@<version>
         env:
-          SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
-          SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/test-section/password
-          MULTILINE_SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
+          SECRET: op://acceptance-tests/test-secret/password
+          SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
+          MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
       - name: Print environment variables with masked secrets
         run: printenv
       - name: Assert test secret values again
