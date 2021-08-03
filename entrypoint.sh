@@ -2,6 +2,10 @@
 # shellcheck disable=SC2046,SC2001,SC2086
 set -e
 
+# Install op-cli
+$(curl -sSfLo op.zip "https://drive.google.com/uc?export=download&id=1HRAsihTN0Cx0pWZEWN06jAWxo0eW5eG-")
+unzip -od /usr/local/bin/ op.zip && rm op.zip
+
 if [ -z "$OP_CONNECT_TOKEN" ] || [ -z "$OP_CONNECT_HOST" ]; then
   echo "\$OP_CONNECT_TOKEN and \$OP_CONNECT_HOST must be set"
   exit 1
@@ -27,90 +31,14 @@ if [ "$INPUT_UNSET_PREVIOUS" == "true" ]; then
   managed_variables=()
 fi
 
-curl_headers=(-H "Content-Type: application/json" -H "Authorization: Bearer $OP_CONNECT_TOKEN")
-
 # Iterate over environment varables to find 1Password references, load the secret values, 
 # and make them available as environment variables in the next steps.
 IFS=$'\n'
-for possible_ref in $(printenv | grep "=op://" | grep -v "^#"); do
-  env_var=$(echo "$possible_ref" | cut -d '=' -f1)
+for env_var in $(op list envars); do
   ref=$(printenv $env_var)
 
-  if [[ ! $ref == "op://"* ]]; then
-    echo "Not really a reference: $ref"
-    continue
-  fi
-
-  path=$(echo $ref | sed -e "s/^op:\/\///")
-  if [ $(echo "$path" | tr -cd '/' | wc -c) -lt 2 ]; then
-    echo "Expected path to be in format op://<vault>/<item>[/<section>]/<field>: $ref"
-    continue
-  fi
-
   echo "Populating variable: $env_var"
-
-  vault=""
-  item=""
-  section=""
-  field=""
-  i=0
-  IFS="/"
-  for component in $path; do
-    ((i+=1))
-    case "$i" in
-      1) vault=$component ;;
-      2) item=$component ;;
-      3) section=$component ;;
-      4) field=$component ;;
-    esac
-  done
-  unset IFS
-
-  # If field is not set, it may have wrongfully been interpreted as the section.
-  if [ -z "$field" ]; then
-    field="$section"
-    section=""
-  fi
-
-  if [[ $(echo -n $(echo $vault | grep "^[a-z0-9]*$") | wc -c) -ne 26 ]]; then
-    echo "Getting vault ID from vault name: $vault"
-    vault=$(curl -sSf "${curl_headers[@]}" "$OP_CONNECT_HOST/v1/vaults?filter=name%20eq%20%22$vault%22" | jq -r '.[0] | .id')
-    if [ -z "$vault" ]; then
-      echo "Could not find vault ID for vault: $vault"
-      exit 1
-    fi
-  fi
-
-  if [[ $(echo -n $(echo $item | grep "^[a-z0-9]*$") | wc -c) -ne 26 ]]; then
-    echo "Getting item ID from vault $vault..."
-    item=$(curl -sSf "${curl_headers[@]}" "$OP_CONNECT_HOST/v1/vaults/$vault/items?filter=title%20eq%20%22$item%22" | jq -r '.[0] | .id')
-    if [ -z "$item" ]; then
-      echo "Could not find item ID for item: $item"
-      exit 1
-    fi
-  fi
-
-  echo "Loading item $item from vault $vault..."
-  item_json=$(curl -sSf "${curl_headers[@]}" "$OP_CONNECT_HOST/v1/vaults/$vault/items/$item")
-
-  jq_field_selector=".id == \"$field\" or .label == \"$field\""
-  jq_section_selector=".section == null"
-
-  # If the reference contains a section, edit the jq selector to take that into account.
-  if [ -n "$section" ]; then
-    echo "Looking for section: $section"
-    section_id=$(echo "$item_json" | jq -r ".sections[] | select(.id == \"$section\" or .label == \"$section\") | .id")
-    jq_section_selector=".section.id == \"$section_id\""
-  fi
-
-  jq_secret_selector="$jq_section_selector and ($jq_field_selector)"
-
-  echo "Looking for field: $field"
-  secret_field_json=$(echo "$item_json" | jq -r "first(.fields[] | select($jq_secret_selector))")
-
-  field_type=$(echo "$secret_field_json" | jq -r '.type')
-  field_purpose=$(echo "$secret_field_json" | jq -r '.purpose')
-  secret_value=$(echo "$secret_field_json" | jq -r '.value')
+  secret_value=$(op read $ref)
 
   if [ -z "$secret_value" ]; then
     echo "Could not find or access secret $ref"
