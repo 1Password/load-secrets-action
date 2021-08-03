@@ -3,7 +3,7 @@
 set -e
 
 # Install op-cli
-$(curl -sSfLo op.zip "https://drive.google.com/uc?export=download&id=1HRAsihTN0Cx0pWZEWN06jAWxo0eW5eG-")
+curl -sSfLo op.zip "https://drive.google.com/uc?export=download&id=1HRAsihTN0Cx0pWZEWN06jAWxo0eW5eG-"
 unzip -od /usr/local/bin/ op.zip && rm op.zip
 
 if [ -z "$USE_CONNECT" ]; then
