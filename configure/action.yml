@@ -6,11 +6,26 @@ inputs:
     description: Your 1Password Connect instance URL
   connect-token:
     description: Token to authenticate to your 1Password Connect instance
+  use-connect:
+    description: Use Connect for fetching secrets
+  user-domain:
+    description: Your sign-in address
+  user-email:
+    description: Your account email
+  user-key:
+    description: Your Account secret key
+  user-pwd:
+    description: Your Master Password
 runs:
   using: composite
   steps: 
     - run: |
         export INPUT_CONNECT_HOST=${{ inputs.connect-host }}
         export INPUT_CONNECT_TOKEN=${{ inputs.connect-token }}
+        export INPUT_USE_CONNECT=${{ inputs.use-connect }}
+        export INPUT_USER_DOMAIN=${{ inputs.user-domain }}
+        export INPUT_USER_EMAIL=${{ inputs.user-email }}
+        export INPUT_USER_KEY=${{ inputs.user-key }}
+        export INPUT_USER_PWD=${{ inputs.user-pwd }}
         ${{ github.action_path }}/entrypoint.sh
       shell: bash

@@ -49,3 +49,46 @@ jobs:
         run: printenv
       - name: Assert test secret values again
         run: ./tests/assert-env-set.sh
+  test-user:  
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure 1Password with a user
+        uses: ./configure # 1password/load-secrets-action/configure@<version>
+        with:
+          user-domain: ${{ secrets.USER_DOMAIN }}
+          user-email: ${{ secrets.USER_EMAIL }}
+          user-key: ${{ secrets.USER_KEY }}
+          user-pwd: ${{ secrets.USER_PWD }}
+      - name: Load secrets
+        uses: ./ # 1password/load-secrets-action@<version>
+        env:
+          SECRET: op://p4a7xwirm3lcwtu6okulbhym5i/mybhbbwhewncjb67cy4v7hjpgi/password
+          SECRET_IN_SECTION: op://p4a7xwirm3lcwtu6okulbhym5i/mybhbbwhewncjb67cy4v7hjpgi/test-section/password
+          UNMASKED_VALUE: op://p4a7xwirm3lcwtu6okulbhym5i/mybhbbwhewncjb67cy4v7hjpgi/test-section/username
+      - name: Load multiline secret
+        uses: ./ # 1password/load-secrets-action@<version>
+        env:
+          MULTILINE_SECRET: op://p4a7xwirm3lcwtu6okulbhym5i/bcshnrykfwf5i5zm7nkqy63dca/notesPlain
+      - name: Print environment variables with masked secrets
+        run: printenv
+      - name: Assert test secret values
+        run: ./tests/assert-env-set.sh
+      - name: Remove secrets
+        uses: ./ # 1password/load-secrets-action@<version>
+        with:
+          unset-previous: true
+      - name: Print environment variables with secrets removed
+        run: printenv
+      - name: Assert removed secrets
+        run: ./tests/assert-env-unset.sh
+      - name: Load secrets by vault and item titles
+        uses: ./ # 1password/load-secrets-action@<version>
+        env:
+          SECRET: op://acceptance-tests/test-secret/password
+          SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
+          MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
+      - name: Print environment variables with masked secrets
+        run: printenv
+      - name: Assert test secret values again
+        run: ./tests/assert-env-set.sh

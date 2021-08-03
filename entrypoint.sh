@@ -6,9 +6,19 @@ set -e
 $(curl -sSfLo op.zip "https://drive.google.com/uc?export=download&id=1HRAsihTN0Cx0pWZEWN06jAWxo0eW5eG-")
 unzip -od /usr/local/bin/ op.zip && rm op.zip
 
-if [ -z "$OP_CONNECT_TOKEN" ] || [ -z "$OP_CONNECT_HOST" ]; then
-  echo "\$OP_CONNECT_TOKEN and \$OP_CONNECT_HOST must be set"
-  exit 1
+if [ -z "$USE_CONNECT" ]; then
+  if [ -z "$OP_USER_DOMAIN" ] || [ -z "$OP_USER_EMAIL" ] || [ -z "$OP_USER_KEY" ] || [ -z "$OP_USER_PWD" ]; then
+    echo "\$OP_USER_DOMAIN, \$OP_USER_EMAIL, \$OP_USER_KEY and \$OP_USER_PWD must be set"
+    exit 1
+  fi
+
+  export OP_DEVICE=ugsqksnl4o6f2uwkyeibhqpony
+  eval $(printenv OP_USER_PWD | op signin "$OP_USER_DOMAIN" "$OP_USER_EMAIL" "$OP_USER_KEY")
+else
+  if [ -z "$OP_CONNECT_TOKEN" ] || [ -z "$OP_CONNECT_HOST" ]; then
+    echo "\$OP_CONNECT_TOKEN and \$OP_CONNECT_HOST must be set"
+    exit 1
+  fi
 fi
 
 managed_variables_var="OP_MANAGED_VARIABLES"
