@@ -45,21 +45,18 @@ for env_var in $(op list envars); do
     exit 1
   fi
 
-  # If the field is marked as concealed or is a note, register a mask
-  # for the secret to prevent accidental log exposure.
-  if [ "$field_type" == "CONCEALED" ] || [ "$field_purpose" == "NOTES" ]; then
-    # To support multiline secrets, escape percent signs and add a mask per line.
-    escaped_mask_value=$(echo "$secret_value" | sed -e 's/%/%25/g')
-    IFS=$'\n'
-    for line in $escaped_mask_value; do
-      if [ "${#line}" -lt 3 ]; then
-        # To avoid false positives and unreadable logs, omit mask for lines that are too short.
-        continue
-      fi
-      echo "::add-mask::$line"
-    done
-    unset IFS
-  fi
+  # Register a mask for the secret to prevent accidental log exposure.
+  # To support multiline secrets, escape percent signs and add a mask per line.
+  escaped_mask_value=$(echo "$secret_value" | sed -e 's/%/%25/g')
+  IFS=$'\n'
+  for line in $escaped_mask_value; do
+    if [ "${#line}" -lt 3 ]; then
+      # To avoid false positives and unreadable logs, omit mask for lines that are too short.
+      continue
+    fi
+    echo "::add-mask::$line"
+  done
+  unset IFS
 
   # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
   # As the heredoc identifier, we'll use a randomly generated 64-character string,
