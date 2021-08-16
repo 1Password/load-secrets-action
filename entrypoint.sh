@@ -3,7 +3,7 @@
 set -e
 
 # Install op-cli
-curl -sSfLo op.zip "https://drive.google.com/uc?export=download&id=1HRAsihTN0Cx0pWZEWN06jAWxo0eW5eG-"
+curl -sSfLo op.zip "https://drive.google.com/uc?export=download&id=1ih-kXa-5Jui4U-VETWbFqzfYUROB_Ukr"
 unzip -od /usr/local/bin/ op.zip && rm op.zip
 
 if [ -z "$OP_CONNECT_TOKEN" ] || [ -z "$OP_CONNECT_HOST" ]; then
@@ -34,7 +34,7 @@ fi
 # Iterate over environment varables to find 1Password references, load the secret values, 
 # and make them available as environment variables in the next steps.
 IFS=$'\n'
-for env_var in $(op list envars); do
+for env_var in $(op env ls); do
   ref=$(printenv $env_var)
 
   echo "Populating variable: $env_var"
