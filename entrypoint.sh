@@ -62,19 +62,28 @@ for env_var in $(op env ls); do
   done
   unset IFS
 
-  # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
-  # As the heredoc identifier, we'll use a randomly generated 64-character string,
-  # so that collisions are practically impossible.
-  random_heredoc_identifier=$(openssl rand -hex 16)
+  if [ "$INPUT_EXPORT_ENV" == "true" ]; then
+    # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
+    # As the heredoc identifier, we'll use a randomly generated 64-character string,
+    # so that collisions are practically impossible.
+    random_heredoc_identifier=$(openssl rand -hex 16)
+  
+    {
+      # Populate env var, using heredoc syntax with generated identifier
+      echo "$env_var<<${random_heredoc_identifier}"
+      echo "$secret_value"
+      echo "${random_heredoc_identifier}"
+    } >> $GITHUB_ENV
 
-  {
-    # Populate env var, using heredoc syntax with generated identifier
-    echo "$env_var<<${random_heredoc_identifier}"
-    echo "$secret_value"
-    echo "${random_heredoc_identifier}"
-  } >> $GITHUB_ENV
+    managed_variables+=("$env_var")
 
-  managed_variables+=("$env_var")
+  else
+    # Prepare the secret_value to be outputed properly (especially multiline secrets)
+    secret_value=$(echo "$secret_value" | awk -v ORS='%0A' '1')
+
+    echo "::set-output name=$env_var::$secret_value"
+  fi
+
 done
 unset IFS
 
