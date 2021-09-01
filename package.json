@@ -30,6 +30,7 @@
     "@actions/exec": "^1.1.0"
   },
   "devDependencies": {
+    "@types/node": "^16.7.10",
     "@vercel/ncc": "^0.30.0",
     "typescript": "^4.4.2"
   }
