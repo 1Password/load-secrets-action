@@ -3,7 +3,11 @@
 set -e
 
 # Install op-cli
-curl -sSfLo op.zip "https://drive.google.com/uc?export=download&id=1ih-kXa-5Jui4U-VETWbFqzfYUROB_Ukr"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  curl -sSfLo op.zip "https://bucket.agilebits.com/cli-private-beta/v2/op_linux_amd64_v2-alpha2.zip"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  curl -sSfLo op.zip "https://bucket.agilebits.com/cli-private-beta/v2/op_darwin_amd64_v2-alpha2.zip"
+fi
 unzip -od /usr/local/bin/ op.zip && rm op.zip
 
 if [ -z "$OP_CONNECT_TOKEN" ] || [ -z "$OP_CONNECT_HOST" ]; then
