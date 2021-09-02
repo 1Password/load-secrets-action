@@ -8,10 +8,9 @@ inputs:
   unset-previous:
     description: Whether to unset environment variables populated by 1Password in earlier job steps
     default: false
+  export-env:
+    description: Export the secrets as environment variables
+    default: false
 runs:
-  using: composite
-  steps: 
-    - run: |
-        export INPUT_UNSET_PREVIOUS=${{ inputs.unset-previous }}
-        ${{ github.action_path }}/entrypoint.sh
-      shell: bash
+  using: 'node12'
+  main: 'dist/index.js'
