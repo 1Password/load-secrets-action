@@ -10,8 +10,9 @@ inputs:
     default: false
 runs:
   using: composite
-  steps: 
-    - run: |
-        export INPUT_UNSET_PREVIOUS=${{ inputs.unset-previous }}
+  steps:
+    - shell: bash
+      env:
+        INPUT_UNSET_PREVIOUS: ${{ inputs.unset-previous }}
+      run: |
         ${{ github.action_path }}/entrypoint.sh
-      shell: bash
