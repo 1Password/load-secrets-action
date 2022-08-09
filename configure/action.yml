@@ -8,9 +8,10 @@ inputs:
     description: Token to authenticate to your 1Password Connect instance
 runs:
   using: composite
-  steps: 
-    - run: |
-        export INPUT_CONNECT_HOST=${{ inputs.connect-host }}
-        export INPUT_CONNECT_TOKEN=${{ inputs.connect-token }}
+  steps:
+    - shell: bash
+      env:
+        INPUT_CONNECT_HOST: ${{ inputs.connect-host }}
+        INPUT_CONNECT_TOKEN: ${{ inputs.connect-token }}
+      run: |
         ${{ github.action_path }}/entrypoint.sh
-      shell: bash
