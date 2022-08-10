@@ -23,7 +23,7 @@ jobs:
         with:
           export-env: true
         env:
-          SECRET: op://acceptance-tests/test-secret/password
+          SECRET: op://acceptance-tests/test-secret/not_existing_field
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
           MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
       - name: Assert test secret values
