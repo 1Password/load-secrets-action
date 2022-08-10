@@ -2,7 +2,7 @@ on: push
 name: Run acceptance tests
 
 jobs:
-  test-output-linux:
+  test-connect-output:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
           MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
       - name: Assert test secret values
         run: ./tests/assert-env-set.sh
-  test-export-linux:
+  test-connect-export:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
