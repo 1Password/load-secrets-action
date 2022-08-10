@@ -20,6 +20,8 @@ jobs:
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
+        with:
+          export-env: true
         env:
           SECRET: op://acceptance-tests/test-secret/password
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
