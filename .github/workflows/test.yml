@@ -27,6 +27,10 @@ jobs:
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
           MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
       - name: Assert test secret values
+        env:
+          SECRET: ${{ steps.load_secrets.outputs.SECRET }}
+          SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
+          MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
         run: ./tests/assert-env-set.sh
   test-connect-export:
     runs-on: ubuntu-latest
