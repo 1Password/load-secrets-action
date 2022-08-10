@@ -33,7 +33,7 @@ install_op_cli() {
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/op_linux_amd64_v2.6.0-beta.06.zip"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    curl -sSfLo op.zip "https://bucket.agilebits.com/cli-private-beta/v2/op_darwin_amd64_v2-alpha2.zip"
+    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/1password-cli_v2.6.0-beta.06_darwin_arm64.tar.gz"
   fi
   unzip -od /usr/local/bin/ op.zip && rm op.zip
 }
