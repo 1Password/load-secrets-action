@@ -93,7 +93,6 @@ extract_using_service_account() {
   for env_var in $(op env ls); do
     populating_secret $env_var
   done
-  unset IFS
 }
 
 # Load environment variables using connect service. Iterate over hem to find 1Password references, load the secret values,
@@ -129,6 +128,7 @@ elif [ "$auth_type" == "$CONNECT" ]; then
   extract_using_connect
 fi
 
+unset IFS
 # Add extra env var that lists which secrets are managed by 1Password so that in a later step
 # these can be unset again.
 managed_variables_str=$(IFS=','; echo "${managed_variables[*]}")
