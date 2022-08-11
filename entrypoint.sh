@@ -43,7 +43,6 @@ populating_secret() {
 
   echo "Populating variable: $1"
   secret_value=$(op read $ref)
-  echo "Secret value: $secret_value"
 
   if [ -z "$secret_value" ]; then
     echo "Could not find or access secret $ref"
@@ -64,12 +63,10 @@ populating_secret() {
   unset IFS
 
   if [ "$INPUT_EXPORT_ENV" == "true" ]; then
-    echo "inside if"
     # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
     # As the heredoc identifier, we'll use a randomly generated 64-character string,
     # so that collisions are practically impossible.
     random_heredoc_identifier=$(openssl rand -hex 16)
-    echo "random_heredoc_identifier: $random_heredoc_identifier"
 
     {
       # Populate env var, using heredoc syntax with generated identifier
@@ -80,15 +77,12 @@ populating_secret() {
     echo "GITHUB_ENV: $(cat $GITHUB_ENV)"
 
   else
-    echo "inside else"
     # Prepare the secret_value to be outputed properly (especially multiline secrets)
     secret_value=$(echo "$secret_value" | awk -v ORS='%0A' '1')
 
     echo "::set-output name=$env_var::$secret_value"
   fi
 
-  echo "env_var: $env_var"
-  echo "secret_value: $secret_value"
   managed_variables+=("$env_var")
 }
 
@@ -104,7 +98,7 @@ extract_using_service_account() {
 
 # Load environment variables using connect service. Iterate over hem to find 1Password references, load the secret values,
 # and make them available as environment variables in the next steps.
-extract_using_connec() {
+extract_using_connect() {
   curl_headers=(-H "Content-Type: application/json" -H "Authorization: Bearer $OP_CONNECT_TOKEN")
   IFS=$'\n'
 
