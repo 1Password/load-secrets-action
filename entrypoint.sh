@@ -33,7 +33,7 @@ install_op_cli() {
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/op_linux_amd64_v2.6.0-beta.06.zip"
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/1password-cli_v2.6.0-beta.06_darwin_arm64.tar.gz"
+    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/1password-cli_v2.6.0-beta.06_darwin_amd64.tar.gz"
   fi
   unzip -od /usr/local/bin/ op.zip && rm op.zip
 }
@@ -99,7 +99,6 @@ extract_using_service_account() {
 # Load environment variables using connect service. Iterate over hem to find 1Password references, load the secret values,
 # and make them available as environment variables in the next steps.
 extract_using_connect() {
-  curl_headers=(-H "Content-Type: application/json" -H "Authorization: Bearer $OP_CONNECT_TOKEN")
   IFS=$'\n'
 
   for possible_ref in $(printenv | grep "=op://" | grep -v "^#"); do
