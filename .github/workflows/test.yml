@@ -23,7 +23,7 @@ jobs:
         env:
           SECRET: op://acceptance-tests/test-secret/password
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
-          MULTILINE_SECRET: op://psbfcqkcx5eup45paydr4f7zsu/c7nxmxceicjdevotw3gpxcd354/dphnoeos3nrynixqcp7kbnukzm/username
+          MULTILINE_SECRET: op://psbfcqkcx5eup45paydr4f7zsu/dphnoeos3nrynixqcp7kbnukzm/notesPlain
       - name: Assert test secret values
         env:
           SECRET: ${{ steps.load_secrets.outputs.SECRET }}
