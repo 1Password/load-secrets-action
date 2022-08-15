@@ -32,10 +32,11 @@ unset_prev_secrets() {
 install_op_cli() {
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/op_linux_amd64_v2.6.0-beta.06.zip"
+    unzip -od ./op op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/1password-cli_v2.6.0-beta.06_darwin_amd64.tar.gz"
+    curl -sSfLo op.tar.gz "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/1password-cli_v2.6.0-beta.06_darwin_amd64.tar.gz"
+    mkdir ./op && tar -xf op.tar.gz -C ./op
   fi
-  unzip -od /usr/local/bin/ op.zip && rm op.zip
 }
 
 populating_secret() {
