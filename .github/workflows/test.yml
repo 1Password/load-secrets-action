@@ -21,9 +21,9 @@ jobs:
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
         env:
-          SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
-          SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/test-section/password
-          UNMASKED_VALUE: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/test-section/username
+          SECRET: op://acceptance-tests/test-secret/password
+          SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
+          MULTILINE_SECRET: op://psbfcqkcx5eup45paydr4f7zsu/c7nxmxceicjdevotw3gpxcd354/dphnoeos3nrynixqcp7kbnukzm/username
       - name: Assert test secret values
         env:
           SECRET: ${{ steps.load_secrets.outputs.SECRET }}
