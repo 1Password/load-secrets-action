@@ -1935,13 +1935,10 @@ function run() {
         try {
             const parentDir = path__WEBPACK_IMPORTED_MODULE_2___default().resolve(__dirname, '..');
             // Get action inputs
-            const unsetPrevious = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('unset-previous');
-            const exportEnv = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('export-env');
+            process.env.INPUT_UNSET_PREVIOUS = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('unset-previous');
+            process.env.INPUT_EXPORT_ENV = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('export-env');
             // Execute bash script
-            yield _actions_exec__WEBPACK_IMPORTED_MODULE_1__.exec(`sh -c "` +
-                `INPUT_UNSET_PREVIOUS=` + unsetPrevious + ` ` +
-                `INPUT_EXPORT_ENV=` + exportEnv + ` ` +
-                parentDir + `/entrypoint.sh"`);
+            yield _actions_exec__WEBPACK_IMPORTED_MODULE_1__.exec(`sh -c "` + parentDir + `/entrypoint.sh"`);
         }
         catch (error) {
             _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error.message);

@@ -7,14 +7,11 @@ async function run(): Promise<void> {
     const parentDir = path.resolve(__dirname, '..');
     
     // Get action inputs
-    const unsetPrevious = core.getInput('unset-previous');
-    const exportEnv = core.getInput('export-env');
+    process.env.INPUT_UNSET_PREVIOUS = core.getInput('unset-previous');
+    process.env.INPUT_EXPORT_ENV = core.getInput('export-env');
 
     // Execute bash script
-    await exec.exec(`sh -c "` +
-      `INPUT_UNSET_PREVIOUS=` + unsetPrevious + ` ` +
-      `INPUT_EXPORT_ENV=` + exportEnv + ` ` + 
-      parentDir + `/entrypoint.sh"`);
+    await exec.exec(`sh -c "` + parentDir + `/entrypoint.sh"`);
 
   } catch (error: any) {
     core.setFailed(error.message);
