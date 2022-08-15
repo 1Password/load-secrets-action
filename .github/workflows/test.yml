@@ -22,13 +22,17 @@ jobs:
         uses: ./ # 1password/load-secrets-action@<version>
         env:
           SECRET: op://acceptance-tests/test-secret/password
+          SECRET2: op://psbfcqkcx5eup45paydr4f7zsu/c7nxmxceicjdevotw3gpxcd354/password
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
-          MULTILINE_SECRET: op://psbfcqkcx5eup45paydr4f7zsu/dphnoeos3nrynixqcp7kbnukzm/notesPlain
+          MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
+          MULTILINE_SECRET2: op://psbfcqkcx5eup45paydr4f7zsu/dphnoeos3nrynixqcp7kbnukzm/notesPlain
       - name: Assert test secret values
         env:
           SECRET: ${{ steps.load_secrets.outputs.SECRET }}
+          SECRET2: ${{ steps.load_secrets.outputs.SECRET2 }}
           SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
           MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
+          MULTILINE_SECRET2: ${{ steps.load_secrets.outputs.MULTILINE_SECRET2 }}
         run: ./tests/assert-env-set.sh
   use-connect-with-export-env:
     runs-on: ubuntu-latest
