@@ -15,24 +15,20 @@ jobs:
       - name: Configure 1Password Connect
         uses: ./configure # 1password/load-secrets-action/configure@<version>
         with:
-          connect-host:	http://localhost:8080
+          connect-host: http://localhost:8080
           connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
         env:
           SECRET: op://acceptance-tests/test-secret/password
-          SECRET2: op://psbfcqkcx5eup45paydr4f7zsu/c7nxmxceicjdevotw3gpxcd354/password
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
           MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
-          MULTILINE_SECRET2: op://psbfcqkcx5eup45paydr4f7zsu/dphnoeos3nrynixqcp7kbnukzm/notesPlain
       - name: Assert test secret values
         env:
           SECRET: ${{ steps.load_secrets.outputs.SECRET }}
-          SECRET2: ${{ steps.load_secrets.outputs.SECRET2 }}
           SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
           MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
-          MULTILINE_SECRET2: ${{ steps.load_secrets.outputs.MULTILINE_SECRET2 }}
         run: ./tests/assert-env-set.sh
   use-connect-with-export-env:
     runs-on: ubuntu-latest
@@ -47,7 +43,7 @@ jobs:
       - name: Configure 1Password Connect
         uses: ./configure # 1password/load-secrets-action/configure@<version>
         with:
-          connect-host:	http://localhost:8080
+          connect-host: http://localhost:8080
           connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
       - name: Load secrets
         id: load_secrets
@@ -66,6 +62,34 @@ jobs:
           unset-previous: true
       - name: Assert removed secrets
         run: ./tests/assert-env-unset.sh
+  use-connect-with-references-with-id:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Launch 1Password Connect instance
+        env:
+          OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
+        run: |
+          echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
+          docker-compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
+      - name: Configure 1Password Connect
+        uses: ./configure # 1password/load-secrets-action/configure@<version>
+        with:
+          connect-host: http://localhost:8080
+          connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
+      - name: Load secrets
+        id: load_secrets
+        uses: ./ # 1password/load-secrets-action@<version>
+        env:
+          SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
+          SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/Section_tco6nsqycj6jcbyx63h5isxcny/doxu3mhkozcznnk5vjrkpdqayy
+          MULTILINE_SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
+      - name: Assert test secret values
+        env:
+          SECRET: ${{ steps.load_secrets.outputs.SECRET }}
+          SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
+          MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
+        run: ./tests/assert-env-set.sh
   use-service-account-without-export-env:
     runs-on: ubuntu-latest
     steps:
@@ -74,7 +98,6 @@ jobs:
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
         env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://acceptance-tests/test-secret/password
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
           MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
@@ -94,9 +117,25 @@ jobs:
         with:
           export-env: true
         env:
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://acceptance-tests/test-secret/password
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
           MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
       - name: Assert test secret values
+        run: ./tests/assert-env-set.sh
+  use-service-account-with-references-with-id:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Load secrets
+        id: load_secrets
+        uses: ./ # 1password/load-secrets-action@<version>
+        env:
+          SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
+          SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/Section_tco6nsqycj6jcbyx63h5isxcny/doxu3mhkozcznnk5vjrkpdqayy
+          MULTILINE_SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
+      - name: Assert test secret values
+        env:
+          SECRET: ${{ steps.load_secrets.outputs.SECRET }}
+          SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
+          MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
         run: ./tests/assert-env-set.sh
