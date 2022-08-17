@@ -7,13 +7,13 @@ Specify right from your workflow YAML which secrets from 1Password should be loa
 
 ## Usage
 
-You can configure the action to use either 1Password Connect instance or service account.
+You can configure the action to use either 1Password Connect instance or a 1Password Service Account. Service Accounts are currently in Beta and are only available to select users.
 
 If you provide `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` variables, the Connect instance will be used to load secrets. Make sure [1Password Connect](https://support.1password.com/secrets-automation/#step-2-deploy-a-1password-connect-server) deployed in your infrastructure.
 
 If you provide `OP_SERVICE_ACCOUNT_TOKEN` variable, the service account will be used to load secrets.
 
-***Note***: if all environment variables are provided, the GitHub action will use Connect over the service account. Clear the Connect environment variables to make the action use a service account instead.
+***Note***: If all environment variables have been set, the Connect credentials will take precedence over the provided service account token. You must unset the Connect environment variables to ensure the action uses the service account token.
 
 There are two ways that secrets can be loaded:
  - [use the secrets from the action's ouput](#use-secrets-from-the-actions-output)
@@ -21,7 +21,7 @@ There are two ways that secrets can be loaded:
 
 ### Use secrets from the action's output
 
-This approach enables the user to use the loaded secrets as an output from the step: `steps.step-id.outputs.secret-name`. You need to set an id for the step that uses this action to be able to access its outputs. More details about the metadata syntax [here](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputsoutput_id).
+This method allows for you to use the loaded secrets as an output from the step: `steps.step-id.outputs.secret-name`. You will need to set an id for the step that uses this action to be able to access its outputs. More details about the metadata syntax [here](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputsoutput_id).
 
 ```yml
 on: push
@@ -89,7 +89,7 @@ jobs:
 
 ### Export secrets as environment variables
 
-In this approach, the user can access the loaded secrets as environment variables. These environment variables are accessible at a job level.
+This method, allows the action to access the loaded secrets as environment variables. These environment variables are accessible at a job level.
 
 ```yml
 on: push
@@ -208,7 +208,8 @@ So if one of these values accidentally gets printed, it'll get replaced with `**
 
 To use the action with Connect, you need to have a [1Password Connect](https://support.1password.com/secrets-automation/#step-1-set-up-a-secrets-automation-workflow) instance deployed somewhere.
 To configure the action with your Connect host and token, set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` environment variables.  
-To configure the action with your service account token, set the `OP_SERVICE_ACCOUNT_TOKEN` environment variable.
+To configure the action with your service account token, set the `OP_SERVICE_ACCOUNT_TOKEN` environment variable. 
+*** Note: *** Service Accounts are currently in Beta and are only available to select users.
 
 If you're using the `load-secrets` action more than once in a single job, you can use the `configure` action to avoid duplicate configuration:
 
