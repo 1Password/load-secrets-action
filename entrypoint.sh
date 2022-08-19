@@ -31,7 +31,7 @@ unset_prev_secrets() {
 # Install op-cli
 install_op_cli() {
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/op_linux_amd64_v2.6.0-beta.06.zip"
+    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.1-beta.01/op_linux_amd64_v2.7.1-beta.01.zip"
     unzip -od /usr/local/bin/ op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     curl -sSfLo op.tar.gz "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/1password-cli_v2.6.0-beta.06_darwin_amd64.tar.gz"
@@ -89,20 +89,9 @@ populating_secret() {
 
 # Load environment variables using op cli. Iterate over them to find 1Password references, load the secret values,
 # and make them available as environment variables in the next steps.
-extract_using_service_account() {
+extract_secrets() {
   IFS=$'\n'
   for env_var in $(op env ls); do
-    populating_secret $env_var
-  done
-}
-
-# Load environment variables using connect service. Iterate over hem to find 1Password references, load the secret values,
-# and make them available as environment variables in the next steps.
-extract_using_connect() {
-  IFS=$'\n'
-
-  for possible_ref in $(printenv | grep "=op://" | grep -v "^#"); do
-    env_var=$(echo "$possible_ref" | cut -d '=' -f1)
     populating_secret $env_var
   done
 }
@@ -122,12 +111,7 @@ printf "Authenticated with %s \n" $auth_type
 
 unset_prev_secrets
 install_op_cli
-
-if [ "$auth_type" == "$SERVICE_ACCOUNT" ]; then
-  extract_using_service_account
-elif [ "$auth_type" == "$CONNECT" ]; then
-  extract_using_connect
-fi
+extract_secrets
 
 unset IFS
 # Add extra env var that lists which secrets are managed by 1Password so that in a later step
