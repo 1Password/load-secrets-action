@@ -34,8 +34,8 @@ install_op_cli() {
     curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.1-beta.01/op_linux_amd64_v2.7.1-beta.01.zip"
     unzip -od /usr/local/bin/ op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    curl -sSfLo op.tar.gz "https://cache.agilebits.com/dist/1P/op2/pkg/v2.6.0-beta.06/1password-cli_v2.6.0-beta.06_darwin_amd64.tar.gz"
-    tar -xf op.tar.gz -C /usr/local/bin/ && rm op.tar.gz
+    curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.1-beta.01/op_apple_universal_v2.7.1-beta.01.pkg"
+    sudo installer -pkg op.pkg -target /usr/local/bin/ && rm op.pkg
   fi
 }
 
