@@ -142,3 +142,21 @@ jobs:
           SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
           MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
         run: ./tests/assert-env-set.sh
+  run-on-macos-12:
+    runs-on: macos-12
+    steps:
+      - uses: actions/checkout@v2
+      - name: Load secrets
+        id: load_secrets
+        uses: ./ # 1password/load-secrets-action@<version>
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          SECRET: op://acceptance-tests/test-secret/password
+          SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
+          MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
+      - name: Assert test secret values
+        env:
+          SECRET: ${{ steps.load_secrets.outputs.SECRET }}
+          SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
+          MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
+        run: ./tests/assert-env-set.sh
