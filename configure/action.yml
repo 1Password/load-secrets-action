@@ -1,11 +1,13 @@
-name: Configure 1Password Connect
-description: Persist 1Password Connect host and token for use in next steps.
+name: Configure 1Password Connect and service account
+description: Persist 1Password Connect host, token and service account for use in next steps.
 author: 1Password
 inputs:
   connect-host:
     description: Your 1Password Connect instance URL
   connect-token:
     description: Token to authenticate to your 1Password Connect instance
+  service-account-token:
+    description: Your 1Password service account token
 runs:
   using: composite
   steps:
@@ -13,5 +15,6 @@ runs:
       env:
         INPUT_CONNECT_HOST: ${{ inputs.connect-host }}
         INPUT_CONNECT_TOKEN: ${{ inputs.connect-token }}
+        INPUT_SERVICE_ACCOUNT_TOKEN: ${{ inputs.service-account-token }}
       run: |
         ${{ github.action_path }}/entrypoint.sh
