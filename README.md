@@ -1,18 +1,14 @@
 # Load Secrets from 1Password - GitHub Action
 
-This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://1password.com/secrets/) or a Service Account.
+This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://1password.com/secrets/).
 
 Specify right from your workflow YAML which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
 
 ## Usage
 
-You can configure the action to use either 1Password Connect instance or a 1Password Service Account. Service Accounts are currently in Beta and are only available to select users.
+You can configure the action to use either 1Password Connect instance.
 
 If you provide `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` variables, the Connect instance will be used to load secrets. Make sure [1Password Connect](https://support.1password.com/secrets-automation/#step-2-deploy-a-1password-connect-server) is deployed in your infrastructure.
-
-If you provide `OP_SERVICE_ACCOUNT_TOKEN` variable, the service account will be used to load secrets.
-
-**_Note_**: If all environment variables have been set, the Connect credentials will take precedence over the provided service account token. You must unset the Connect environment variables to ensure the action uses the service account token.
 
 There are two ways that secrets can be loaded:
 
@@ -212,8 +208,6 @@ So if one of these values accidentally gets printed, it'll get replaced with `**
 
 To use the action with Connect, you need to have a [1Password Connect](https://support.1password.com/secrets-automation/#step-1-set-up-a-secrets-automation-workflow) instance deployed somewhere.
 To configure the action with your Connect host and token, set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` environment variables.  
-To configure the action with your service account token, set the `OP_SERVICE_ACCOUNT_TOKEN` environment variable.
-**_ Note: _** Service Accounts are currently in Beta and are only available to select users.
 
 If you're using the `load-secrets` action more than once in a single job, you can use the `configure` action to avoid duplicate configuration:
 
@@ -242,7 +236,6 @@ jobs:
 | ----------------------- | ------- | -------------------------- | -------------------------------------------------------- |
 | `connect-host`          |         | `OP_CONNECT_HOST`          | Your 1Password Connect instance URL                      |
 | `connect-token`         |         | `OP_CONNECT_TOKEN`         | Token to authenticate to your 1Password Connect instance |
-| `service-account-token` |         | `OP_SERVICE_ACCOUNT_TOKEN` | Your 1Password service account token                     |
 
 ## Supported Runners
 
