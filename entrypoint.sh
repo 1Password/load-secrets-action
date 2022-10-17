@@ -67,7 +67,7 @@ populating_secret() {
     # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
     # As the heredoc identifier, we'll use a randomly generated 64-character string,
     # so that collisions are practically impossible.
-    random_heredoc_identifier=$(openssl rand -hex 16)
+    random_heredoc_identifier=$(openssl rand -hex 32)
 
     {
       # Populate env var, using heredoc syntax with generated identifier
