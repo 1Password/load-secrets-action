@@ -25,8 +25,66 @@ If you're using the action more than once in a single job, [you can use the `con
 
 You can load secrets using the action in two ways:
 
-1. [Use secrets from the action's output](https://developer.1password.com/docs/connect/github-actions/#use-secrets-from-the-actions-output)
-2. [Export secrets as environment variables](https://developer.1password.com/docs/connect/github-actions/#export-secrets-as-environment-variables)
+1. [Use secrets from the action's output](#use-secrets-from-the-actions-output)
+2. [Export secrets as environment variables](#export-secrets-as-environment-variables)
+
+### Use secrets from the action's output
+
+This method allows you to use the loaded secrets outputted by the step: `steps.step-id.outputs.secret-name`.
+
+You'll need to set an ID for the step to be able to access its outputs. For more information, see [`outputs.<output_id>`](https://docs.github.com/actions/creating-actions/metadata-syntax-for-github-actions#outputsoutput_id).
+
+```yml
+on: push
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Load secret
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        env:
+          OP_CONNECT_HOST: <Your Connect instance URL>
+          OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
+          SECRET: op://app-cicd/hello-world/secret
+
+      - name: Print masked secret
+        run: echo "Secret: ${{ steps.op-load-secret.outputs.SECRET }}"
+        # Prints: Secret: ***
+```
+
+[Read the full documentation for more usage examples.](https://developer.1password.com/docs/connect/github-actions/#use-secrets-from-the-actions-output)
+
+### Export secrets as environment variables
+
+This method allows the action to access the loaded secrets as environment variables. These environment variables are accessible at a job level.
+
+```yml
+on: push
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Load secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          # Export loaded secrets as environment variables
+          export-env: true
+        env:
+          OP_CONNECT_HOST: <Your Connect instance URL>
+          OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
+          SECRET: op://app-cicd/hello-world/secret
+
+      - name: Print masked secret
+        run: echo "Secret: $SECRET"
+        # Prints: Secret: ***
+```
+
+[Read the full documentation for more usage examples.](https://developer.1password.com/docs/connect/github-actions/#export-secrets-as-environment-variables)
 
 ## Masking
 
