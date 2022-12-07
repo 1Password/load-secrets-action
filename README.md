@@ -2,11 +2,24 @@
 
 This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://1password.com/secrets/).
 
-Specify right from your workflow YAML which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
+Specify in your workflow YAML file which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
+
+Read more on the [1Password Developer Portal](https://developer.1password.com/ci-cd/github-actions).
+
+
+## Requirements
+
+Before you get started, you'll need to:
+
+- [Deploy 1Password Connect](/docs/connect/get-started#step-2-deploy-1password-connect-server) in your infrastructure.
+- Set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` environment variables to your Connect instance's credentials, so it'll be used to load secrets.
+
+_Supported runners_: You can run the action on Mac and Linux runners. Windows is currently not supported.
+
 
 ## Usage
 
-You can configure the action to use either 1Password Connect instance.
+You can configure the action to use your 1Password Connect instance.
 
 If you provide `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` variables, the Connect instance will be used to load secrets. Make sure [1Password Connect](https://support.1password.com/secrets-automation/#step-2-deploy-a-1password-connect-server) is deployed in your infrastructure.
 
