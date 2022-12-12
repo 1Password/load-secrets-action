@@ -43,7 +43,7 @@ populating_secret() {
   ref=$(printenv $1)
 
   echo "Populating variable: $1"
-  secret_value=$(op read $ref)
+  secret_value=$(op read "$ref")
 
   if [ -z "$secret_value" ]; then
     echo "Could not find or access secret $ref"
