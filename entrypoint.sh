@@ -2,6 +2,11 @@
 # shellcheck disable=SC2046,SC2001,SC2086
 set -e
 
+# Pass User-Agent Inforomation to the 1Password CLI
+export OP_INTEGRATION_NAME="1Password GitHub Action"
+export OP_INTEGRATION_ID="GHA"
+export OP_INTEGRATION_BUILDNUMBER="1010001"
+
 readonly CONNECT="CONNECT"
 readonly SERVICE_ACCOUNT="SERVICE_ACCOUNT"
 
@@ -31,10 +36,10 @@ unset_prev_secrets() {
 # Install op-cli
 install_op_cli() {
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.1-beta.01/op_linux_amd64_v2.7.1-beta.01.zip"
+    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.10.0-beta.02/op_linux_amd64_v2.10.0-beta.02.zip"
     unzip -od /usr/local/bin/ op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/v2.7.1-beta.01/op_apple_universal_v2.7.1-beta.01.pkg"
+    curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/v2.10.0-beta.02/op_apple_universal_v2.10.0-beta.02.pkg"
     sudo installer -pkg op.pkg -target /usr/local/bin/ && rm op.pkg
   fi
 }
