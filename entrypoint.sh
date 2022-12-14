@@ -2,6 +2,11 @@
 # shellcheck disable=SC2046,SC2001,SC2086
 set -e
 
+# Pass User-Agent Inforomation to the 1Password CLI
+export OP_INTEGRATION_NAME="1Password GitHub Action"
+export OP_INTEGRATION_ID="GHA"
+export OP_INTEGRATION_BUILDNUMBER="1010001"
+
 readonly CONNECT="CONNECT"
 readonly SERVICE_ACCOUNT="SERVICE_ACCOUNT"
 
