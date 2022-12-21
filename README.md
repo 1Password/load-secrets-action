@@ -43,6 +43,8 @@ jobs:
       - name: Load secret
         id: op-load-secret
         uses: 1password/load-secrets-action@v1
+        with:
+          export-env: false
         env:
           OP_CONNECT_HOST: <Your Connect instance URL>
           OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
@@ -77,6 +79,8 @@ jobs:
       - name: Load Docker credentials
         id: load-docker-credentials
         uses: 1password/load-secrets-action@v1
+        with:
+          export-env: false
         env:
           OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
           DOCKERHUB_USERNAME: op://app-cicd/docker/username
@@ -111,9 +115,6 @@ jobs:
 
       - name: Load secret
         uses: 1password/load-secrets-action@v1
-        with:
-          # Export loaded secrets as environment variables
-          export-env: true
         env:
           OP_CONNECT_HOST: <Your Connect instance URL>
           OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
@@ -147,9 +148,6 @@ jobs:
 
       - name: Load Docker credentials
         uses: 1password/load-secrets-action@v1
-        with:
-          # Export loaded secrets as environment variables
-          export-env: true
         env:
           OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
           DOCKERHUB_USERNAME: op://app-cicd/docker/username
@@ -173,8 +171,6 @@ jobs:
       - name: Load AWS credentials
         uses: 1password/load-secrets-action@v1
         with:
-          # Export loaded secrets as environment variables
-          export-env: true
           # Remove local copies of the Docker credentials, which are not needed anymore
           unset-previous: true
         env:
@@ -194,7 +190,7 @@ jobs:
 
 | Name             | Default | Description                                                                        |
 | ---------------- | ------- | ---------------------------------------------------------------------------------- |
-| `export-env`     | `false` | Export the loaded secrets as environment variables                                 |
+| `export-env`     | `true`  | Export the loaded secrets as environment variables                                 |
 | `unset-previous` | `false` | Whether to unset environment variables populated by 1Password in earlier job steps |
 
 ## Secrets Reference Syntax
