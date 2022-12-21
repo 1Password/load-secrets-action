@@ -14,7 +14,7 @@ auth_type=$CONNECT
 managed_variables_var="OP_MANAGED_VARIABLES"
 IFS=','
 
-if [[ "$OP_CONNECT_HOST" != "HTTP://"* ]] || [[ "$OP_CONNECT_HOST" != "HTTPS://"* ]]; then
+if [[ "$OP_CONNECT_HOST" != "http://"* ]] || [[ "$OP_CONNECT_HOST" != "https://"* ]]; then
   export OP_CONNECT_HOST=HTTP://$OP_CONNECT_HOST
 fi
 
