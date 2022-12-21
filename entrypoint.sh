@@ -14,6 +14,10 @@ auth_type=$CONNECT
 managed_variables_var="OP_MANAGED_VARIABLES"
 IFS=','
 
+if [[ "$OP_CONNECT_HOST" != "HTTP://"* ]] || [[ "$OP_CONNECT_HOST" != "HTTPS://"* ]]; then
+  export OP_CONNECT_HOST=HTTP://$OP_CONNECT_HOST
+fi
+
 # Unset all secrets managed by 1Password if `unset-previous` is set.
 unset_prev_secrets() {
   if [ "$INPUT_UNSET_PREVIOUS" == "true" ]; then
