@@ -80,6 +80,8 @@ jobs:
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
+        with:
+          export-env: false
         env:
           SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
           SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/Section_tco6nsqycj6jcbyx63h5isxcny/doxu3mhkozcznnk5vjrkpdqayy
