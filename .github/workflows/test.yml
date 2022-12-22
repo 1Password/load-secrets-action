@@ -15,11 +15,13 @@ jobs:
       - name: Configure 1Password Connect
         uses: ./configure # 1password/load-secrets-action/configure@<version>
         with:
-          connect-host: http://localhost:8080
+          connect-host: localhost:8080
           connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
+        with:
+          export-env: false
         env:
           SECRET: op://acceptance-tests/test-secret/password
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
@@ -48,8 +50,6 @@ jobs:
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
-        with:
-          export-env: true
         env:
           SECRET: op://acceptance-tests/test-secret/password
           SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
@@ -80,6 +80,8 @@ jobs:
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
+        with:
+          export-env: false
         env:
           SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
           SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/Section_tco6nsqycj6jcbyx63h5isxcny/doxu3mhkozcznnk5vjrkpdqayy
@@ -97,6 +99,8 @@ jobs:
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
+        with:
+          export-env: false
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://acceptance-tests/test-secret/password
@@ -115,8 +119,6 @@ jobs:
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
-        with:
-          export-env: true
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://acceptance-tests/test-secret/password
@@ -131,6 +133,8 @@ jobs:
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
+        with:
+          export-env: false
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
@@ -149,6 +153,8 @@ jobs:
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
+        with:
+          export-env: false
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://acceptance-tests/test-secret/password

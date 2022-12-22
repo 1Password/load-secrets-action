@@ -10,7 +10,7 @@ inputs:
     default: false
   export-env:
     description: Export the secrets as environment variables
-    default: false
+    default: true
 runs:
   using: 'node16'
   main: 'dist/index.js'
