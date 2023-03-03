@@ -90,7 +90,7 @@ populating_secret() {
     # Prepare the secret_value to be outputed properly (especially multiline secrets)
     secret_value=$(echo "$secret_value" | awk -v ORS='%0A' '1')
 
-    echo "$env_var=$secret_value" >> "$GITHUB_OUTPUT"
+    echo "::set-output name=$env_var::$secret_value"
   fi
 
   managed_variables+=("$env_var")
