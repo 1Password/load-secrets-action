@@ -39,12 +39,26 @@ unset_prev_secrets() {
 
 # Install op-cli
 install_op_cli() {
+  OP_INSTALL_DIR="$(mktemp -d)"
+  if [[ ! -d "$OP_INSTALL_DIR" ]]; then
+    echo "Install dir $OP_INSTALL_DIR not found"
+    exit 1
+  fi
+  export OP_INSTALL_DIR
+  echo "::debug::OP_INSTALL_DIR: ${OP_INSTALL_DIR}"
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.10.0-beta.02/op_linux_amd64_v2.10.0-beta.02.zip"
-    unzip -od /usr/local/bin/ op.zip && rm op.zip
+    unzip -od "$OP_INSTALL_DIR" op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/v2.10.0-beta.02/op_apple_universal_v2.10.0-beta.02.pkg"
-    sudo installer -pkg op.pkg -target /usr/local/bin/ && rm op.pkg
+    sudo installer -pkg op.pkg -target "$OP_INSTALL_DIR" && rm op.pkg
+  fi
+}
+
+# Uninstall op-cli
+uninstall_op_cli() {
+  if [[ -d "$OP_INSTALL_DIR" ]]; then
+    rm -fr "$OP_INSTALL_DIR"
   fi
 }
 
@@ -52,7 +66,7 @@ populating_secret() {
   ref=$(printenv $1)
 
   echo "Populating variable: $1"
-  secret_value=$(op read "$ref")
+  secret_value=$("${OP_INSTALL_DIR}/op" read "$ref")
 
   if [ -z "$secret_value" ]; then
     echo "Could not find or access secret $ref"
@@ -100,7 +114,7 @@ populating_secret() {
 # and make them available as environment variables in the next steps.
 extract_secrets() {
   IFS=$'\n'
-  for env_var in $(op env ls); do
+  for env_var in $("${OP_INSTALL_DIR}/op" env ls); do
     populating_secret $env_var
   done
 }
@@ -121,6 +135,7 @@ printf "Authenticated with %s \n" $auth_type
 unset_prev_secrets
 install_op_cli
 extract_secrets
+uninstall_op_cli
 
 unset IFS
 # Add extra env var that lists which secrets are managed by 1Password so that in a later step
