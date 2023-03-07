@@ -39,20 +39,21 @@ unset_prev_secrets() {
 
 # Install op-cli
 install_op_cli() {
-  OP_INSTALL_DIR="$(mktemp -d)"
-  if [[ ! -d "$OP_INSTALL_DIR" ]]; then
-    echo "Install dir $OP_INSTALL_DIR not found"
-    exit 1
-  fi
-  export OP_INSTALL_DIR
-  echo "::debug::OP_INSTALL_DIR: ${OP_INSTALL_DIR}"
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    OP_INSTALL_DIR="$(mktemp -d)"
+    if [[ ! -d "$OP_INSTALL_DIR" ]]; then
+      echo "Install dir $OP_INSTALL_DIR not found"
+      exit 1
+    fi
     curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.10.0-beta.02/op_linux_amd64_v2.10.0-beta.02.zip"
     unzip -od "$OP_INSTALL_DIR" op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
+    OP_INSTALL_DIR="$HOME/usr/local/bin"
     curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/v2.10.0-beta.02/op_apple_universal_v2.10.0-beta.02.pkg"
-    sudo installer -pkg op.pkg -target "$OP_INSTALL_DIR" && rm op.pkg
+    sudo installer -pkg op.pkg -target CurrentUserHomeDirectory && rm op.pkg
   fi
+  export OP_INSTALL_DIR
+  echo "::debug::OP_INSTALL_DIR: ${OP_INSTALL_DIR}"
 }
 
 # Uninstall op-cli
