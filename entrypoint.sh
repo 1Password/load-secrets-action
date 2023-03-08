@@ -51,7 +51,9 @@ install_op_cli() {
     unzip -od "$OP_INSTALL_DIR" op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/v2.10.0-beta.02/op_apple_universal_v2.10.0-beta.02.pkg"
-    sudo installer -pkg op.pkg -target "$OP_INSTALL_DIR" && rm op.pkg
+    pkgutil --expand op.pkg temp-pkg
+    tar -xvf temp-pkg/op.pkg/Payload -C "$OP_INSTALL_DIR"
+    rm -rf temp-pkg && rm op.pkg
   fi
 }
 
