@@ -58,5 +58,5 @@
 			"project": "./config/tsconfig.json"
 		}
 	},
-	"prettier": "@1password/front-end-style/prettierrc.json"
+	"prettier": "./node_modules/@1password/front-end-style/prettierrc.json"
 }
