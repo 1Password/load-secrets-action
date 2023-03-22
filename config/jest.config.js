@@ -11,7 +11,7 @@ const jestConfig = {
 	moduleFileExtensions: ["ts", "js", "json"],
 	rootDir: "../src/",
 	testEnvironment: "node",
-	testRegex: "<rootDir>(/__tests__/.*|(\\.|/)test)\\.ts",
+	testRegex: "(/__tests__/.*|(\\.|/)test)\\.ts",
 	transform: {
 		".ts": [
 			"ts-jest",
