@@ -10,7 +10,11 @@
 	"scripts": {
 		"build": "tsc --project ./config/tsconfig.json",
 		"format": "prettier --ignore-path config/.prettierignore --check src/**/*",
-		"lint": "eslint 'src/**/*'"
+		"lint": "eslint 'src/**/*'",
+		"test": "jest --config=./config/jest.config.js",
+		"test:clearcache": "jest --clearCache",
+		"test:coverage": "npm run test -- --coverage",
+		"test:watch": "npm run test -- --watch"
 	},
 	"repository": {
 		"type": "git",
@@ -34,7 +38,10 @@
 	},
 	"devDependencies": {
 		"@1password/front-end-style": "^6.0.1",
+		"@types/jest": "^29.5.0",
 		"@types/node": "^18.15.5",
+		"jest": "^29.5.0",
+		"ts-jest": "^29.0.5",
 		"typescript": "^4.9.5"
 	},
 	"eslintConfig": {
