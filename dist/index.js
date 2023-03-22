@@ -1,7 +1,7 @@
+import path from "path";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import path from "path";
-async function run() {
+const run = async () => {
     try {
         const parentDir = path.resolve(__dirname, "..");
         // Get action inputs
@@ -11,7 +11,12 @@ async function run() {
         await exec.exec(`sh -c "` + parentDir + `/entrypoint.sh"`);
     }
     catch (error) {
-        core.setFailed(error.message);
+        // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
+        let message = "Unknown Error";
+        if (error instanceof Error) {
+            message = error.message;
+        }
+        core.setFailed(message);
     }
-}
-run();
+};
+await run();
