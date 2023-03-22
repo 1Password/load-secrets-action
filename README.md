@@ -6,7 +6,6 @@ Specify in your workflow YAML file which secrets from 1Password should be loaded
 
 Read more on the [1Password Developer Portal](https://developer.1password.com/ci-cd/github-actions).
 
-
 ## Requirements
 
 Before you get started, you'll need to:
@@ -15,7 +14,6 @@ Before you get started, you'll need to:
 - Set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` environment variables to your Connect instance's credentials, so it'll be used to load secrets.
 
 _Supported runners_: You can run the action on Mac and Linux runners. Windows is currently not supported.
-
 
 ## Usage
 
@@ -224,7 +222,7 @@ So if one of these values accidentally gets printed, it'll get replaced with `**
 ## 1Password Configuration
 
 To use the action with Connect, you need to have a [1Password Connect](https://support.1password.com/secrets-automation/#step-1-set-up-a-secrets-automation-workflow) instance deployed somewhere.
-To configure the action with your Connect host and token, set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` environment variables.  
+To configure the action with your Connect host and token, set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` environment variables.
 
 If you're using the `load-secrets` action more than once in a single job, you can use the `configure` action to avoid duplicate configuration:
 
@@ -249,10 +247,10 @@ jobs:
 
 ### `configure` Action Inputs
 
-| Name                    | Default | Environment variable       | Description                                              |
-| ----------------------- | ------- | -------------------------- | -------------------------------------------------------- |
-| `connect-host`          |         | `OP_CONNECT_HOST`          | Your 1Password Connect instance URL                      |
-| `connect-token`         |         | `OP_CONNECT_TOKEN`         | Token to authenticate to your 1Password Connect instance |
+| Name            | Default | Environment variable | Description                                              |
+| --------------- | ------- | -------------------- | -------------------------------------------------------- |
+| `connect-host`  |         | `OP_CONNECT_HOST`    | Your 1Password Connect instance URL                      |
+| `connect-token` |         | `OP_CONNECT_TOKEN`   | Token to authenticate to your 1Password Connect instance |
 
 ## Supported Runners
 

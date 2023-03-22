@@ -1,37 +1,40 @@
 {
-  "name": "load-secrets-action",
-  "version": "1.1.0",
-  "description": "Load Secrets from 1Password",
-  "type": "module",
-  "main": "dist/index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "scripts": {
-    "build": "tsc --project ./config/tsconfig.json"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/1Password/load-secrets-action.git"
-  },
-  "keywords": [
-    "actions",
-    "1password",
-    "load secrets",
-    "connect"
-  ],
-  "author": "1Password",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/1Password/load-secrets-action/issues"
-  },
-  "homepage": "https://github.com/1Password/load-secrets-action#readme",
-  "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/exec": "^1.1.1"
-  },
-  "devDependencies": {
-    "@types/node": "^18.14.2",
-    "typescript": "^4.9.5"
-  }
+	"name": "load-secrets-action",
+	"version": "1.1.0",
+	"description": "Load Secrets from 1Password",
+	"type": "module",
+	"main": "dist/index.js",
+	"directories": {
+		"test": "tests"
+	},
+	"scripts": {
+		"build": "tsc --project ./config/tsconfig.json",
+		"format": "prettier --ignore-path config/.prettierignore --check src/**/*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/1Password/load-secrets-action.git"
+	},
+	"keywords": [
+		"actions",
+		"1password",
+		"load secrets",
+		"connect"
+	],
+	"author": "1Password",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/1Password/load-secrets-action/issues"
+	},
+	"homepage": "https://github.com/1Password/load-secrets-action#readme",
+	"dependencies": {
+		"@actions/core": "^1.10.0",
+		"@actions/exec": "^1.1.1"
+	},
+	"devDependencies": {
+		"@1password/front-end-style": "^6.0.1",
+		"@types/node": "^18.14.2",
+		"typescript": "^4.9.5"
+	},
+	"prettier": "@1password/front-end-style/prettierrc.json"
 }

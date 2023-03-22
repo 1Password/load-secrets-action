@@ -12,5 +12,5 @@ inputs:
     description: Export the secrets as environment variables
     default: true
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: "node16"
+  main: "dist/index.js"
