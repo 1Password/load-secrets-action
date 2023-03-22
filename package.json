@@ -9,7 +9,8 @@
 	},
 	"scripts": {
 		"build": "tsc --project ./config/tsconfig.json",
-		"format": "prettier --ignore-path config/.prettierignore --check src/**/*"
+		"format": "prettier --ignore-path config/.prettierignore --check src/**/*",
+		"lint": "eslint 'src/**/*'"
 	},
 	"repository": {
 		"type": "git",
@@ -35,6 +36,15 @@
 		"@1password/front-end-style": "^6.0.1",
 		"@types/node": "^18.14.2",
 		"typescript": "^4.9.5"
+	},
+	"eslintConfig": {
+		"extends": "./node_modules/@1password/front-end-style/eslintrc.yml",
+		"ignorePatterns": [
+			"coverage/"
+		],
+		"parserOptions": {
+			"project": "./config/tsconfig.json"
+		}
 	},
 	"prettier": "@1password/front-end-style/prettierrc.json"
 }
