@@ -14,7 +14,8 @@
 		"test": "jest --config=./config/jest.config.js",
 		"test:clearcache": "jest --clearCache",
 		"test:coverage": "npm run test -- --coverage",
-		"test:watch": "npm run test -- --watch"
+		"test:watch": "npm run test -- --watch",
+		"validate": "npm run format && npm run lint && npm run test:coverage && npm run build"
 	},
 	"repository": {
 		"type": "git",
