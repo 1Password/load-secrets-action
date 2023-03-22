@@ -9,13 +9,17 @@
 	},
 	"scripts": {
 		"build": "tsc --project ./config/tsconfig.json",
-		"format": "prettier --ignore-path config/.prettierignore --check src/**/*",
-		"lint": "eslint 'src/**/*'",
+		"format": "prettier --ignore-path ./config/.prettierignore",
+		"format:check": "npm run format -- --check ./",
+		"format:write": "npm run format -- --write ./",
+		"lint": "eslint ./",
+		"lint:fix": "npm run lint -- --fix",
 		"test": "jest --config=./config/jest.config.js",
 		"test:clearcache": "jest --clearCache",
 		"test:coverage": "npm run test -- --coverage",
+		"test:findrelated": "npm run test -- --findRelatedTests",
 		"test:watch": "npm run test -- --watch",
-		"validate": "npm run format && npm run lint && npm run test:coverage && npm run build"
+		"validate": "npm run format:check && npm run lint && npm run test:coverage && npm run build"
 	},
 	"repository": {
 		"type": "git",
