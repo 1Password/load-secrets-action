@@ -22,4 +22,4 @@ const run = async () => {
 	}
 };
 
-await run();
+void run();
