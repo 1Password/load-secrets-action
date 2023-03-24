@@ -9,4 +9,5 @@ jobs:
       - name: ShellCheck
         uses: ludeeus/action-shellcheck@1.1.0
         with:
-          ignore_paths: ./config/.husky/
+          ignore_paths: >-
+            .husky
