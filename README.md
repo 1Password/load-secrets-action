@@ -4,7 +4,7 @@ This action loads secrets from 1Password into GitHub Actions using [1Password Co
 
 Specify in your workflow YAML file which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
 
-Read more on the [1Password Developer Portal](https://developer.1password.com/ci-cd/github-actions).
+Read more on the [1Password Developer Portal](https://developer.1password.com/docs/ci-cd/github-actions).
 
 
 ## Requirements
