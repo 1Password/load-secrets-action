@@ -1,10 +1,13 @@
 import path from "path";
+import url from "url";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 
 const run = async () => {
 	try {
-		const parentDir = path.resolve(__dirname, "..");
+		const currentFile = url.fileURLToPath(import.meta.url);
+		const currentDir = path.dirname(currentFile);
+		const parentDir = path.resolve(currentDir, "..");
 
 		// Get action inputs
 		process.env.INPUT_UNSET_PREVIOUS = core.getInput("unset-previous");

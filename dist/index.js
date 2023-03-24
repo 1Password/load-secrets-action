@@ -4093,23 +4093,32 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("util");
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(17);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(186);
-/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _actions_exec__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(514);
-/* harmony import */ var _actions_exec__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__nccwpck_require__.n(_actions_exec__WEBPACK_IMPORTED_MODULE_2__);
+
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(17);
+var external_path_default = /*#__PURE__*/__nccwpck_require__.n(external_path_);
+;// CONCATENATED MODULE: external "url"
+const external_url_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("url");
+var external_url_default = /*#__PURE__*/__nccwpck_require__.n(external_url_namespaceObject);
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(186);
+// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
+var exec = __nccwpck_require__(514);
+;// CONCATENATED MODULE: ./src/index.ts
+
 
 
 
 const run = async () => {
     try {
-        const parentDir = path__WEBPACK_IMPORTED_MODULE_0___default().resolve(__dirname, "..");
+        const currentFile = external_url_default().fileURLToPath(import.meta.url);
+        const currentDir = external_path_default().dirname(currentFile);
+        const parentDir = external_path_default().resolve(currentDir, "..");
         // Get action inputs
-        process.env.INPUT_UNSET_PREVIOUS = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("unset-previous");
-        process.env.INPUT_EXPORT_ENV = _actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput("export-env");
+        process.env.INPUT_UNSET_PREVIOUS = core.getInput("unset-previous");
+        process.env.INPUT_EXPORT_ENV = core.getInput("export-env");
         // Execute bash script
-        await _actions_exec__WEBPACK_IMPORTED_MODULE_2__.exec(`sh -c "` + parentDir + `/entrypoint.sh"`);
+        await exec.exec(`sh -c "` + parentDir + `/entrypoint.sh"`);
     }
     catch (error) {
         // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
@@ -4117,7 +4126,7 @@ const run = async () => {
         if (error instanceof Error) {
             message = error.message;
         }
-        _actions_core__WEBPACK_IMPORTED_MODULE_1__.setFailed(message);
+        core.setFailed(message);
     }
 };
 void run();
