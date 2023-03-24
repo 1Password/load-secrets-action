@@ -1,5 +1,4 @@
 {
-	"include": ["../src/**/*"],
 	"compilerOptions": {
 		"allowJs": false,
 		"allowUnreachableCode": false,
@@ -11,13 +10,15 @@
 		"isolatedModules": true,
 		"module": "esnext",
 		"moduleResolution": "node",
+		"noEmit": true,
 		"noEmitOnError": true,
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"outDir": "../dist",
+		"outDir": "dist/",
+		"rootDir": "src/",
 		"strict": true,
 		"target": "es2022"
 	}
