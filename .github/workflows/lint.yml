@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@2.0.0
         with:
           ignore_paths: >-
             .husky
