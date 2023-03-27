@@ -14,8 +14,6 @@
 		"format:write": "npm run format -- --write ./",
 		"lint": "eslint ./",
 		"lint:fix": "npm run lint -- --fix",
-		"pre-commit": "lint-staged --config ./config/lint-staged.config.js",
-		"pre-push": "npm run validate",
 		"prepare": "husky install ./config/.husky",
 		"test": "jest --config=./config/jest.config.js",
 		"test:clearcache": "jest --clearCache",
