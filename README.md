@@ -247,10 +247,10 @@ jobs:
 
 ### `configure` Action Inputs
 
-| Name            | Default | Environment variable | Description                                              |
-| --------------- | ------- | -------------------- | -------------------------------------------------------- |
-| `connect-host`  |         | `OP_CONNECT_HOST`    | Your 1Password Connect instance URL                      |
-| `connect-token` |         | `OP_CONNECT_TOKEN`   | Token to authenticate to your 1Password Connect instance |
+| Name            | Environment variable | Description                                              |
+| --------------- | -------------------- | -------------------------------------------------------- |
+| `connect-host`  | `OP_CONNECT_HOST`    | Your 1Password Connect instance URL                      |
+| `connect-token` | `OP_CONNECT_TOKEN`   | Token to authenticate to your 1Password Connect instance |
 
 ## Supported Runners
 
