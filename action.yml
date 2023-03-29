@@ -7,10 +7,10 @@ branding:
 inputs:
   unset-previous:
     description: Whether to unset environment variables populated by 1Password in earlier job steps
-    default: false
+    default: "false"
   export-env:
     description: Export the secrets as environment variables
-    default: true
+    default: "true"
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: "node16"
+  main: "dist/index.js"

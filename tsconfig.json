@@ -1,13 +1,25 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "outDir": "./dist",
-        "rootDir": "./src",
-        "strict": true,
-        "noImplicitAny": true,
-        "esModuleInterop": true
-    },
-    "exclude": ["node_modules"]
+	"compilerOptions": {
+		"allowJs": false,
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"esModuleInterop": true,
+		"exactOptionalPropertyTypes": true,
+		"forceConsistentCasingInFileNames": true,
+		"importsNotUsedAsValues": "error",
+		"isolatedModules": true,
+		"module": "esnext",
+		"moduleResolution": "node",
+		"noEmit": true,
+		"noEmitOnError": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"outDir": "./dist/",
+		"rootDir": "./src/",
+		"strict": true,
+		"target": "es2022"
+	}
 }
