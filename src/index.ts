@@ -90,7 +90,7 @@ const installCLI = async (): Promise<void> => {
 	const outArr = cmdOut.stdout.split("\n");
 	if (outArr[0] && process.env.PATH) {
 		const cliPath = outArr[0]?.replace(/^(::debug::OP_INSTALL_DIR: )/, "");
-		process.env.PATH = `${cliPath}:${process.env.PATH}`;
+		core.addPath(cliPath);
 	}
 };
 
