@@ -5,7 +5,7 @@ jobs:
   use-connect-without-export-env:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Launch 1Password Connect instance
         env:
           OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
@@ -35,7 +35,7 @@ jobs:
   use-connect-with-export-env:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Launch 1Password Connect instance
         env:
           OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
@@ -65,7 +65,7 @@ jobs:
   use-connect-with-references-with-id:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Launch 1Password Connect instance
         env:
           OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
@@ -95,7 +95,7 @@ jobs:
   use-service-account-without-export-env:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
@@ -115,7 +115,7 @@ jobs:
   use-service-account-with-export-env:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
@@ -129,7 +129,7 @@ jobs:
   use-service-account-with-references-with-id:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
@@ -149,7 +149,7 @@ jobs:
   run-on-macos-12:
     runs-on: macos-12
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
