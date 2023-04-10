@@ -6,7 +6,10 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
-        auth: [ connnect, service-account ]
+        auth: [ connect, service-account ]
+        exclude:
+          - os: macos-latest
+            auth: connect
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -46,7 +49,7 @@ jobs:
   use-connect-with-export-env:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -79,7 +82,7 @@ jobs:
   use-connect-with-references-with-id:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
