@@ -4114,7 +4114,17 @@ var core = __nccwpck_require__(186);
 var exec = __nccwpck_require__(514);
 // EXTERNAL MODULE: ./node_modules/@1password/op-js/dist/index.js
 var dist = __nccwpck_require__(91);
+;// CONCATENATED MODULE: ./package.json
+const package_namespaceObject = {"i8":"1.2.0"};
+;// CONCATENATED MODULE: ./src/utils.ts
+const semverToInt = (input) => input
+    .split(".")
+    .map((n) => n.padStart(2, "0"))
+    .join("");
+
 ;// CONCATENATED MODULE: ./src/index.ts
+
+
 
 
 
@@ -4198,7 +4208,7 @@ const loadSecrets = async (shouldExportEnv) => {
     (0,dist.setClientInfo)({
         name: "1Password GitHub Action",
         id: "GHA",
-        build: "1020000",
+        build: semverToInt(package_namespaceObject.i8),
     });
     // Load secrets from environment variables using 1Password CLI.
     // Iterate over them to find 1Password references, extract the secret values,

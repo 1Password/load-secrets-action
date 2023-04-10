@@ -3,6 +3,8 @@ import url from "url";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
+import { version } from "../package.json";
+import { semverToInt } from "./utils";
 
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
@@ -99,7 +101,7 @@ const loadSecrets = async (shouldExportEnv: boolean) => {
 	setClientInfo({
 		name: "1Password GitHub Action",
 		id: "GHA",
-		build: "1020000",
+		build: semverToInt(version),
 	});
 
 	// Load secrets from environment variables using 1Password CLI.
