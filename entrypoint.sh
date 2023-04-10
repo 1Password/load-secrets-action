@@ -7,16 +7,8 @@ export OP_INTEGRATION_NAME="1Password GitHub Action"
 export OP_INTEGRATION_ID="GHA"
 export OP_INTEGRATION_BUILDNUMBER="1010001"
 
-readonly CONNECT="CONNECT"
-readonly SERVICE_ACCOUNT="SERVICE_ACCOUNT"
-
-auth_type=$CONNECT
 managed_variables_var="OP_MANAGED_VARIABLES"
 IFS=','
-
-if [[ "$OP_CONNECT_HOST" != "http://"* ]] && [[ "$OP_CONNECT_HOST" != "https://"* ]]; then
-  export OP_CONNECT_HOST="http://"$OP_CONNECT_HOST
-fi
 
 # Unset all secrets managed by 1Password if `unset-previous` is set.
 unset_prev_secrets() {
@@ -122,17 +114,6 @@ extract_secrets() {
 }
 
 read -r -a managed_variables <<< "$(printenv $managed_variables_var)"
-
-if [ -z "$OP_CONNECT_TOKEN" ] || [ -z "$OP_CONNECT_HOST" ]; then
-  if [ -z "$OP_SERVICE_ACCOUNT_TOKEN" ]; then
-    echo "(\$OP_CONNECT_TOKEN and \$OP_CONNECT_HOST) or \$OP_SERVICE_ACCOUNT_TOKEN must be set"
-    exit 1
-  fi
-
-  auth_type=$SERVICE_ACCOUNT
-fi
-
-printf "Authenticated with %s \n" $auth_type
 
 unset_prev_secrets
 install_op_cli
