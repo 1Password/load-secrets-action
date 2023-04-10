@@ -76,7 +76,16 @@ const installCLI = async (): Promise<void> => {
 	const parentDir = path.resolve(currentDir, "..");
 
 	// Execute bash script
-	await exec.exec(`sh -c "` + parentDir + `/entrypoint.sh"`);
+	const cmdOut = await exec.getExecOutput(
+		`sh -c "` + parentDir + `/entrypoint.sh"`,
+	);
+
+	// Add path to 1Password CLI to $PATH
+	const outArr = cmdOut.stdout.split("\n");
+	if (outArr[0] && process.env.PATH) {
+		const cliPath = outArr[0]?.replace(/^(::debug::OP_INSTALL_DIR: )/, "");
+		process.env.PATH = `${cliPath}:${process.env.PATH}`;
+	}
 };
 
 const extractSecrets = async (exportEnv: boolean) => {
