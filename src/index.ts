@@ -60,8 +60,8 @@ const validateAuth = () => {
 	if (
 		process.env[envConnectHost] &&
 		/* eslint-disable no-restricted-syntax */
-		(!process.env[envConnectHost]?.startsWith("http://") ||
-			!process.env[envConnectHost].startsWith("https://"))
+		!process.env[envConnectHost].startsWith("http://") &&
+		!process.env[envConnectHost].startsWith("https://")
 	) {
 		process.env[envConnectHost] = `http://${process.env[envConnectHost]}`;
 	}
