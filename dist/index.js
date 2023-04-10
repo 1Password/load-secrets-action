@@ -4123,25 +4123,20 @@ var dist = __nccwpck_require__(91);
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
 const envServiceAccountToken = "OP_SERVICE_ACCOUNT_TOKEN";
+const envManagedVariables = "OP_MANAGED_VARIABLES";
 const run = async () => {
     try {
+        // Get action inputs
+        const shouldUnsetPrevious = core.getBooleanInput("unset-previous");
+        const shouldExportEnv = core.getBooleanInput("export-env");
+        // Unset all secrets managed by 1Password if `unset-previous` is set.
+        unsetPrevious(shouldUnsetPrevious);
         // Validate that a proper authentication configuration is set for the CLI
         validateAuth();
         // Download and install the CLI
         await installCLI();
-        // Get action inputs
-        const unsetPrevious = core.getBooleanInput("unset-previous");
-        const exportEnv = core.getBooleanInput("export-env");
-        // Unset all secrets managed by 1Password if `unset-previous` is set.
-        if (unsetPrevious && process.env.OP_MANAGED_VARIABLES) {
-            core.debug(`Unsetting previous values ...`);
-            const managedEnvs = process.env.OP_MANAGED_VARIABLES.split(",");
-            for (const envName of managedEnvs) {
-                core.debug(`Unsetting ${envName}`);
-                core.exportVariable(envName, "");
-            }
-        }
-        await extractSecrets(exportEnv);
+        // Load secrets
+        await loadSecrets(shouldExportEnv);
     }
     catch (error) {
         // It's possible for the Error constructor to be modified to be anything
@@ -4155,6 +4150,16 @@ const run = async () => {
             String(error);
         }
         core.setFailed(message);
+    }
+};
+const unsetPrevious = (shouldUnsetPrevious) => {
+    if (shouldUnsetPrevious && process.env[envManagedVariables]) {
+        core.debug(`Unsetting previous values ...`);
+        const managedEnvs = process.env[envManagedVariables].split(",");
+        for (const envName of managedEnvs) {
+            core.debug(`Unsetting ${envName}`);
+            core.exportVariable(envName, "");
+        }
     }
 };
 const validateAuth = () => {
@@ -4188,16 +4193,16 @@ const installCLI = async () => {
         process.env.PATH = `${cliPath}:${process.env.PATH}`;
     }
 };
-const extractSecrets = async (exportEnv) => {
+const loadSecrets = async (shouldExportEnv) => {
     // Pass User-Agent Inforomation to the 1Password CLI
     (0,dist.setClientInfo)({
         name: "1Password GitHub Action",
         id: "GHA",
         build: "1020000",
     });
-    // Load environment variables using 1Password CLI. Iterate over them to find 1Password references,
-    // load the secret values, and make them available either as step output or as environment variables
-    // in the next steps.
+    // Load secrets from environment variables using 1Password CLI.
+    // Iterate over them to find 1Password references, extract the secret values,
+    // and make them available in the next steps either as step outputs or as environment variables.
     const res = await exec.getExecOutput(`sh -c "op env ls"`);
     const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
     for (const envName of envs) {
@@ -4206,7 +4211,7 @@ const extractSecrets = async (exportEnv) => {
         if (ref) {
             const secretValue = dist.read.parse(ref);
             if (secretValue) {
-                if (exportEnv) {
+                if (shouldExportEnv) {
                     core.exportVariable(envName, secretValue);
                 }
                 else {
@@ -4216,8 +4221,8 @@ const extractSecrets = async (exportEnv) => {
             }
         }
     }
-    if (exportEnv) {
-        core.exportVariable("OP_MANAGED_VARIABLES", envs.join());
+    if (shouldExportEnv) {
+        core.exportVariable(envManagedVariables, envs.join());
     }
 };
 void run();
