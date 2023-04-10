@@ -2,20 +2,28 @@ on: push
 name: Run acceptance tests
 
 jobs:
-  use-connect-without-export-env:
+  test-with-output-secrets:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
+        auth: [ connnect, service-account ]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: Launch 1Password Connect instance
+        if: ${{ matrix.auth == 'connect' }}
         env:
           OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
         run: |
           echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
           docker-compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
+      - name: Configure Service account
+        if: ${{ matrix.auth == 'service-account' }}
+        uses: ./configure
+        with:
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
       - name: Configure 1Password Connect
+        if: ${{ matrix.auth == 'connect' }}
         uses: ./configure # 1password/load-secrets-action/configure@<version>
         with:
           connect-host: localhost:8080
