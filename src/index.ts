@@ -2,6 +2,7 @@ import path from "path";
 import url from "url";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
+import { read, setClientInfo } from "@1password/op-js";
 
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
@@ -12,12 +13,24 @@ const run = async () => {
 		// Validate that a proper authentication configuration is set for the CLI
 		validateAuth();
 
-		// Get action inputs
-		process.env.INPUT_UNSET_PREVIOUS = core.getInput("unset-previous");
-		process.env.INPUT_EXPORT_ENV = core.getInput("export-env");
+		// Download and install the CLI
+		await installCLI();
 
-		// Execute bash script
-		await executeScript();
+		// Get action inputs
+		const unsetPrevious = core.getBooleanInput("unset-previous");
+		const exportEnv = core.getBooleanInput("export-env");
+
+		// Unset all secrets managed by 1Password if `unset-previous` is set.
+		if (unsetPrevious && process.env.OP_MANAGED_VARIABLES) {
+			core.debug(`Unsetting previous values ...`);
+			const managedEnvs = process.env.OP_MANAGED_VARIABLES.split(",");
+			for (const envName of managedEnvs) {
+				core.debug(`Unsetting ${envName}`);
+				core.exportVariable(envName, "");
+			}
+		}
+
+		await extractSecrets(exportEnv);
 	} catch (error) {
 		// It's possible for the Error constructor to be modified to be anything
 		// in JavaScript, so the following code accounts for this possibility.
@@ -56,13 +69,47 @@ const validateAuth = () => {
 	core.debug(`Authenticated with ${authType}.`);
 };
 
-const executeScript = async (): Promise<void> => {
+/* eslint-disable @typescript-eslint/naming-convention */
+const installCLI = async (): Promise<void> => {
 	const currentFile = url.fileURLToPath(import.meta.url);
 	const currentDir = path.dirname(currentFile);
 	const parentDir = path.resolve(currentDir, "..");
 
 	// Execute bash script
 	await exec.exec(`sh -c "` + parentDir + `/entrypoint.sh"`);
+};
+
+const extractSecrets = async (exportEnv: boolean) => {
+	// Pass User-Agent Inforomation to the 1Password CLI
+	setClientInfo({
+		name: "1Password GitHub Action",
+		id: "GHA",
+		build: "1020000",
+	});
+
+	// Load environment variables using 1Password CLI. Iterate over them to find 1Password references,
+	// load the secret values, and make them available either as step output or as environment variables
+	// in the next steps.
+	const res = await exec.getExecOutput(`sh -c "op env ls"`);
+	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
+	for (const envName of envs) {
+		core.debug(`Populating variable: ${envName}`);
+		const ref = process.env[envName];
+		if (ref) {
+			const secretValue = read.parse(ref);
+			if (secretValue) {
+				if (exportEnv) {
+					core.exportVariable(envName, secretValue);
+				} else {
+					core.setOutput(envName, secretValue);
+				}
+				core.setSecret(secretValue);
+			}
+		}
+	}
+	if (exportEnv) {
+		core.exportVariable("OP_MANAGED_VARIABLES", envs.join());
+	}
 };
 
 void run();
