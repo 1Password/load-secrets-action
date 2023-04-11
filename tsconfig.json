@@ -6,8 +6,6 @@
 		"esModuleInterop": true,
 		"exactOptionalPropertyTypes": true,
 		"forceConsistentCasingInFileNames": true,
-		"importsNotUsedAsValues": "error",
-		"isolatedModules": true,
 		"module": "esnext",
 		"moduleResolution": "node",
 		"noEmit": true,
@@ -19,6 +17,7 @@
 		"noUnusedParameters": true,
 		"resolveJsonModule": true,
 		"strict": true,
-		"target": "es2022"
+		"target": "es2022",
+		"verbatimModuleSyntax": true
 	}
 }

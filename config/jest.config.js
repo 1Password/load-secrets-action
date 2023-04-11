@@ -11,7 +11,13 @@ const jestConfig = {
 	testEnvironment: "node",
 	testRegex: "(/__tests__/.*|(\\.|/)test)\\.ts",
 	transform: {
-		".ts": ["ts-jest"],
+		".ts": [
+			"ts-jest",
+			{
+				isolatedModules: true,
+				useESM: true,
+			},
+		],
 	},
 	verbose: true,
 };
