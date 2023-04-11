@@ -4,14 +4,8 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
 import { version } from "../package.json";
-import { semverToInt } from "./utils";
-import {
-	envConnectHost,
-	envConnectToken,
-	envServiceAccountToken,
-	envManagedVariables,
-	authErr,
-} from "./constants";
+import { semverToInt, validateAuth } from "./utils";
+import { envManagedVariables } from "./constants";
 
 const run = async () => {
 	try {
@@ -53,28 +47,6 @@ const unsetPrevious = (shouldUnsetPrevious: boolean) => {
 			core.exportVariable(envName, "");
 		}
 	}
-};
-
-const validateAuth = () => {
-	let authType = "Connect";
-	if (!process.env[envConnectHost] || !process.env[envConnectToken]) {
-		if (!process.env[envServiceAccountToken]) {
-			throw new Error(authErr);
-		}
-		authType = "Service account";
-	}
-
-	// Adjust Connect host to have a protocol
-	if (
-		process.env[envConnectHost] &&
-		/* eslint-disable no-restricted-syntax */
-		!process.env[envConnectHost].startsWith("http://") &&
-		!process.env[envConnectHost].startsWith("https://")
-	) {
-		process.env[envConnectHost] = `http://${process.env[envConnectHost]}`;
-	}
-
-	core.debug(`Authenticated with ${authType}.`);
 };
 
 /* eslint-disable @typescript-eslint/naming-convention */

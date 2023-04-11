@@ -4116,18 +4116,37 @@ var exec = __nccwpck_require__(514);
 var dist = __nccwpck_require__(91);
 ;// CONCATENATED MODULE: ./package.json
 const package_namespaceObject = {"i8":"1.2.0"};
-;// CONCATENATED MODULE: ./src/utils.ts
-const semverToInt = (input) => input
-    .split(".")
-    .map((n) => n.padStart(2, "0"))
-    .join("");
-
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
 const envServiceAccountToken = "OP_SERVICE_ACCOUNT_TOKEN";
 const envManagedVariables = "OP_MANAGED_VARIABLES";
 const authErr = `(${envConnectHost} and ${envConnectToken}) or ${envServiceAccountToken} must be set`;
+
+;// CONCATENATED MODULE: ./src/utils.ts
+
+
+const semverToInt = (input) => input
+    .split(".")
+    .map((n) => n.padStart(2, "0"))
+    .join("");
+const validateAuth = () => {
+    let authType = "Connect";
+    if (!process.env[envConnectHost] || !process.env[envConnectToken]) {
+        if (!process.env[envServiceAccountToken]) {
+            throw new Error(authErr);
+        }
+        authType = "Service account";
+    }
+    // Adjust Connect host to have a protocol
+    if (process.env[envConnectHost] &&
+        /* eslint-disable no-restricted-syntax */
+        !process.env[envConnectHost].startsWith("http://") &&
+        !process.env[envConnectHost].startsWith("https://")) {
+        process.env[envConnectHost] = `http://${process.env[envConnectHost]}`;
+    }
+    core.debug(`Authenticated with ${authType}.`);
+};
 
 ;// CONCATENATED MODULE: ./src/index.ts
 
@@ -4175,23 +4194,6 @@ const unsetPrevious = (shouldUnsetPrevious) => {
             core.exportVariable(envName, "");
         }
     }
-};
-const validateAuth = () => {
-    let authType = "Connect";
-    if (!process.env[envConnectHost] || !process.env[envConnectToken]) {
-        if (!process.env[envServiceAccountToken]) {
-            throw new Error(authErr);
-        }
-        authType = "Service account";
-    }
-    // Adjust Connect host to have a protocol
-    if (process.env[envConnectHost] &&
-        /* eslint-disable no-restricted-syntax */
-        !process.env[envConnectHost].startsWith("http://") &&
-        !process.env[envConnectHost].startsWith("https://")) {
-        process.env[envConnectHost] = `http://${process.env[envConnectHost]}`;
-    }
-    core.debug(`Authenticated with ${authType}.`);
 };
 /* eslint-disable @typescript-eslint/naming-convention */
 const installCLI = async () => {
