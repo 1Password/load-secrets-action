@@ -1,5 +1,6 @@
 import * as core from "@actions/core";
-import { semverToInt, validateAuth } from "./utils";
+import { read } from "@1password/op-js";
+import { extractSecret, semverToInt, validateAuth } from "./utils";
 import {
 	authErr,
 	envConnectHost,
@@ -62,5 +63,45 @@ describe("validateAuth", () => {
 		process.env[envServiceAccountToken] = "ops_token";
 		expect(validateAuth).not.toThrowError(authErr);
 		expect(mockCoreDebug).toBeCalledWith("Authenticated with Service account.");
+	});
+});
+
+describe("extractSecret", () => {
+	const envTestSecretEnv = "TEST_SECRET";
+	const testSecretRef = "op://vault/item/secret";
+	const testSecretValue = "Secret1@3$";
+
+	const mockCoreExportVariable = jest.spyOn(core, "exportVariable");
+	const mockCoreSetOutput = jest.spyOn(core, "setOutput");
+	const mockCoreSetSecret = jest.spyOn(core, "setSecret");
+	read.parse = jest.fn().mockReturnValue(testSecretValue);
+
+	process.env[envTestSecretEnv] = testSecretRef;
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
+	it("should set secret as step output", () => {
+		extractSecret(envTestSecretEnv, false);
+		expect(mockCoreExportVariable).not.toBeCalledWith(
+			envTestSecretEnv,
+			testSecretValue,
+		);
+		expect(mockCoreSetOutput).toBeCalledWith(envTestSecretEnv, testSecretValue);
+		expect(mockCoreSetSecret).toBeCalledWith(testSecretValue);
+	});
+
+	it("should set secret as environment variable", () => {
+		extractSecret(envTestSecretEnv, true);
+		expect(mockCoreExportVariable).toBeCalledWith(
+			envTestSecretEnv,
+			testSecretValue,
+		);
+		expect(mockCoreSetOutput).not.toBeCalledWith(
+			envTestSecretEnv,
+			testSecretValue,
+		);
+		expect(mockCoreSetSecret).toBeCalledWith(testSecretValue);
 	});
 });
