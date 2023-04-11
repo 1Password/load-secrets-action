@@ -4,7 +4,12 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { setClientInfo } from "@1password/op-js";
 import { version } from "../package.json";
-import { extractSecret, semverToInt, validateAuth } from "./utils";
+import {
+	extractSecret,
+	semverToInt,
+	unsetPrevious,
+	validateAuth,
+} from "./utils";
 import { envManagedVariables } from "./constants";
 
 const run = async () => {
@@ -35,17 +40,6 @@ const run = async () => {
 			String(error);
 		}
 		core.setFailed(message);
-	}
-};
-
-const unsetPrevious = (shouldUnsetPrevious: boolean) => {
-	if (shouldUnsetPrevious && process.env[envManagedVariables]) {
-		core.debug(`Unsetting previous values ...`);
-		const managedEnvs = process.env[envManagedVariables].split(",");
-		for (const envName of managedEnvs) {
-			core.debug(`Unsetting ${envName}`);
-			core.exportVariable(envName, "");
-		}
 	}
 };
 

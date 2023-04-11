@@ -4164,6 +4164,16 @@ const extractSecret = (envName, shouldExportEnv) => {
         }
     }
 };
+const unsetPrevious = (shouldUnsetPrevious) => {
+    if (shouldUnsetPrevious && process.env[envManagedVariables]) {
+        core.debug(`Unsetting previous values ...`);
+        const managedEnvs = process.env[envManagedVariables].split(",");
+        for (const envName of managedEnvs) {
+            core.debug(`Unsetting ${envName}`);
+            core.exportVariable(envName, "");
+        }
+    }
+};
 
 ;// CONCATENATED MODULE: ./src/index.ts
 
@@ -4200,16 +4210,6 @@ const run = async () => {
             String(error);
         }
         core.setFailed(message);
-    }
-};
-const unsetPrevious = (shouldUnsetPrevious) => {
-    if (shouldUnsetPrevious && process.env[envManagedVariables]) {
-        core.debug(`Unsetting previous values ...`);
-        const managedEnvs = process.env[envManagedVariables].split(",");
-        for (const envName of managedEnvs) {
-            core.debug(`Unsetting ${envName}`);
-            core.exportVariable(envName, "");
-        }
     }
 };
 /* eslint-disable @typescript-eslint/naming-convention */

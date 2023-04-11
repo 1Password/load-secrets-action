@@ -5,6 +5,7 @@ import {
 	envConnectHost,
 	envConnectToken,
 	envServiceAccountToken,
+	envManagedVariables,
 } from "./constants";
 
 export const semverToInt = (input: string): string =>
@@ -50,6 +51,17 @@ export const extractSecret = (
 				core.setOutput(envName, secretValue);
 			}
 			core.setSecret(secretValue);
+		}
+	}
+};
+
+export const unsetPrevious = (shouldUnsetPrevious: boolean): void => {
+	if (shouldUnsetPrevious && process.env[envManagedVariables]) {
+		core.debug(`Unsetting previous values ...`);
+		const managedEnvs = process.env[envManagedVariables].split(",");
+		for (const envName of managedEnvs) {
+			core.debug(`Unsetting ${envName}`);
+			core.exportVariable(envName, "");
 		}
 	}
 };
