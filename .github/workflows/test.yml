@@ -5,8 +5,8 @@ jobs:
   test-with-output-secrets:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
-        auth: [ connect, service-account ]
+        os: [ubuntu-latest, macos-latest]
+        auth: [connect, service-account]
         exclude:
           - os: macos-latest
             auth: connect
@@ -49,8 +49,8 @@ jobs:
   test-with-export-env:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
-        auth: [ connect, service-account ]
+        os: [ubuntu-latest, macos-latest]
+        auth: [connect, service-account]
         exclude:
           - os: macos-latest
             auth: connect
@@ -93,8 +93,8 @@ jobs:
   test-references-with-ids:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
-        auth: [ connect, service-account ]
+        os: [ubuntu-latest, macos-latest]
+        auth: [connect, service-account]
         exclude:
           - os: macos-latest
             auth: connect
