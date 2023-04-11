@@ -5,11 +5,13 @@ import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
 import { version } from "../package.json";
 import { semverToInt } from "./utils";
-
-const envConnectHost = "OP_CONNECT_HOST";
-const envConnectToken = "OP_CONNECT_TOKEN";
-const envServiceAccountToken = "OP_SERVICE_ACCOUNT_TOKEN";
-const envManagedVariables = "OP_MANAGED_VARIABLES";
+import {
+	envConnectHost,
+	envConnectToken,
+	envServiceAccountToken,
+	envManagedVariables,
+	authErr,
+} from "./constants";
 
 const run = async () => {
 	try {
@@ -57,9 +59,7 @@ const validateAuth = () => {
 	let authType = "Connect";
 	if (!process.env[envConnectHost] || !process.env[envConnectToken]) {
 		if (!process.env[envServiceAccountToken]) {
-			throw new Error(
-				`(${envConnectHost} and ${envConnectToken}) or ${envServiceAccountToken} must be set`,
-			);
+			throw new Error(authErr);
 		}
 		authType = "Service account";
 	}

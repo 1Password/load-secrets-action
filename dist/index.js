@@ -4122,6 +4122,13 @@ const semverToInt = (input) => input
     .map((n) => n.padStart(2, "0"))
     .join("");
 
+;// CONCATENATED MODULE: ./src/constants.ts
+const envConnectHost = "OP_CONNECT_HOST";
+const envConnectToken = "OP_CONNECT_TOKEN";
+const envServiceAccountToken = "OP_SERVICE_ACCOUNT_TOKEN";
+const envManagedVariables = "OP_MANAGED_VARIABLES";
+const authErr = `(${envConnectHost} and ${envConnectToken}) or ${envServiceAccountToken} must be set`;
+
 ;// CONCATENATED MODULE: ./src/index.ts
 
 
@@ -4130,10 +4137,7 @@ const semverToInt = (input) => input
 
 
 
-const envConnectHost = "OP_CONNECT_HOST";
-const envConnectToken = "OP_CONNECT_TOKEN";
-const envServiceAccountToken = "OP_SERVICE_ACCOUNT_TOKEN";
-const envManagedVariables = "OP_MANAGED_VARIABLES";
+
 const run = async () => {
     try {
         // Get action inputs
@@ -4176,7 +4180,7 @@ const validateAuth = () => {
     let authType = "Connect";
     if (!process.env[envConnectHost] || !process.env[envConnectToken]) {
         if (!process.env[envServiceAccountToken]) {
-            throw new Error(`(${envConnectHost} and ${envConnectToken}) or ${envServiceAccountToken} must be set`);
+            throw new Error(authErr);
         }
         authType = "Service account";
     }
