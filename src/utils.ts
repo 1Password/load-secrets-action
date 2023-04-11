@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import { read } from "@1password/op-js";
 import {
 	authErr,
 	envConnectHost,
@@ -32,4 +33,23 @@ export const validateAuth = (): void => {
 	}
 
 	core.debug(`Authenticated with ${authType}.`);
+};
+
+export const extractSecret = (
+	envName: string,
+	shouldExportEnv: boolean,
+): void => {
+	core.debug(`Populating variable: ${envName}`);
+	const ref = process.env[envName];
+	if (ref) {
+		const secretValue = read.parse(ref);
+		if (secretValue) {
+			if (shouldExportEnv) {
+				core.exportVariable(envName, secretValue);
+			} else {
+				core.setOutput(envName, secretValue);
+			}
+			core.setSecret(secretValue);
+		}
+	}
 };

@@ -2,9 +2,9 @@ import path from "path";
 import url from "url";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import { read, setClientInfo } from "@1password/op-js";
+import { setClientInfo } from "@1password/op-js";
 import { version } from "../package.json";
-import { semverToInt, validateAuth } from "./utils";
+import { extractSecret, semverToInt, validateAuth } from "./utils";
 import { envManagedVariables } from "./constants";
 
 const run = async () => {
@@ -82,19 +82,7 @@ const loadSecrets = async (shouldExportEnv: boolean) => {
 	const res = await exec.getExecOutput(`sh -c "op env ls"`);
 	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
 	for (const envName of envs) {
-		core.debug(`Populating variable: ${envName}`);
-		const ref = process.env[envName];
-		if (ref) {
-			const secretValue = read.parse(ref);
-			if (secretValue) {
-				if (shouldExportEnv) {
-					core.exportVariable(envName, secretValue);
-				} else {
-					core.setOutput(envName, secretValue);
-				}
-				core.setSecret(secretValue);
-			}
-		}
+		extractSecret(envName, shouldExportEnv);
 	}
 	if (shouldExportEnv) {
 		core.exportVariable(envManagedVariables, envs.join());

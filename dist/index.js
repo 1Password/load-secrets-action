@@ -4126,6 +4126,7 @@ const authErr = `(${envConnectHost} and ${envConnectToken}) or ${envServiceAccou
 ;// CONCATENATED MODULE: ./src/utils.ts
 
 
+
 const semverToInt = (input) => input
     .split(".")
     .map((n) => n.padStart(2, "0"))
@@ -4146,6 +4147,22 @@ const validateAuth = () => {
         process.env[envConnectHost] = `http://${process.env[envConnectHost]}`;
     }
     core.debug(`Authenticated with ${authType}.`);
+};
+const extractSecret = (envName, shouldExportEnv) => {
+    core.debug(`Populating variable: ${envName}`);
+    const ref = process.env[envName];
+    if (ref) {
+        const secretValue = dist.read.parse(ref);
+        if (secretValue) {
+            if (shouldExportEnv) {
+                core.exportVariable(envName, secretValue);
+            }
+            else {
+                core.setOutput(envName, secretValue);
+            }
+            core.setSecret(secretValue);
+        }
+    }
 };
 
 ;// CONCATENATED MODULE: ./src/index.ts
@@ -4222,20 +4239,7 @@ const loadSecrets = async (shouldExportEnv) => {
     const res = await exec.getExecOutput(`sh -c "op env ls"`);
     const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
     for (const envName of envs) {
-        core.debug(`Populating variable: ${envName}`);
-        const ref = process.env[envName];
-        if (ref) {
-            const secretValue = dist.read.parse(ref);
-            if (secretValue) {
-                if (shouldExportEnv) {
-                    core.exportVariable(envName, secretValue);
-                }
-                else {
-                    core.setOutput(envName, secretValue);
-                }
-                core.setSecret(secretValue);
-            }
-        }
+        extractSecret(envName, shouldExportEnv);
     }
     if (shouldExportEnv) {
         core.exportVariable(envManagedVariables, envs.join());
