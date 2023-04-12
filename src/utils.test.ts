@@ -1,10 +1,16 @@
 import * as core from "@actions/core";
 import { read } from "@1password/op-js";
-import { extractSecret, semverToInt, validateAuth } from "./utils";
+import {
+	extractSecret,
+	semverToInt,
+	unsetPrevious,
+	validateAuth,
+} from "./utils";
 import {
 	authErr,
 	envConnectHost,
 	envConnectToken,
+	envManagedVariables,
 	envServiceAccountToken,
 } from "./constants";
 
@@ -103,5 +109,26 @@ describe("extractSecret", () => {
 			testSecretValue,
 		);
 		expect(mockCoreSetSecret).toBeCalledWith(testSecretValue);
+	});
+});
+
+describe("unsetPrevious", () => {
+	const testManagedEnv = "TEST_SECRET";
+	const testSecretValue = "MyS3cr#T";
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+		process.env[testManagedEnv] = testSecretValue;
+		process.env[envManagedVariables] = testManagedEnv;
+	});
+
+	it("should unset the environment variable if user wants it", () => {
+		unsetPrevious(true);
+		expect(process.env[testManagedEnv]).toBe("");
+	});
+
+	it("shouldn't unset the environment variable if user doesn't want it", () => {
+		unsetPrevious(false);
+		expect(process.env[testManagedEnv]).toBe(testSecretValue);
 	});
 });
