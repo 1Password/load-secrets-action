@@ -40,7 +40,7 @@ jobs:
   hello-world:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Load secret
         id: op-load-secret
@@ -66,7 +66,7 @@ jobs:
   hello-world:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Load secret
         id: op-load-secret
@@ -95,7 +95,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Configure 1Password Connect
         uses: 1password/load-secrets-action/configure@v1
@@ -116,13 +116,13 @@ jobs:
           DOCKERHUB_TOKEN: op://app-cicd/docker/token
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ steps.load-docker-credentials.outputs.DOCKERHUB_USERNAME }}
           password: ${{ steps.load-docker-credentials.outputs.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           tags: acme/app:latest
@@ -141,7 +141,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Configure 1Password Connect
         uses: 1password/load-secrets-action/configure@v1
@@ -160,13 +160,13 @@ jobs:
           DOCKERHUB_TOKEN: op://app-cicd/docker/token
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ steps.load-docker-credentials.outputs.DOCKERHUB_USERNAME }}
           password: ${{ steps.load-docker-credentials.outputs.DOCKERHUB_TOKEN }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           tags: acme/app:latest
@@ -184,7 +184,7 @@ jobs:
   hello-world:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Load secret
         uses: 1password/load-secrets-action@v1
@@ -209,7 +209,7 @@ jobs:
   hello-world:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Load secret
         uses: 1password/load-secrets-action@v1
@@ -239,7 +239,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Configure 1Password Connect
         uses: 1password/load-secrets-action/configure@v1
@@ -260,7 +260,7 @@ jobs:
           DOCKERHUB_TOKEN: op://app-cicd/docker/token
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_TOKEN }}
@@ -269,7 +269,7 @@ jobs:
         run: printenv
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           tags: acme/app:latest
@@ -305,7 +305,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Configure 1Password Connect
         uses: 1password/load-secrets-action/configure@v1
@@ -324,7 +324,7 @@ jobs:
           DOCKERHUB_TOKEN: op://app-cicd/docker/token
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_TOKEN }}
@@ -333,7 +333,7 @@ jobs:
         run: printenv
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           tags: acme/app:latest
@@ -399,7 +399,7 @@ jobs:
   hello-world:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Configure 1Password Connect
         uses: 1password/load-secrets-action/configure@v1
