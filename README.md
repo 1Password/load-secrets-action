@@ -1,6 +1,6 @@
 # Load Secrets from 1Password - GitHub Action
 
-This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://1password.com/secrets/).
+This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://1password.com/secrets/) or a Service Account<sup>[BETA]</sup>.
 
 Specify in your workflow YAML file which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
 
@@ -20,6 +20,10 @@ _Supported runners_: You can run the action on Mac and Linux runners. Windows is
 You can configure the action to use your 1Password Connect instance.
 
 If you provide `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` variables, the Connect instance will be used to load secrets. Make sure [1Password Connect](https://support.1password.com/secrets-automation/#step-2-deploy-a-1password-connect-server) is deployed in your infrastructure.
+
+If you provide `OP_SERVICE_ACCOUNT_TOKEN` variable, the service account will be used to load secrets.
+
+**_Note_**: If all environment variables have been set, the Connect credentials will take precedence over the provided service account token. You must unset the Connect environment variables to ensure the action uses the service account token.
 
 There are two ways that secrets can be loaded:
 
@@ -52,6 +56,33 @@ jobs:
         run: echo "Secret: ${{ steps.op-load-secret.outputs.SECRET }}"
         # Prints: Secret: ***
 ```
+
+<details>
+<summary><b>Usage example with Service Accounts<sup>BETA</sup></b></summary>
+
+```yml
+on: push
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Load secret
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: false
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          SECRET: op://app-cicd/hello-world/secret
+
+      - name: Print masked secret
+        run: echo "Secret: ${{ steps.op-load-secret.outputs.SECRET }}"
+        # Prints: Secret: ***
+```
+
+</details>
 
 <details>
 <summary><b>Longer usage example</b></summary>
@@ -99,9 +130,78 @@ jobs:
 
 </details>
 
+<details>
+<summary><b>Longer usage example with Service Accounts<sup>BETA</sup></b></summary>
+
+```yml
+on: push
+name: Deploy app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure 1Password Connect
+        uses: 1password/load-secrets-action/configure@v1
+        with:
+          # Persist the 1Password Service Account token. Keep in mind that
+          # every single step in the job will be able to access the token.
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Load Docker credentials
+        id: load-docker-credentials
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: false
+        env:
+          DOCKERHUB_USERNAME: op://app-cicd/docker/username
+          DOCKERHUB_TOKEN: op://app-cicd/docker/token
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ steps.load-docker-credentials.outputs.DOCKERHUB_USERNAME }}
+          password: ${{ steps.load-docker-credentials.outputs.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: acme/app:latest
+```
+
+</details>
+
 ### Export secrets as environment variables
 
 This method, allows the action to access the loaded secrets as environment variables. These environment variables are accessible at a job level.
+
+```yml
+on: push
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Load secret
+        uses: 1password/load-secrets-action@v1
+        with:
+          # Export loaded secrets as environment variables
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          SECRET: op://app-cicd/hello-world/secret
+
+      - name: Print masked secret
+        run: echo "Secret: $SECRET"
+        # Prints: Secret: ***
+```
+
+<details>
+<summary><b>Usage example with Service Accounts<sup>BETA</sup></b></summary>
 
 ```yml
 on: push
@@ -125,6 +225,8 @@ jobs:
         run: echo "Secret: $SECRET"
         # Prints: Secret: ***
 ```
+
+</details>
 
 <details>
 <summary><b>Longer usage example</b></summary>
@@ -192,6 +294,69 @@ jobs:
 
 </details>
 
+<details>
+<summary><b>Longer usage example with Service Accounts<sup>BETA</sup></b></summary>
+
+```yml
+on: push
+name: Deploy app
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure 1Password Connect
+        uses: 1password/load-secrets-action/configure@v1
+        with:
+          # Persist the 1Password Service Account token. Keep in mind that
+          # every single step in the job will be able to access the token.
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Load Docker credentials
+        uses: 1password/load-secrets-action@v1
+        with:
+          # Export loaded secrets as environment variables
+          export-env: true
+        env:
+          DOCKERHUB_USERNAME: op://app-cicd/docker/username
+          DOCKERHUB_TOKEN: op://app-cicd/docker/token
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Print environment variables with masked secrets
+        run: printenv
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: acme/app:latest
+
+      - name: Load AWS credentials
+        uses: 1password/load-secrets-action@v1
+        with:
+          # Export loaded secrets as environment variables
+          export-env: true
+          # Remove local copies of the Docker credentials, which are not needed anymore
+          unset-previous: true
+        env:
+          AWS_ACCESS_KEY_ID: op://app-cicd/aws/access-key-id
+          AWS_SECRET_ACCESS_KEY: op://app-cicd/aws/secret-access-key
+
+      - name: Deploy app
+        # This script expects AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set, which was
+        # done automatically by the step above
+        run: ./deploy.sh
+```
+
+</details>
+
 ## Action Inputs
 
 | Name             | Default | Description                                                                        |
@@ -224,6 +389,8 @@ So if one of these values accidentally gets printed, it'll get replaced with `**
 To use the action with Connect, you need to have a [1Password Connect](https://support.1password.com/secrets-automation/#step-1-set-up-a-secrets-automation-workflow) instance deployed somewhere.
 To configure the action with your Connect host and token, set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` environment variables.
 
+To configure the action with your service account token <sup>BETA</sup>, set the `OP_SERVICE_ACCOUNT_TOKEN` environment variable.
+
 If you're using the `load-secrets` action more than once in a single job, you can use the `configure` action to avoid duplicate configuration:
 
 ```yml
@@ -247,10 +414,11 @@ jobs:
 
 ### `configure` Action Inputs
 
-| Name            | Environment variable | Description                                              |
-| --------------- | -------------------- | -------------------------------------------------------- |
-| `connect-host`  | `OP_CONNECT_HOST`    | Your 1Password Connect instance URL                      |
-| `connect-token` | `OP_CONNECT_TOKEN`   | Token to authenticate to your 1Password Connect instance |
+| Name                    | Environment variable       | Description                                              |
+| ----------------------- | -------------------------- | -------------------------------------------------------- |
+| `connect-host`          | `OP_CONNECT_HOST`          | Your 1Password Connect instance URL                      |
+| `connect-token`         | `OP_CONNECT_TOKEN`         | Token to authenticate to your 1Password Connect instance |
+| `service-account-token` | `OP_SERVICE_ACCOUNT_TOKEN` | Your 1Password service account token                     |
 
 ## Supported Runners
 
