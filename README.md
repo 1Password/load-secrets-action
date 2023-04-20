@@ -1,6 +1,6 @@
 # Load Secrets from 1Password - GitHub Action
 
-This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://1password.com/secrets/) or a Service Account<sup>[BETA]</sup>.
+This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://developer.1password.com/docs/connect) or a [Service Account <sup>[BETA]</sup>](https://developer.1password.com/docs/service-accounts).
 
 Specify in your workflow YAML file which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
 
@@ -58,7 +58,7 @@ jobs:
 ```
 
 <details>
-<summary><b>Usage example with Service Accounts<sup>BETA</sup></b></summary>
+<summary><b>Usage example with Service Accounts <sup>BETA</sup></b></summary>
 
 ```yml
 on: push
@@ -131,7 +131,7 @@ jobs:
 </details>
 
 <details>
-<summary><b>Longer usage example with Service Accounts<sup>BETA</sup></b></summary>
+<summary><b>Longer usage example with Service Accounts <sup>BETA</sup></b></summary>
 
 ```yml
 on: push
@@ -201,7 +201,7 @@ jobs:
 ```
 
 <details>
-<summary><b>Usage example with Service Accounts<sup>BETA</sup></b></summary>
+<summary><b>Usage example with Service Accounts <sup>BETA</sup></b></summary>
 
 ```yml
 on: push
@@ -295,7 +295,7 @@ jobs:
 </details>
 
 <details>
-<summary><b>Longer usage example with Service Accounts<sup>BETA</sup></b></summary>
+<summary><b>Longer usage example with Service Accounts <sup>BETA</sup></b></summary>
 
 ```yml
 on: push
@@ -428,9 +428,9 @@ You can run the action on Linux and macOS runners. Windows is currently not supp
 
 1Password requests you practice responsible disclosure if you discover a vulnerability.
 
-Please file requests via [**BugCrowd**](https://bugcrowd.com/agilebits).
+Please file requests through [BugCrowd](https://bugcrowd.com/agilebits).
 
-For information about security practices, please visit our [Security homepage](https://bugcrowd.com/agilebits).
+For information about our security practices, visit the [1Password Security homepage](https://1password.com/security).
 
 ## Getting help
 
