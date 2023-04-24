@@ -102,7 +102,7 @@ jobs:
         with:
           # Persist the 1Password Connect URL for next steps. You can also persist
           # the Connect token using input `connect-token`, but keep in mind that
-          # every single step in the job would then be able to access the token.
+          # this will grant all steps of the job access to the token.
           connect-host: https://1password.acme.com
 
       - name: Load Docker credentials
@@ -146,8 +146,8 @@ jobs:
       - name: Configure 1Password Connect
         uses: 1password/load-secrets-action/configure@v1
         with:
-          # Persist the 1Password Service Account token. Keep in mind that
-          # every single step in the job will be able to access the token.
+          # Persist the 1Password Service Account token. This will grant
+          # all steps of the job access to the token.
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Load Docker credentials
@@ -246,7 +246,7 @@ jobs:
         with:
           # Persist the 1Password Connect URL for next steps. You can also persist
           # the Connect token using input `connect-token`, but keep in mind that
-          # every single step in the job would then be able to access the token.
+          # this will grant all steps of the job access to the token.
           connect-host: https://1password.acme.com
 
       - name: Load Docker credentials
@@ -279,7 +279,7 @@ jobs:
         with:
           # Export loaded secrets as environment variables
           export-env: true
-          # Remove local copies of the Docker credentials, which are not needed anymore
+          # Remove local copies of the Docker credentials, which aren't needed anymore
           unset-previous: true
         env:
           OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
@@ -287,8 +287,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: op://app-cicd/aws/secret-access-key
 
       - name: Deploy app
-        # This script expects AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set, which was
-        # done automatically by the step above
+        # This script expects AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set.
+        # This happened using secret references in the preceding lines.
         run: ./deploy.sh
 ```
 
@@ -310,8 +310,8 @@ jobs:
       - name: Configure 1Password Connect
         uses: 1password/load-secrets-action/configure@v1
         with:
-          # Persist the 1Password Service Account token. Keep in mind that
-          # every single step in the job will be able to access the token.
+          # Persist the 1Password Service Account token. This will grant
+          # all steps of the job access to the token.
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
 
       - name: Load Docker credentials
@@ -343,15 +343,15 @@ jobs:
         with:
           # Export loaded secrets as environment variables
           export-env: true
-          # Remove local copies of the Docker credentials, which are not needed anymore
+          # Remove local copies of the Docker credentials, which aren't needed anymore
           unset-previous: true
         env:
           AWS_ACCESS_KEY_ID: op://app-cicd/aws/access-key-id
           AWS_SECRET_ACCESS_KEY: op://app-cicd/aws/secret-access-key
 
       - name: Deploy app
-        # This script expects AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set, which was
-        # done automatically by the step above
+        # This script expects AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set.
+        # This happened using secret references in the preceding lines.
         run: ./deploy.sh
 ```
 
