@@ -424,6 +424,37 @@ jobs:
 
 You can run the action on Linux and macOS runners. Windows is currently not supported.
 
+## Warnings
+
+If you're using the CLI in your GitHub pipelines and you want to create items with it, the following command will fail:
+
+```
+op item create --category=login --title='My Example Item' --vault='Test' \
+                --url https://www.acme.com/login \
+                --generate-password=20,letters,digits \
+                username=jane@acme.com \
+                'Test Field 1=my test secret' \
+                'Test Section 1.Test Field2[text]=Jane Doe' \
+                'Test Section 1.Test Field3[date]=1995-02-23' \
+                'Test Section 2.Test Field4[text]='$myNotes
+```
+
+This is caused by the fact that the environment in these pipelines is in piped mode, which triggers the CLI's pipe detection to expect a piped input.
+To be able to create items in such environments, do the following steps:
+
+1. Get the template of the item category you want:
+
+   ```sh
+   op item template get --out-file=new-item.json <category>
+   ```
+
+2. Edit [the template](https://developer.1password.com/docs/cli/item-template-json) to add your information.
+3. Pipe the item content to the command:
+
+   ```sh
+   cat new-item.json | op item create --vault='Test'
+   ```
+
 ## Security
 
 1Password requests you practice responsible disclosure if you discover a vulnerability.
