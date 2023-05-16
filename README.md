@@ -1,6 +1,6 @@
 # Load Secrets from 1Password - GitHub Action
 
-This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://developer.1password.com/docs/connect) or a [Service Account <sup>[BETA]</sup>](https://developer.1password.com/docs/service-accounts).
+This action loads secrets from 1Password into GitHub Actions using [1Password Connect](https://developer.1password.com/docs/connect) or a [Service Account](https://developer.1password.com/docs/service-accounts).
 
 Specify in your workflow YAML file which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
 
@@ -58,7 +58,7 @@ jobs:
 ```
 
 <details>
-<summary><b>Usage example with Service Accounts <sup>BETA</sup></b></summary>
+<summary><b>Usage example with Service Accounts</b></summary>
 
 ```yml
 on: push
@@ -131,7 +131,7 @@ jobs:
 </details>
 
 <details>
-<summary><b>Longer usage example with Service Accounts <sup>BETA</sup></b></summary>
+<summary><b>Longer usage example with Service Accounts</b></summary>
 
 ```yml
 on: push
@@ -201,7 +201,7 @@ jobs:
 ```
 
 <details>
-<summary><b>Usage example with Service Accounts <sup>BETA</sup></b></summary>
+<summary><b>Usage example with Service Accounts</b></summary>
 
 ```yml
 on: push
@@ -295,7 +295,7 @@ jobs:
 </details>
 
 <details>
-<summary><b>Longer usage example with Service Accounts <sup>BETA</sup></b></summary>
+<summary><b>Longer usage example with Service Accounts</b></summary>
 
 ```yml
 on: push
@@ -389,7 +389,7 @@ So if one of these values accidentally gets printed, it'll get replaced with `**
 To use the action with Connect, you need to have a [1Password Connect](https://support.1password.com/secrets-automation/#step-1-set-up-a-secrets-automation-workflow) instance deployed somewhere.
 To configure the action with your Connect host and token, set the `OP_CONNECT_HOST` and `OP_CONNECT_TOKEN` environment variables.
 
-To configure the action with your service account token <sup>BETA</sup>, set the `OP_SERVICE_ACCOUNT_TOKEN` environment variable.
+To configure the action with your service account token, set the `OP_SERVICE_ACCOUNT_TOKEN` environment variable.
 
 If you're using the `load-secrets` action more than once in a single job, you can use the `configure` action to avoid duplicate configuration:
 
