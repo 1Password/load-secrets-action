@@ -50,7 +50,7 @@ install_op_cli() {
     ARCHITECTURE=""
     if [[ "$(uname -m)" == "x86_64" ]]; then
       ARCHITECTURE="amd64"
-    elif [[ "$(uname -m)" == "arm64" ]]; then
+    elif [[ "$(uname -m)" == "aarch64" ]]; then
       ARCHITECTURE="arm64"
     else
       echo "Unsupported architecture"
