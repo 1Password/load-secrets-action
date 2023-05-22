@@ -43,7 +43,9 @@ const run = async () => {
 	}
 };
 
-/* eslint-disable @typescript-eslint/naming-convention */
+// This function's name is an exception from the naming convention
+// since we refer to the 1Password CLI here.
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const installCLI = async (): Promise<void> => {
 	const currentFile = url.fileURLToPath(import.meta.url);
 	const currentDir = path.dirname(currentFile);

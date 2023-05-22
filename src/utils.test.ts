@@ -47,7 +47,9 @@ describe("validateAuth", () => {
 		process.env[envConnectHost] = "localhost:8080";
 		process.env[envConnectToken] = "token";
 		expect(validateAuth).not.toThrowError(authErr);
-		/* eslint-disable no-restricted-syntax */
+		// The following lint error is not an issue because we are checking for the presence of the `http://` prefix;
+		// we are not using it as an insecure connection protocol to link out to another resource.
+		// eslint-disable-next-line no-restricted-syntax
 		expect(process.env[envConnectHost]).toBe("http://localhost:8080");
 	});
 

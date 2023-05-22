@@ -26,7 +26,9 @@ export const validateAuth = (): void => {
 	// Adjust Connect host to have a protocol
 	if (
 		process.env[envConnectHost] &&
-		/* eslint-disable no-restricted-syntax */
+		// The following lint error is not an issue because we are checking for the presence of the `http://` prefix;
+		// we are not using it as an insecure connection protocol to link out to another resource.
+		// eslint-disable-next-line no-restricted-syntax
 		!process.env[envConnectHost].startsWith("http://") &&
 		!process.env[envConnectHost].startsWith("https://")
 	) {
