@@ -4132,16 +4132,17 @@ const semverToInt = (input) => input
     .map((n) => n.padStart(2, "0"))
     .join("");
 const validateAuth = () => {
-    let authType = "Connect";
-    if (!process.env[envConnectHost] || !process.env[envConnectToken]) {
-        if (!process.env[envServiceAccountToken]) {
-            throw new Error(authErr);
-        }
-        authType = "Service account";
+    const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
+    const isServiceAccount = process.env[envServiceAccountToken];
+    if (!isConnect && !isServiceAccount) {
+        throw new Error(authErr);
     }
+    const authType = isConnect ? "Connect" : "Service account";
     // Adjust Connect host to have a protocol
     if (process.env[envConnectHost] &&
-        /* eslint-disable no-restricted-syntax */
+        // The following lint error is not an issue because we are checking for the presence of the `http://` prefix;
+        // we are not using it as an insecure connection protocol to link out to another resource.
+        // eslint-disable-next-line no-restricted-syntax
         !process.env[envConnectHost].startsWith("http://") &&
         !process.env[envConnectHost].startsWith("https://")) {
         process.env[envConnectHost] = `http://${process.env[envConnectHost]}`;
@@ -4151,22 +4152,24 @@ const validateAuth = () => {
 const extractSecret = (envName, shouldExportEnv) => {
     core.debug(`Populating variable: ${envName}`);
     const ref = process.env[envName];
-    if (ref) {
-        const secretValue = dist.read.parse(ref);
-        if (secretValue) {
-            if (shouldExportEnv) {
-                core.exportVariable(envName, secretValue);
-            }
-            else {
-                core.setOutput(envName, secretValue);
-            }
-            core.setSecret(secretValue);
-        }
+    if (!ref) {
+        return;
     }
+    const secretValue = dist.read.parse(ref);
+    if (!secretValue) {
+        return;
+    }
+    if (shouldExportEnv) {
+        core.exportVariable(envName, secretValue);
+    }
+    else {
+        core.setOutput(envName, secretValue);
+    }
+    core.setSecret(secretValue);
 };
-const unsetPrevious = (shouldUnsetPrevious) => {
-    if (shouldUnsetPrevious && process.env[envManagedVariables]) {
-        core.debug(`Unsetting previous values ...`);
+const unsetPrevious = () => {
+    if (process.env[envManagedVariables]) {
+        core.debug("Unsetting previous values ...");
         const managedEnvs = process.env[envManagedVariables].split(",");
         for (const envName of managedEnvs) {
             core.debug(`Unsetting ${envName}`);
@@ -4190,7 +4193,9 @@ const run = async () => {
         const shouldUnsetPrevious = core.getBooleanInput("unset-previous");
         const shouldExportEnv = core.getBooleanInput("export-env");
         // Unset all secrets managed by 1Password if `unset-previous` is set.
-        unsetPrevious(shouldUnsetPrevious);
+        if (shouldUnsetPrevious) {
+            unsetPrevious();
+        }
         // Validate that a proper authentication configuration is set for the CLI
         validateAuth();
         // Download and install the CLI
@@ -4212,22 +4217,26 @@ const run = async () => {
         core.setFailed(message);
     }
 };
-/* eslint-disable @typescript-eslint/naming-convention */
+// This function's name is an exception from the naming convention
+// since we refer to the 1Password CLI here.
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const installCLI = async () => {
-    const currentFile = external_url_default().fileURLToPath(import.meta.url);
-    const currentDir = external_path_default().dirname(currentFile);
-    const parentDir = external_path_default().resolve(currentDir, "..");
-    // Execute bash script
-    const cmdOut = await exec.getExecOutput(`sh -c "` + parentDir + `/entrypoint.sh"`);
-    // Add path to 1Password CLI to $PATH
-    const outArr = cmdOut.stdout.split("\n");
-    if (outArr[0] && process.env.PATH) {
-        const cliPath = outArr[0]?.replace(/^(::debug::OP_INSTALL_DIR: )/, "");
-        core.addPath(cliPath);
-    }
+    await (0,dist.validateCli)().catch(async () => {
+        const currentFile = external_url_default().fileURLToPath(import.meta.url);
+        const currentDir = external_path_default().dirname(currentFile);
+        const parentDir = external_path_default().resolve(currentDir, "..");
+        // Execute bash script
+        const cmdOut = await exec.getExecOutput(`sh -c "` + parentDir + `/install_cli.sh"`);
+        // Add path to 1Password CLI to $PATH
+        const outArr = cmdOut.stdout.split("\n");
+        if (outArr[0] && process.env.PATH) {
+            const cliPath = outArr[0]?.replace(/^(::debug::OP_INSTALL_DIR: )/, "");
+            core.addPath(cliPath);
+        }
+    });
 };
 const loadSecrets = async (shouldExportEnv) => {
-    // Pass User-Agent Inforomation to the 1Password CLI
+    // Pass User-Agent Information to the 1Password CLI
     (0,dist.setClientInfo)({
         name: "1Password GitHub Action",
         id: "GHA",
