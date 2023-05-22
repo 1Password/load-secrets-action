@@ -44,18 +44,23 @@ export const extractSecret = (
 	shouldExportEnv: boolean,
 ): void => {
 	core.debug(`Populating variable: ${envName}`);
+
 	const ref = process.env[envName];
-	if (ref) {
-		const secretValue = read.parse(ref);
-		if (secretValue) {
-			if (shouldExportEnv) {
-				core.exportVariable(envName, secretValue);
-			} else {
-				core.setOutput(envName, secretValue);
-			}
-			core.setSecret(secretValue);
-		}
+	if (!ref) {
+		return;
 	}
+
+	const secretValue = read.parse(ref);
+	if (!secretValue) {
+		return;
+	}
+
+	if (shouldExportEnv) {
+		core.exportVariable(envName, secretValue);
+	} else {
+		core.setOutput(envName, secretValue);
+	}
+	core.setSecret(secretValue);
 };
 
 export const unsetPrevious = (): void => {
