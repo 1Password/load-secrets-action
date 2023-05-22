@@ -15,13 +15,14 @@ export const semverToInt = (input: string): string =>
 		.join("");
 
 export const validateAuth = (): void => {
-	let authType = "Connect";
-	if (!process.env[envConnectHost] || !process.env[envConnectToken]) {
-		if (!process.env[envServiceAccountToken]) {
-			throw new Error(authErr);
-		}
-		authType = "Service account";
+	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
+	const isServiceAccount = process.env[envServiceAccountToken];
+
+	if (!isConnect && !isServiceAccount) {
+		throw new Error(authErr);
 	}
+
+	const authType = isConnect ? "Connect" : "Service account";
 
 	// Adjust Connect host to have a protocol
 	if (
@@ -57,9 +58,9 @@ export const extractSecret = (
 	}
 };
 
-export const unsetPrevious = (shouldUnsetPrevious: boolean): void => {
-	if (shouldUnsetPrevious && process.env[envManagedVariables]) {
-		core.debug(`Unsetting previous values ...`);
+export const unsetPrevious = (): void => {
+	if (process.env[envManagedVariables]) {
+		core.debug("Unsetting previous values ...");
 		const managedEnvs = process.env[envManagedVariables].split(",");
 		for (const envName of managedEnvs) {
 			core.debug(`Unsetting ${envName}`);

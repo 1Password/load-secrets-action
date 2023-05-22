@@ -19,7 +19,9 @@ const run = async () => {
 		const shouldExportEnv = core.getBooleanInput("export-env");
 
 		// Unset all secrets managed by 1Password if `unset-previous` is set.
-		unsetPrevious(shouldUnsetPrevious);
+		if (shouldUnsetPrevious) {
+			unsetPrevious();
+		}
 
 		// Validate that a proper authentication configuration is set for the CLI
 		validateAuth();
@@ -65,7 +67,7 @@ const installCLI = async (): Promise<void> => {
 };
 
 const loadSecrets = async (shouldExportEnv: boolean) => {
-	// Pass User-Agent Inforomation to the 1Password CLI
+	// Pass User-Agent Information to the 1Password CLI
 	setClientInfo({
 		name: "1Password GitHub Action",
 		id: "GHA",

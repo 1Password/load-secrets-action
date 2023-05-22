@@ -125,12 +125,7 @@ describe("unsetPrevious", () => {
 	});
 
 	it("should unset the environment variable if user wants it", () => {
-		unsetPrevious(true);
+		unsetPrevious();
 		expect(process.env[testManagedEnv]).toBe("");
-	});
-
-	it("shouldn't unset the environment variable if user doesn't want it", () => {
-		unsetPrevious(false);
-		expect(process.env[testManagedEnv]).toBe(testSecretValue);
 	});
 });
