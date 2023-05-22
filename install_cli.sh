@@ -3,7 +3,7 @@ set -e
 
 # Install op-cli
 install_op_cli() {
-  CLI_VERSION="$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | jq -r .version)"
+  CLI_VERSION="v$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | jq -r .version)"
   OP_INSTALL_DIR="$(mktemp -d)"
   if [[ ! -d "$OP_INSTALL_DIR" ]]; then
     echo "Install dir $OP_INSTALL_DIR not found"
