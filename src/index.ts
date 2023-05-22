@@ -2,7 +2,7 @@ import path from "path";
 import url from "url";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import { setClientInfo } from "@1password/op-js";
+import { setClientInfo, validateCli } from "@1password/op-js";
 import { version } from "../package.json";
 import {
 	extractSecret,
@@ -49,21 +49,23 @@ const run = async () => {
 // since we refer to the 1Password CLI here.
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const installCLI = async (): Promise<void> => {
-	const currentFile = url.fileURLToPath(import.meta.url);
-	const currentDir = path.dirname(currentFile);
-	const parentDir = path.resolve(currentDir, "..");
+	await validateCli().catch(async () => {
+		const currentFile = url.fileURLToPath(import.meta.url);
+		const currentDir = path.dirname(currentFile);
+		const parentDir = path.resolve(currentDir, "..");
 
-	// Execute bash script
-	const cmdOut = await exec.getExecOutput(
-		`sh -c "` + parentDir + `/entrypoint.sh"`,
-	);
+		// Execute bash script
+		const cmdOut = await exec.getExecOutput(
+			`sh -c "` + parentDir + `/install_cli.sh"`,
+		);
 
-	// Add path to 1Password CLI to $PATH
-	const outArr = cmdOut.stdout.split("\n");
-	if (outArr[0] && process.env.PATH) {
-		const cliPath = outArr[0]?.replace(/^(::debug::OP_INSTALL_DIR: )/, "");
-		core.addPath(cliPath);
-	}
+		// Add path to 1Password CLI to $PATH
+		const outArr = cmdOut.stdout.split("\n");
+		if (outArr[0] && process.env.PATH) {
+			const cliPath = outArr[0]?.replace(/^(::debug::OP_INSTALL_DIR: )/, "");
+			core.addPath(cliPath);
+		}
+	});
 };
 
 const loadSecrets = async (shouldExportEnv: boolean) => {
