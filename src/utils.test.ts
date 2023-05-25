@@ -14,6 +14,12 @@ import {
 	envServiceAccountToken,
 } from "./constants";
 
+jest.mock("@actions/core");
+
+beforeEach(() => {
+	jest.clearAllMocks();
+});
+
 describe("semverToInt", () => {
 	it("converts a semver string to build number", () => {
 		expect(semverToInt("0.1.2")).toBe("000102");
@@ -25,13 +31,11 @@ describe("semverToInt", () => {
 
 describe("validateAuth", () => {
 	const testConnectHost = "https://localhost:8000";
-	const mockCoreDebug = jest.spyOn(core, "debug");
 
 	beforeEach(() => {
 		process.env[envConnectHost] = "";
 		process.env[envConnectToken] = "";
 		process.env[envServiceAccountToken] = "";
-		jest.clearAllMocks();
 	});
 
 	it("should throw an error when no config is provided", () => {
@@ -64,13 +68,13 @@ describe("validateAuth", () => {
 		process.env[envConnectHost] = testConnectHost;
 		process.env[envConnectToken] = "token";
 		expect(validateAuth).not.toThrowError(authErr);
-		expect(mockCoreDebug).toBeCalledWith("Authenticated with Connect.");
+		expect(core.debug).toBeCalledWith("Authenticated with Connect.");
 	});
 
 	it("should be authenticated as a service account", () => {
 		process.env[envServiceAccountToken] = "ops_token";
 		expect(validateAuth).not.toThrowError(authErr);
-		expect(mockCoreDebug).toBeCalledWith("Authenticated with Service account.");
+		expect(core.debug).toBeCalledWith("Authenticated with Service account.");
 	});
 });
 
@@ -79,38 +83,31 @@ describe("extractSecret", () => {
 	const testSecretRef = "op://vault/item/secret";
 	const testSecretValue = "Secret1@3$";
 
-	const mockCoreExportVariable = jest.spyOn(core, "exportVariable");
-	const mockCoreSetOutput = jest.spyOn(core, "setOutput");
-	const mockCoreSetSecret = jest.spyOn(core, "setSecret");
 	read.parse = jest.fn().mockReturnValue(testSecretValue);
 
 	process.env[envTestSecretEnv] = testSecretRef;
 
-	beforeEach(() => {
-		jest.clearAllMocks();
-	});
-
 	it("should set secret as step output", () => {
 		extractSecret(envTestSecretEnv, false);
-		expect(mockCoreExportVariable).not.toBeCalledWith(
+		expect(core.exportVariable).not.toBeCalledWith(
 			envTestSecretEnv,
 			testSecretValue,
 		);
-		expect(mockCoreSetOutput).toBeCalledWith(envTestSecretEnv, testSecretValue);
-		expect(mockCoreSetSecret).toBeCalledWith(testSecretValue);
+		expect(core.setOutput).toBeCalledWith(envTestSecretEnv, testSecretValue);
+		expect(core.setSecret).toBeCalledWith(testSecretValue);
 	});
 
 	it("should set secret as environment variable", () => {
 		extractSecret(envTestSecretEnv, true);
-		expect(mockCoreExportVariable).toBeCalledWith(
+		expect(core.exportVariable).toBeCalledWith(
 			envTestSecretEnv,
 			testSecretValue,
 		);
-		expect(mockCoreSetOutput).not.toBeCalledWith(
+		expect(core.setOutput).not.toBeCalledWith(
 			envTestSecretEnv,
 			testSecretValue,
 		);
-		expect(mockCoreSetSecret).toBeCalledWith(testSecretValue);
+		expect(core.setSecret).toBeCalledWith(testSecretValue);
 	});
 });
 
@@ -119,13 +116,14 @@ describe("unsetPrevious", () => {
 	const testSecretValue = "MyS3cr#T";
 
 	beforeEach(() => {
-		jest.clearAllMocks();
 		process.env[testManagedEnv] = testSecretValue;
 		process.env[envManagedVariables] = testManagedEnv;
 	});
 
 	it("should unset the environment variable if user wants it", () => {
 		unsetPrevious();
-		expect(process.env[testManagedEnv]).toBe("");
+		expect(core.debug).toHaveBeenCalledWith("Unsetting previous values ...");
+		expect(core.debug).toHaveBeenCalledWith("Unsetting TEST_SECRET");
+		expect(core.exportVariable).toHaveBeenCalledWith("TEST_SECRET", "");
 	});
 });
