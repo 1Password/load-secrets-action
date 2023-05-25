@@ -5,7 +5,7 @@ import * as exec from "@actions/exec";
 import { validateCli } from "@1password/op-js";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
 
-const run = async () => {
+const loadSecretsAction = async () => {
 	try {
 		// Get action inputs
 		const shouldUnsetPrevious = core.getBooleanInput("unset-previous");
@@ -61,4 +61,4 @@ const installCLI = async (): Promise<void> => {
 	});
 };
 
-void run();
+void loadSecretsAction();
