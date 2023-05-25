@@ -1,5 +1,7 @@
 import * as core from "@actions/core";
-import { read } from "@1password/op-js";
+import * as exec from "@actions/exec";
+import { read, setClientInfo } from "@1password/op-js";
+import { version } from "../package.json";
 import {
 	authErr,
 	envConnectHost,
@@ -61,6 +63,27 @@ export const extractSecret = (
 		core.setOutput(envName, secretValue);
 	}
 	core.setSecret(secretValue);
+};
+
+export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
+	// Pass User-Agent Information to the 1Password CLI
+	setClientInfo({
+		name: "1Password GitHub Action",
+		id: "GHA",
+		build: semverToInt(version),
+	});
+
+	// Load secrets from environment variables using 1Password CLI.
+	// Iterate over them to find 1Password references, extract the secret values,
+	// and make them available in the next steps either as step outputs or as environment variables.
+	const res = await exec.getExecOutput(`sh -c "op env ls"`);
+	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
+	for (const envName of envs) {
+		extractSecret(envName, shouldExportEnv);
+	}
+	if (shouldExportEnv) {
+		core.exportVariable(envManagedVariables, envs.join());
+	}
 };
 
 export const unsetPrevious = (): void => {

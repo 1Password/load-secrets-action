@@ -2,15 +2,8 @@ import path from "path";
 import url from "url";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import { setClientInfo, validateCli } from "@1password/op-js";
-import { version } from "../package.json";
-import {
-	extractSecret,
-	semverToInt,
-	unsetPrevious,
-	validateAuth,
-} from "./utils";
-import { envManagedVariables } from "./constants";
+import { validateCli } from "@1password/op-js";
+import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
 
 const run = async () => {
 	try {
@@ -66,27 +59,6 @@ const installCLI = async (): Promise<void> => {
 			core.addPath(cliPath);
 		}
 	});
-};
-
-const loadSecrets = async (shouldExportEnv: boolean) => {
-	// Pass User-Agent Information to the 1Password CLI
-	setClientInfo({
-		name: "1Password GitHub Action",
-		id: "GHA",
-		build: semverToInt(version),
-	});
-
-	// Load secrets from environment variables using 1Password CLI.
-	// Iterate over them to find 1Password references, extract the secret values,
-	// and make them available in the next steps either as step outputs or as environment variables.
-	const res = await exec.getExecOutput(`sh -c "op env ls"`);
-	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
-	for (const envName of envs) {
-		extractSecret(envName, shouldExportEnv);
-	}
-	if (shouldExportEnv) {
-		core.exportVariable(envManagedVariables, envs.join());
-	}
 };
 
 void run();
