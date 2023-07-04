@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import { read, setClientInfo } from "@1password/op-js";
+import { read, setClientInfo, semverToInt } from "@1password/op-js";
 import { version } from "../package.json";
 import {
 	authErr,
@@ -9,12 +9,6 @@ import {
 	envServiceAccountToken,
 	envManagedVariables,
 } from "./constants";
-
-export const semverToInt = (input: string): string =>
-	input
-		.split(".")
-		.map((n) => n.padStart(2, "0"))
-		.join("");
 
 export const validateAuth = (): void => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
