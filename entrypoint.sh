@@ -52,6 +52,7 @@ install_op_cli() {
   OP_CLI_VERSION="v$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | jq -r .version)"
 
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Get runner's architecture
     ARCH=$(uname -m)
     if [[ "$(getconf LONG_BIT)" = 32 ]]; then
       ARCH="386"
@@ -60,6 +61,12 @@ install_op_cli() {
     elif [[ "$ARCH" == "aarch64" ]]; then
       ARCH="arm64"
     fi
+
+    if [[ "$ARCH" != "386" ]] && [[ "$ARCH" == "amd64" ]] && [[ "$ARCH" == "arm" ]] && [[ "$ARCH" == "arm64" ]]; then
+      echo "Unsupported architecture for the 1Password CLI: $ARCH."
+      exit 1
+    fi
+
     curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/${OP_CLI_VERSION}/op_linux_${ARCH}_${OP_CLI_VERSION}.zip"
     unzip -od "$OP_INSTALL_DIR" op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
