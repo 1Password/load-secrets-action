@@ -62,7 +62,7 @@ install_op_cli() {
       ARCH="arm64"
     fi
 
-    if [[ "$ARCH" != "386" ]] && [[ "$ARCH" == "amd64" ]] && [[ "$ARCH" == "arm" ]] && [[ "$ARCH" == "arm64" ]]; then
+    if [[ "$ARCH" != "386" ]] && [[ "$ARCH" != "amd64" ]] && [[ "$ARCH" != "arm" ]] && [[ "$ARCH" != "arm64" ]]; then
       echo "Unsupported architecture for the 1Password CLI: $ARCH."
       exit 1
     fi
@@ -114,6 +114,7 @@ populating_secret() {
   # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
   # As the heredoc identifier, we'll use a randomly generated 64-character string,
   # so that collisions are practically impossible.
+  # Read more: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
   delimiter="$(openssl rand -hex 32)"
 
   if [ "$INPUT_EXPORT_ENV" == "true" ]; then
