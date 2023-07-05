@@ -39,6 +39,7 @@ unset_prev_secrets() {
 
 # Install op-cli
 install_op_cli() {
+  # Create a temporary directory where the CLI is installed
   OP_INSTALL_DIR="$(mktemp -d)"
   if [[ ! -d "$OP_INSTALL_DIR" ]]; then
     echo "Install dir $OP_INSTALL_DIR not found"
@@ -46,23 +47,36 @@ install_op_cli() {
   fi
   export OP_INSTALL_DIR
   echo "::debug::OP_INSTALL_DIR: ${OP_INSTALL_DIR}"
+
+  # Get the latest stable version of the CLI
+  OP_CLI_VERSION="v$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | jq -r .version)"
+
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    ARCHITECTURE=""
-    if [[ "$(uname -m)" == "x86_64" ]]; then
-      ARCHITECTURE="amd64"
-    elif [[ "$(uname -m)" == "aarch64" ]]; then
-      ARCHITECTURE="arm64"
-    else
-      echo "Unsupported architecture"
+    # Get runner's architecture
+    ARCH=$(uname -m)
+    if [[ "$(getconf LONG_BIT)" = 32 ]]; then
+      ARCH="386"
+    elif [[ "$ARCH" == "x86_64" ]]; then
+      ARCH="amd64"
+    elif [[ "$ARCH" == "aarch64" ]]; then
+      ARCH="arm64"
+    fi
+
+    if [[ "$ARCH" != "386" ]] && [[ "$ARCH" != "amd64" ]] && [[ "$ARCH" != "arm" ]] && [[ "$ARCH" != "arm64" ]]; then
+      echo "Unsupported architecture for the 1Password CLI: $ARCH."
       exit 1
     fi
-    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/v2.18.0/op_linux_${ARCHITECTURE}_v2.18.0.zip"
+
+    curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/${OP_CLI_VERSION}/op_linux_${ARCH}_${OP_CLI_VERSION}.zip"
     unzip -od "$OP_INSTALL_DIR" op.zip && rm op.zip
   elif [[ "$OSTYPE" == "darwin"* ]]; then
-    curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/v2.18.0/op_apple_universal_v2.18.0.pkg"
+    curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/${OP_CLI_VERSION}/op_apple_universal_${OP_CLI_VERSION}.pkg"
     pkgutil --expand op.pkg temp-pkg
     tar -xvf temp-pkg/op.pkg/Payload -C "$OP_INSTALL_DIR"
     rm -rf temp-pkg && rm op.pkg
+  else
+    echo "Operating system not supported yet for this GitHub Action: $OSTYPE."
+    exit 1
   fi
 }
 
@@ -97,25 +111,28 @@ populating_secret() {
   done
   unset IFS
 
-  if [ "$INPUT_EXPORT_ENV" == "true" ]; then
-    # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
-    # As the heredoc identifier, we'll use a randomly generated 64-character string,
-    # so that collisions are practically impossible.
-    random_heredoc_identifier=$(openssl rand -hex 32)
+  # To support multiline secrets, we'll use the heredoc syntax to populate the environment variables.
+  # As the heredoc identifier, we'll use a randomly generated 64-character string,
+  # so that collisions are practically impossible.
+  # Read more: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
+  delimiter="$(openssl rand -hex 32)"
 
+  if [ "$INPUT_EXPORT_ENV" == "true" ]; then
     {
       # Populate env var, using heredoc syntax with generated identifier
-      echo "$env_var<<${random_heredoc_identifier}"
+      echo "$env_var<<${delimiter}"
       echo "$secret_value"
-      echo "${random_heredoc_identifier}"
+      echo "${delimiter}"
     } >> $GITHUB_ENV
     echo "GITHUB_ENV: $(cat $GITHUB_ENV)"
 
   else
-    # Prepare the secret_value to be outputed properly (especially multiline secrets)
-    secret_value=$(echo "$secret_value" | awk -v ORS='%0A' '1')
-
-    echo "::set-output name=$env_var::$secret_value"
+    {
+      # Populate env var, using heredoc syntax with generated identifier
+      echo "$env_var<<${delimiter}"
+      echo "$secret_value"
+      echo "${delimiter}"
+    } >> $GITHUB_OUTPUT
   fi
 
   managed_variables+=("$env_var")
