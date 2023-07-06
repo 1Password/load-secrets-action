@@ -15,6 +15,7 @@ install_op_cli() {
   CLI_VERSION="v$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | jq -r .version)"
 
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Get runner's architecture
     ARCH=$(uname -m)
     if [[ "$(getconf LONG_BIT)" = 32 ]]; then
       ARCH="386"
