@@ -17,6 +17,8 @@ beforeEach(() => {
 
 describe("validateAuth", () => {
 	const testConnectHost = "https://localhost:8000";
+	const testConnectToken = "token";
+	const testServiceAccountToken = "ops_token";
 
 	beforeEach(() => {
 		process.env[envConnectHost] = "";
@@ -35,7 +37,7 @@ describe("validateAuth", () => {
 
 	it("should append protocol if Connect host doesn't have it", () => {
 		process.env[envConnectHost] = "localhost:8080";
-		process.env[envConnectToken] = "token";
+		process.env[envConnectToken] = testConnectToken;
 		expect(validateAuth).not.toThrowError(authErr);
 		// The following lint error is not an issue because we are checking for the presence of the `http://` prefix;
 		// we are not using it as an insecure connection protocol to link out to another resource.
@@ -45,22 +47,22 @@ describe("validateAuth", () => {
 
 	it("should not append protocol if Connect host has one", () => {
 		process.env[envConnectHost] = testConnectHost;
-		process.env[envConnectToken] = "token";
+		process.env[envConnectToken] = testConnectToken;
 		expect(validateAuth).not.toThrowError(authErr);
 		expect(process.env[envConnectHost]).toBe(testConnectHost);
 	});
 
 	it("should be authenticated as a Connect client", () => {
 		process.env[envConnectHost] = testConnectHost;
-		process.env[envConnectToken] = "token";
+		process.env[envConnectToken] = testConnectToken;
 		expect(validateAuth).not.toThrowError(authErr);
-		expect(core.debug).toBeCalledWith("Authenticated with Connect.");
+		expect(core.info).toBeCalledWith("Authenticated with Connect.");
 	});
 
 	it("should be authenticated as a service account", () => {
-		process.env[envServiceAccountToken] = "ops_token";
+		process.env[envServiceAccountToken] = testServiceAccountToken;
 		expect(validateAuth).not.toThrowError(authErr);
-		expect(core.debug).toBeCalledWith("Authenticated with Service account.");
+		expect(core.info).toBeCalledWith("Authenticated with Service account.");
 	});
 });
 
@@ -108,8 +110,8 @@ describe("unsetPrevious", () => {
 
 	it("should unset the environment variable if user wants it", () => {
 		unsetPrevious();
-		expect(core.debug).toHaveBeenCalledWith("Unsetting previous values ...");
-		expect(core.debug).toHaveBeenCalledWith("Unsetting TEST_SECRET");
+		expect(core.info).toHaveBeenCalledWith("Unsetting previous values ...");
+		expect(core.info).toHaveBeenCalledWith("Unsetting TEST_SECRET");
 		expect(core.exportVariable).toHaveBeenCalledWith("TEST_SECRET", "");
 	});
 });

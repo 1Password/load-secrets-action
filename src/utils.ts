@@ -32,14 +32,14 @@ export const validateAuth = (): void => {
 		process.env[envConnectHost] = `http://${process.env[envConnectHost]}`;
 	}
 
-	core.debug(`Authenticated with ${authType}.`);
+	core.info(`Authenticated with ${authType}.`);
 };
 
 export const extractSecret = (
 	envName: string,
 	shouldExportEnv: boolean,
 ): void => {
-	core.debug(`Populating variable: ${envName}`);
+	core.info(`Populating variable: ${envName}`);
 
 	const ref = process.env[envName];
 	if (!ref) {
@@ -82,10 +82,10 @@ export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
 
 export const unsetPrevious = (): void => {
 	if (process.env[envManagedVariables]) {
-		core.debug("Unsetting previous values ...");
+		core.info("Unsetting previous values ...");
 		const managedEnvs = process.env[envManagedVariables].split(",");
 		for (const envName of managedEnvs) {
-			core.debug(`Unsetting ${envName}`);
+			core.info(`Unsetting ${envName}`);
 			core.exportVariable(envName, "");
 		}
 	}
