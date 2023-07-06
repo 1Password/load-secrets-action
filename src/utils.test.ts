@@ -56,13 +56,15 @@ describe("validateAuth", () => {
 		process.env[envConnectHost] = testConnectHost;
 		process.env[envConnectToken] = testConnectToken;
 		expect(validateAuth).not.toThrowError(authErr);
-		expect(core.info).toBeCalledWith("Authenticated with Connect.");
+		expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
 	});
 
 	it("should be authenticated as a service account", () => {
 		process.env[envServiceAccountToken] = testServiceAccountToken;
 		expect(validateAuth).not.toThrowError(authErr);
-		expect(core.info).toBeCalledWith("Authenticated with Service account.");
+		expect(core.info).toHaveBeenCalledWith(
+			"Authenticated with Service account.",
+		);
 	});
 });
 
@@ -77,25 +79,28 @@ describe("extractSecret", () => {
 
 	it("should set secret as step output", () => {
 		extractSecret(envTestSecretEnv, false);
-		expect(core.exportVariable).not.toBeCalledWith(
+		expect(core.exportVariable).not.toHaveBeenCalledWith(
 			envTestSecretEnv,
 			testSecretValue,
 		);
-		expect(core.setOutput).toBeCalledWith(envTestSecretEnv, testSecretValue);
-		expect(core.setSecret).toBeCalledWith(testSecretValue);
+		expect(core.setOutput).toHaveBeenCalledWith(
+			envTestSecretEnv,
+			testSecretValue,
+		);
+		expect(core.setSecret).toHaveBeenCalledWith(testSecretValue);
 	});
 
 	it("should set secret as environment variable", () => {
 		extractSecret(envTestSecretEnv, true);
-		expect(core.exportVariable).toBeCalledWith(
+		expect(core.exportVariable).toHaveBeenCalledWith(
 			envTestSecretEnv,
 			testSecretValue,
 		);
-		expect(core.setOutput).not.toBeCalledWith(
+		expect(core.setOutput).not.toHaveBeenCalledWith(
 			envTestSecretEnv,
 			testSecretValue,
 		);
-		expect(core.setSecret).toBeCalledWith(testSecretValue);
+		expect(core.setSecret).toHaveBeenCalledWith(testSecretValue);
 	});
 });
 
