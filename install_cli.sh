@@ -12,7 +12,7 @@ install_op_cli() {
   echo "::debug::OP_INSTALL_DIR: ${OP_INSTALL_DIR}"
 
   # Get the latest stable version of the CLI
-  CLI_VERSION="v$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | jq -r .version)"
+  CLI_VERSION="v$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')"
 
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Get runner's architecture
