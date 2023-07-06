@@ -66,6 +66,15 @@ describe("validateAuth", () => {
 			"Authenticated with Service account.",
 		);
 	});
+
+	it("should prioritize Connect over service account if both are configured", () => {
+		process.env[envServiceAccountToken] = testServiceAccountToken;
+		process.env[envConnectHost] = testConnectHost;
+		process.env[envConnectToken] = testConnectToken;
+		expect(validateAuth).not.toThrowError(authErr);
+		expect(core.warning).toHaveBeenCalled();
+		expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
+	});
 });
 
 describe("extractSecret", () => {

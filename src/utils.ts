@@ -14,6 +14,12 @@ export const validateAuth = (): void => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
 	const isServiceAccount = process.env[envServiceAccountToken];
 
+	if (isConnect && isServiceAccount) {
+		core.warning(
+			"WARNING: Both service account and Connect credentials are provided. Connect credentials will take priority.",
+		);
+	}
+
 	if (!isConnect && !isServiceAccount) {
 		throw new Error(authErr);
 	}
