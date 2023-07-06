@@ -42,6 +42,9 @@ const loadSecretsAction = async () => {
 // since we refer to the 1Password CLI here.
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const installCLI = async (): Promise<void> => {
+	// validateCli checks if there's an existing 1Password CLI installed on the runner.
+	// If there's no CLI installed, then validateCli will throw an error, which we will use
+	// as an indicator that we need to execute the installation script.
 	await validateCli().catch(async () => {
 		const currentFile = url.fileURLToPath(import.meta.url);
 		const currentDir = path.dirname(currentFile);
