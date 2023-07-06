@@ -1,6 +1,12 @@
 import * as core from "@actions/core";
-import { read } from "@1password/op-js";
-import { extractSecret, unsetPrevious, validateAuth } from "./utils";
+import * as exec from "@actions/exec";
+import { read, setClientInfo } from "@1password/op-js";
+import {
+	extractSecret,
+	loadSecrets,
+	unsetPrevious,
+	validateAuth,
+} from "./utils";
 import {
 	authErr,
 	envConnectHost,
@@ -10,6 +16,12 @@ import {
 } from "./constants";
 
 jest.mock("@actions/core");
+jest.mock("@actions/exec", () => ({
+	getExecOutput: jest.fn(() => ({
+		stdout: "MOCK_SECRET",
+	})),
+}));
+jest.mock("@1password/op-js");
 
 beforeEach(() => {
 	jest.clearAllMocks();
@@ -110,6 +122,36 @@ describe("extractSecret", () => {
 			testSecretValue,
 		);
 		expect(core.setSecret).toHaveBeenCalledWith(testSecretValue);
+	});
+});
+
+describe("loadSecrets", () => {
+	it("sets the client info and gets the executed output", async () => {
+		await loadSecrets(true);
+
+		expect(setClientInfo).toHaveBeenCalledWith({
+			name: "1Password GitHub Action",
+			id: "GHA",
+		});
+		expect(exec.getExecOutput).toHaveBeenCalledWith('sh -c "op env ls"');
+		expect(core.exportVariable).toHaveBeenCalledWith(
+			"OP_MANAGED_VARIABLES",
+			"MOCK_SECRET",
+		);
+	});
+
+	describe("core.exportVariable", () => {
+		it("is called when shouldExportEnv is true", async () => {
+			await loadSecrets(true);
+
+			expect(core.exportVariable).toHaveBeenCalledTimes(1);
+		});
+
+		it("is not called when shouldExportEnv is false", async () => {
+			await loadSecrets(false);
+
+			expect(core.exportVariable).not.toHaveBeenCalled();
+		});
 	});
 });
 
