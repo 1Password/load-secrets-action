@@ -4179,6 +4179,9 @@ const loadSecrets = async (shouldExportEnv) => {
     // Iterate over them to find 1Password references, extract the secret values,
     // and make them available in the next steps either as step outputs or as environment variables.
     const res = await exec.getExecOutput(`sh -c "op env ls"`);
+    if (res.stdout === "") {
+        return;
+    }
     const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
     for (const envName of envs) {
         extractSecret(envName, shouldExportEnv);

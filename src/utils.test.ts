@@ -140,6 +140,14 @@ describe("loadSecrets", () => {
 		);
 	});
 
+	it("return early if no env vars with secrets found", async () => {
+		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({ stdout: "" });
+		await loadSecrets(true);
+
+		expect(exec.getExecOutput).toHaveBeenCalledWith('sh -c "op env ls"');
+		expect(core.exportVariable).not.toHaveBeenCalled();
+	});
+
 	describe("core.exportVariable", () => {
 		it("is called when shouldExportEnv is true", async () => {
 			await loadSecrets(true);
