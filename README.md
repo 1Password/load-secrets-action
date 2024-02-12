@@ -36,7 +36,7 @@ jobs:
           SECRET: op://app-cicd/hello-world/secret
 
       - name: Print masked secret
-        run: echo "Secret: ${{ steps.op-load-secret.outputs.SECRET }}"
+        run: echo ""Secret:" ${{ steps.op-load-secret.outputs.SECRET }}"
         # Prints: Secret: ***
 ```
 
@@ -107,7 +107,7 @@ jobs:
           SECRET: op://app-cicd/hello-world/secret
 
       - name: Print masked secret
-        run: echo "Secret: $SECRET"
+        run: echo ""Secret:" $SECRET"
         # Prints: Secret: ***
 ```
 
