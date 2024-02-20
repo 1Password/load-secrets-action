@@ -41,7 +41,7 @@ jobs:
           SECRET: op://app-cicd/hello-world/secret
 
       - name: Print masked secret
-        run: echo "Secret: $SECRET"
+        run: 'echo "Secret: $SECRET"'
         # Prints: Secret: ***
 ```
 
