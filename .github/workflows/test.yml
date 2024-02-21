@@ -39,7 +39,7 @@ jobs:
         if: ${{ matrix.auth == 'connect' }}
         uses: ./configure # 1password/load-secrets-action/configure@<version>
         with:
-          connect-host: localhost:8080
+          connect-host: http://localhost:8080
           connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
       - name: Load secrets
         id: load_secrets
