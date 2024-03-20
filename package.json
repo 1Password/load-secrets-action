@@ -1,6 +1,6 @@
 {
 	"name": "load-secrets-action",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "Load Secrets from 1Password",
 	"type": "module",
 	"main": "dist/index.js",
