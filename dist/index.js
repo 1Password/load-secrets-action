@@ -30062,7 +30062,7 @@ var exec = __nccwpck_require__(1514);
 // EXTERNAL MODULE: ./node_modules/@1password/op-js/dist/index.js
 var dist = __nccwpck_require__(7091);
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"i8":"1.2.0"};
+const package_namespaceObject = {"i8":"2.0.0"};
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";

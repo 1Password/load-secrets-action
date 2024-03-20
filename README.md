@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Load secret
-        uses: 1password/load-secrets-action@v1
+        uses: 1password/load-secrets-action@v2
         with:
           # Export loaded secrets as environment variables
           export-env: true
