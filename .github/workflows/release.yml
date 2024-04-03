@@ -1,13 +1,14 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
-  workflow_run:
-    workflows: ["Lint", "Run acceptance tests"]
-    types:
-      - completed
+  pull_request
+  # push:
+  #   branches:
+  #     - main
+  # workflow_run:
+  #   workflows: ["Lint", "Run acceptance tests"]
+  #   types:
+  #     - completed
 
 permissions:
   contents: read # for checkout
