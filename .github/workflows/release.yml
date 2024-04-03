@@ -1,14 +1,13 @@
 name: Release
 
 on:
-  pull_request
-  # push:
-  #   branches:
-  #     - main
-  # workflow_run:
-  #   workflows: ["Lint", "Run acceptance tests"]
-  #   types:
-  #     - completed
+  push:
+    branches:
+      - ruetz-automate-releases
+  workflow_run:
+    workflows: ["Lint", "Run acceptance tests"]
+    types:
+      - completed
 
 permissions:
   contents: read # for checkout
@@ -41,4 +40,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release --branches main --dry-run
+        run: npx semantic-release --branches ruetz-automate-releases --dry-run
