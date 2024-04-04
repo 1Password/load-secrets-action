@@ -3,6 +3,7 @@ name: Release
 on:
   push:
     branches:
+      # TODO: This branch is for PR testing purposes, update to "main" if we proceed with this PR.
       - ruetz-automate-releases
   workflow_run:
     workflows: ["Lint", "Run acceptance tests"]
@@ -39,5 +40,4 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release --branches ruetz-automate-releases --dry-run
+        run: npx semantic-release
