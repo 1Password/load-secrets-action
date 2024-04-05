@@ -11,4 +11,7 @@ module.exports = {
 		"@semantic-release/release-notes-generator",
 		"@semantic-release/github",
 	],
+	// Use the `https` Git protocol here to prevent semantic-release from erroring
+	// on the SSH protocol used in `repository.url` in the package.json file.
+	repositoryUrl: "https://github.com/1Password/load-secrets-action.git",
 };
