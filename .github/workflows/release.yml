@@ -3,8 +3,9 @@ name: Release
 on:
   push:
     branches:
-      # TODO: This branch is for PR testing purposes, update to "main" if we proceed with this PR.
+      # TODO: This branch is for PR testing purposes; update branch to "main" if we proceed with this PR.
       - ruetz-automate-releases
+  # Specify that this "Release" workflow depends on the other workflows below completing successfully.
   workflow_run:
     workflows: ["Lint", "Run acceptance tests"]
     types:
