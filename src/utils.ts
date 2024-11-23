@@ -1,14 +1,15 @@
 import * as core from "@actions/core";
-import * as exec from "@actions/exec";
-import { read, setClientInfo, semverToInt } from "@1password/op-js";
-import { version } from "../package.json";
 import {
 	authErr,
 	envConnectHost,
 	envConnectToken,
-	envServiceAccountToken,
 	envManagedVariables,
+	envServiceAccountToken,
 } from "./constants";
+import type { SecretReferenceResolver } from "./service/types";
+import { Account } from "./service/account";
+import { Connect } from "./service/connect";
+import process from "node:process";
 
 export const validateAuth = (): void => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
@@ -29,10 +30,11 @@ export const validateAuth = (): void => {
 	core.info(`Authenticated with ${authType}.`);
 };
 
-export const extractSecret = (
+export const extractSecret = async (
+	resolver: SecretReferenceResolver,
 	envName: string,
 	shouldExportEnv: boolean,
-): void => {
+): Promise<void> => {
 	core.info(`Populating variable: ${envName}`);
 
 	const ref = process.env[envName];
@@ -40,7 +42,7 @@ export const extractSecret = (
 		return;
 	}
 
-	const secretValue = read.parse(ref);
+	const secretValue = await resolver.resolve(ref);
 	if (!secretValue) {
 		return;
 	}
@@ -53,30 +55,37 @@ export const extractSecret = (
 	core.setSecret(secretValue);
 };
 
+export const buildSecretResolver = (): SecretReferenceResolver => {
+	if (process.env[envServiceAccountToken]) {
+		return new Account();
+	} else {
+		return new Connect();
+	}
+};
+
 export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
-	// Pass User-Agent Information to the 1Password CLI
-	setClientInfo({
-		name: "1Password GitHub Action",
-		id: "GHA",
-		build: semverToInt(version),
-	});
+	const refs = loadSecretRefsFromEnv();
 
-	// Load secrets from environment variables using 1Password CLI.
-	// Iterate over them to find 1Password references, extract the secret values,
-	// and make them available in the next steps either as step outputs or as environment variables.
-	const res = await exec.getExecOutput(`sh -c "op env ls"`);
-
-	if (res.stdout === "") {
+	if (refs.length === 0) {
 		return;
 	}
 
-	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
-	for (const envName of envs) {
-		extractSecret(envName, shouldExportEnv);
+	const resolver = buildSecretResolver();
+
+	for (const key of refs) {
+		await extractSecret(resolver, key, shouldExportEnv);
 	}
+
 	if (shouldExportEnv) {
-		core.exportVariable(envManagedVariables, envs.join());
+		core.exportVariable(envManagedVariables, refs.join());
 	}
+};
+
+export const loadSecretRefsFromEnv = (): string[] => {
+	// secret references `op://<vault-name>/<item-name>/[section-name/]<field-name>`
+	return Object.entries(process.env)
+		.filter(([, v]) => v && v.startsWith("op://"))
+		.map(([k]) => k);
 };
 
 export const unsetPrevious = (): void => {
