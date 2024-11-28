@@ -53,21 +53,31 @@ export class Connect implements SecretReferenceResolver {
 		const item = await this.op.getItem(vault.id, item_name);
 
 		let item_fields = item.fields;
+    const err_filed_name = section_name ? `${section_name}.${field_name}` : field_name;
 		if (section_name) {
-			// how to deal with same label and id?
 			const section = item.sections?.filter(
 				(s) => s.label === section_name || s.id === section_name,
 			);
-
-			if (section && section.length > 0) {
-				item_fields = item_fields?.filter(
-					(f) => f.section?.id === section[0]?.id,
-				);
-			}
+      if (section === undefined || section.length == 0) {
+        throw new Error(`The item does not have a field '${err_filed_name}'`)
+      }
+      const section_ids= section.map(s => s.id!);
+      item_fields = item_fields?.filter(
+        (f) => f.section && section_ids.includes(f.section.id!)
+      );
 		}
-		const filed = item_fields?.filter(
+
+		const matched_fields = item_fields?.filter(
 			(f) => f.id === field_name || f.label === field_name,
-		)[0];
-		return filed?.value;
+		);
+
+		if (matched_fields == undefined || matched_fields.length == 0) {
+			throw new Error(`The item does not have a field '${err_filed_name}'`);
+		}
+		if (matched_fields.length > 1) {
+			throw new Error(`The item has more than one '${err_filed_name}' field`);
+		}
+
+		return matched_fields[0]!.value;
 	}
 }
