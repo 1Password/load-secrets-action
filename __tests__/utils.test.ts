@@ -170,10 +170,10 @@ describe("ref_regex", () => {
     const exec = utils.ref_regex.exec(ref);
     expect(exec).not.toBeNull();
     expect(exec?.groups).not.toBeNull();
-    expect(exec?.groups?.vault_name).toBe("vault");
-    expect(exec?.groups?.item_name).toBe("Secure Note");
-    expect(exec?.groups?.section_name).toBeUndefined();
-    expect(exec?.groups?.field_name).toBe("field");
+    expect(exec?.groups?.vaultName).toBe("vault");
+    expect(exec?.groups?.itemName).toBe("Secure Note");
+    expect(exec?.groups?.sectionName).toBeUndefined();
+    expect(exec?.groups?.fieldName).toBe("field");
   });
 
   it("with section", () => {
@@ -183,10 +183,10 @@ describe("ref_regex", () => {
     const exec = utils.ref_regex.exec(ref);
     expect(exec).not.toBeNull();
     expect(exec?.groups).not.toBeNull();
-    expect(exec?.groups?.vault_name).toBe("vault");
-    expect(exec?.groups?.item_name).toBe("item");
-    expect(exec?.groups?.section_name).toBe("section");
-    expect(exec?.groups?.field_name).toBe("text");
+    expect(exec?.groups?.vaultName).toBe("vault");
+    expect(exec?.groups?.itemName).toBe("item");
+    expect(exec?.groups?.sectionName).toBe("section");
+    expect(exec?.groups?.fieldName).toBe("text");
   });
 });
 

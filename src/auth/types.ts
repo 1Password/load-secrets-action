@@ -3,8 +3,8 @@ export interface SecretReferenceResolver {
 }
 
 export type SecretReference = {
-	vault_name: string;
-	item_name: string;
-	section_name: string | null;
-	field_name: string;
+	vaultName: string;
+	itemName: string;
+	sectionName: string | null;
+	fieldName: string;
 };

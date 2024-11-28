@@ -17,7 +17,7 @@ import process from "node:process";
  * see more <https://developer.1password.com/docs/cli/secret-references/>
  */
 export const ref_regex =
-  /^op:\/\/(?<vault_name>[^/]+)\/(?<item_name>[^/]+)\/((?<section_name>[^/]+)\/)?(?<field_name>[^/]+)$/;
+  /^op:\/\/(?<vaultName>[^/]+)\/(?<itemName>[^/]+)\/((?<sectionName>[^/]+)\/)?(?<fieldName>[^/]+)$/;
 
 export const getAuth = (): SecretReferenceResolver => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];

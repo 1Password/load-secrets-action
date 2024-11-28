@@ -32,41 +32,41 @@ export class Connect implements SecretReferenceResolver {
 		if (!match) {
 			throw new Error(`Invalid secret reference: ${path}`);
 		}
-		const { vault_name, item_name, section_name, field_name } =
+		const { vaultName, itemName, sectionName, fieldName } =
 			match.groups as SecretReference;
 
-		const vault = await this.op.getVault(vault_name);
+		const vault = await this.op.getVault(vaultName);
 		if (!vault.id) {
 			return undefined;
 		}
-		const item = await this.op.getItem(vault.id, item_name);
+		const item = await this.op.getItem(vault.id, itemName);
 
-		let item_fields = item.fields;
-    const err_filed_name = section_name ? `${section_name}.${field_name}` : field_name;
-		if (section_name) {
+		let itemFields = item.fields;
+    const errFiledName = sectionName ? `${sectionName}.${fieldName}` : fieldName;
+		if (sectionName) {
 			const section = item.sections?.filter(
-				(s) => s.label === section_name || s.id === section_name,
+				(s) => s.label === sectionName || s.id === sectionName,
 			);
       if (section === undefined || section.length == 0) {
-        throw new Error(`The item does not have a field '${err_filed_name}'`)
+        throw new Error(`The item does not have a field '${errFiledName}'`)
       }
-      const section_ids= section.map(s => s.id!);
-      item_fields = item_fields?.filter(
-        (f) => f.section && section_ids.includes(f.section.id!)
+      const sectionIds= section.map(s => s.id!);
+      itemFields = itemFields?.filter(
+        (f) => f.section && sectionIds.includes(f.section.id!)
       );
 		}
 
-		const matched_fields = item_fields?.filter(
-			(f) => f.id === field_name || f.label === field_name,
+		const matchedFields = itemFields?.filter(
+			(f) => f.id === fieldName || f.label === fieldName,
 		);
 
-		if (matched_fields == undefined || matched_fields.length == 0) {
-			throw new Error(`The item does not have a field '${err_filed_name}'`);
+		if (matchedFields == undefined || matchedFields.length == 0) {
+			throw new Error(`The item does not have a field '${errFiledName}'`);
 		}
-		if (matched_fields.length > 1) {
-			throw new Error(`The item has more than one '${err_filed_name}' field`);
+		if (matchedFields.length > 1) {
+			throw new Error(`The item has more than one '${errFiledName}' field`);
 		}
 
-		return matched_fields[0]!.value;
+		return matchedFields[0]!.value;
 	}
 }
