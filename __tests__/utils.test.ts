@@ -83,11 +83,7 @@ describe("extractSecret", () => {
 
   it("should set secret as step output", async () => {
     await utils.extractSecret(new DumbResolver(), envTestSecretEnv, false);
-    expect(core.exportVariable).not.toHaveBeenCalledWith(
-      envTestSecretEnv,
-      testSecretValue,
-    );
-    expect(core.setOutput).toHaveBeenCalled();
+    expect(core.exportVariable).not.toHaveBeenCalled();
 
     expect(core.setOutput).toHaveBeenCalledWith(
       envTestSecretEnv,
@@ -102,10 +98,7 @@ describe("extractSecret", () => {
       envTestSecretEnv,
       testSecretValue,
     );
-    expect(core.setOutput).not.toHaveBeenCalledWith(
-      envTestSecretEnv,
-      testSecretValue,
-    );
+    expect(core.setOutput).not.toHaveBeenCalled();
     expect(core.setSecret).toHaveBeenCalledWith(testSecretValue);
   });
 });

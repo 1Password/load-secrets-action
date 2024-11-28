@@ -14,8 +14,8 @@ describe("test main action", () => {
 
   beforeEach(() => {
     process.env = {
-      OP_MANAGED_VARIABLES: "test-key",
-      test: "op://dev/test/test-key",
+      OP_MANAGED_VARIABLES: "OTHER_TEST_KEY",
+      TEST: "op://dev/test/test-key",
     };
   });
 
@@ -36,13 +36,13 @@ describe("test main action", () => {
       1,
       "Unsetting previous values ...",
     );
-    expect(core.info).toHaveBeenNthCalledWith(2, "Unsetting test-key");
-    expect(core.exportVariable).toHaveBeenNthCalledWith(1, "test-key", "");
+    expect(core.info).toHaveBeenNthCalledWith(2, "Unsetting OTHER_TEST_KEY");
+    expect(core.exportVariable).toHaveBeenNthCalledWith(1, "OTHER_TEST_KEY", "");
 
-    expect(core.setOutput).toHaveBeenNthCalledWith(1, "test", "test-secret");
+    expect(core.setOutput).toHaveBeenNthCalledWith(1, "TEST", "test-secret");
   };
 
-  it("test account service", async () => {
+  it("test service account", async () => {
     process.env.OP_SERVICE_ACCOUNT_TOKEN = "test-token";
 
     jest.spyOn(core, "getBooleanInput").mockImplementation((name) => {
@@ -80,7 +80,7 @@ describe("test main action", () => {
     commonCheck();
   });
 
-  it("test connect service", async () => {
+  it("test connect", async () => {
     process.env = {
       ...process.env,
       OP_CONNECT_HOST: "test-host",
