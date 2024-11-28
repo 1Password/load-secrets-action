@@ -1,4 +1,4 @@
-import { ref_regex } from "../src/service/connect/items";
+import { ref_regex } from "../src/auth/connect";
 import { expect } from "@jest/globals";
 
 describe("connect references regex test", () => {

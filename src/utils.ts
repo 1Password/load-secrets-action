@@ -6,9 +6,9 @@ import {
 	envManagedVariables,
 	envServiceAccountToken,
 } from "./constants";
-import type { SecretReferenceResolver } from "./service/types";
-import { Account } from "./service/account";
-import { Connect } from "./service/connect";
+import type { SecretReferenceResolver } from "./auth/types";
+import { ServiceAccount } from "./auth/service-account";
+import { Connect } from "./auth/connect";
 import process from "node:process";
 
 export const validateAuth = (): void => {
@@ -57,7 +57,7 @@ export const extractSecret = async (
 
 export const buildSecretResolver = (): SecretReferenceResolver => {
 	if (process.env[envServiceAccountToken]) {
-		return new Account();
+		return new ServiceAccount();
 	} else {
 		return new Connect();
 	}

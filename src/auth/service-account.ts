@@ -5,7 +5,7 @@ import { envServiceAccountToken } from "../constants";
 import assert from "node:assert";
 import { version } from "../../package.json";
 
-export class Account implements SecretReferenceResolver {
+export class ServiceAccount implements SecretReferenceResolver {
 	private readonly token: string;
 	private client?: Client;
 

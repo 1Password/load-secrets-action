@@ -7,7 +7,7 @@ import {
   envServiceAccountToken,
 } from "../src/constants";
 import * as utils from "../src/utils";
-import type { SecretReferenceResolver } from "../src/service/types";
+import type { SecretReferenceResolver } from "../src/auth/types";
 
 jest.mock("@actions/core");
 
