@@ -28,24 +28,24 @@ describe("validateAuth", () => {
   });
 
   it("should throw an error when no config is provided", () => {
-    expect(utils.validateAuth).toThrow(authErr);
+    expect(utils.getAuth).toThrow(authErr);
   });
 
   it("should throw an error when partial Connect config is provided", () => {
     process.env[envConnectHost] = testConnectHost;
-    expect(utils.validateAuth).toThrow(authErr);
+    expect(utils.getAuth).toThrow(authErr);
   });
 
   it("should be authenticated as a Connect client", () => {
     process.env[envConnectHost] = testConnectHost;
     process.env[envConnectToken] = testConnectToken;
-    expect(utils.validateAuth).not.toThrow(authErr);
+    expect(utils.getAuth).not.toThrow(authErr);
     expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
   });
 
   it("should be authenticated as a service account", () => {
     process.env[envServiceAccountToken] = testServiceAccountToken;
-    expect(utils.validateAuth).not.toThrow(authErr);
+    expect(utils.getAuth).not.toThrow(authErr);
     expect(core.info).toHaveBeenCalledWith(
       "Authenticated with Service account.",
     );
@@ -55,7 +55,7 @@ describe("validateAuth", () => {
     process.env[envServiceAccountToken] = testServiceAccountToken;
     process.env[envConnectHost] = testConnectHost;
     process.env[envConnectToken] = testConnectToken;
-    expect(utils.validateAuth).not.toThrow(authErr);
+    expect(utils.getAuth).not.toThrow(authErr);
     expect(core.warning).toHaveBeenCalled();
     expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
   });
@@ -108,11 +108,11 @@ describe("loadSecrets", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(utils, "loadSecretRefsFromEnv").mockReturnValue(["MOCK_SECRET"]);
-    jest.spyOn(utils, "buildSecretResolver").mockReturnThis();
+    jest.spyOn(utils, "getAuth").mockImplementation();
   });
 
   it("sets the client info and gets the executed output", async () => {
-    await utils.loadSecrets(true);
+    await utils.loadSecrets(utils.getAuth(), true);
 
     expect(core.exportVariable).toHaveBeenCalledWith(
       "OP_MANAGED_VARIABLES",
@@ -122,21 +122,23 @@ describe("loadSecrets", () => {
 
   it("return early if no env vars with secrets found", async () => {
     jest.spyOn(utils, "loadSecretRefsFromEnv").mockReturnValue([]);
-    await utils.loadSecrets(true);
+    jest.spyOn(utils, "extractSecret");
 
-    expect(utils.buildSecretResolver).not.toHaveBeenCalled();
+    await utils.loadSecrets(utils.getAuth(), true);
+
+    expect(utils.extractSecret).not.toHaveBeenCalled();
     expect(core.exportVariable).not.toHaveBeenCalled();
   });
 
   describe("core.exportVariable", () => {
     it("is called when shouldExportEnv is true", async () => {
-      await utils.loadSecrets(true);
+      await utils.loadSecrets(utils.getAuth(), true);
 
       expect(core.exportVariable).toHaveBeenCalledTimes(1);
     });
 
     it("is not called when shouldExportEnv is false", async () => {
-      await utils.loadSecrets(false);
+      await utils.loadSecrets(utils.getAuth(), false);
 
       expect(core.exportVariable).not.toHaveBeenCalled();
     });
