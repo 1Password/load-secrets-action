@@ -124,6 +124,7 @@ describe("loadSecrets", () => {
     jest.spyOn(utils, "loadSecretRefsFromEnv").mockReturnValue([]);
     await utils.loadSecrets(true);
 
+    expect(utils.buildSecretResolver).not.toHaveBeenCalled();
     expect(core.exportVariable).not.toHaveBeenCalled();
   });
 
