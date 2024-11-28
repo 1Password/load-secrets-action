@@ -19,7 +19,7 @@ import process from "node:process";
 export const ref_regex =
   /^op:\/\/(?<vault_name>[^/]+)\/(?<item_name>[^/]+)\/((?<section_name>[^/]+)\/)?(?<field_name>[^/]+)$/;
 
-export const validateAuth = (): void => {
+export const getAuth = (): SecretReferenceResolver => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
 	const isServiceAccount = process.env[envServiceAccountToken];
 
@@ -36,6 +36,12 @@ export const validateAuth = (): void => {
 	const authType = isConnect ? "Connect" : "Service account";
 
 	core.info(`Authenticated with ${authType}.`);
+
+  if (authType === "Connect") {
+    return new Connect(process.env[envConnectHost]!, process.env[envConnectToken]!);
+  } else {
+    return new ServiceAccount(process.env[envServiceAccountToken]!);
+  }
 };
 
 export const extractSecret = async (
@@ -63,25 +69,15 @@ export const extractSecret = async (
 	core.setSecret(secretValue);
 };
 
-export const buildSecretResolver = (): SecretReferenceResolver => {
-	if (process.env[envServiceAccountToken]) {
-		return new ServiceAccount();
-	} else {
-		return new Connect();
-	}
-};
-
-export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
+export const loadSecrets = async (auth: SecretReferenceResolver, shouldExportEnv: boolean): Promise<void> => {
 	const refs = loadSecretRefsFromEnv();
 
 	if (refs.length === 0) {
 		return;
 	}
 
-	const resolver = buildSecretResolver();
-
 	for (const key of refs) {
-		await extractSecret(resolver, key, shouldExportEnv);
+		await extractSecret(auth, key, shouldExportEnv);
 	}
 
 	if (shouldExportEnv) {

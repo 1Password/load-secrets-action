@@ -1,21 +1,14 @@
 import type { SecretReferenceResolver } from "./types";
 import { Client, createClient } from "@1password/sdk";
-import process from "node:process";
-import { envServiceAccountToken } from "../constants";
-import assert from "node:assert";
 import { version } from "../../package.json";
 
 export class ServiceAccount implements SecretReferenceResolver {
 	private readonly token: string;
 	private client?: Client;
 
-	constructor() {
-		assert(
-			process.env[envServiceAccountToken],
-			`${envServiceAccountToken} is required`,
-		);
-		this.token = process.env[envServiceAccountToken];
-	}
+	constructor(token: string) {
+    this.token = token;
+  }
 
 	async init(): Promise<Client> {
 		if (!this.client) {

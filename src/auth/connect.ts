@@ -1,7 +1,4 @@
 import type { SecretReference, SecretReferenceResolver } from "./types";
-import process from "node:process";
-import { envConnectHost, envConnectToken } from "../constants";
-import assert from "node:assert";
 import { OnePasswordConnect } from "@1password/connect";
 import { OPConnect } from "@1password/connect/dist/lib/op-connect";
 import { ref_regex } from "../utils";
@@ -9,13 +6,10 @@ import { ref_regex } from "../utils";
 export class Connect implements SecretReferenceResolver {
 	op: OPConnect;
 
-	constructor() {
-		assert(process.env[envConnectHost], `${envConnectHost} is required`);
-		assert(process.env[envConnectToken], `${envConnectToken} is required`);
-
+	constructor(serverURL: string, token: string) {
 		this.op = OnePasswordConnect({
-			serverURL: process.env[envConnectHost],
-			token: process.env[envConnectToken],
+			serverURL,
+			token,
 			keepAlive: true,
 		});
 	}

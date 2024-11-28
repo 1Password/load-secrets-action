@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
+import { getAuth, loadSecrets, unsetPrevious } from "./utils";
 
 export const run = async (): Promise<void> => {
 	try {
@@ -12,11 +12,11 @@ export const run = async (): Promise<void> => {
 			unsetPrevious();
 		}
 
-		// Validate that a proper authentication configuration is set for the CLI
-		validateAuth();
+		// Validate that a proper authentication configuration is set for the SDK, and return proper instance.
+		const auth = getAuth();
 
 		// Load secrets
-		await loadSecrets(shouldExportEnv);
+		await loadSecrets(auth, shouldExportEnv);
 	} catch (error) {
 		// It's possible for the Error constructor to be modified to be anything
 		// in JavaScript, so the following code accounts for this possibility.
