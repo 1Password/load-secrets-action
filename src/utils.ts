@@ -11,6 +11,14 @@ import { ServiceAccount } from "./auth/service-account";
 import { Connect } from "./auth/connect";
 import process from "node:process";
 
+/**
+ * `op://<vault-name>/<item-name>/[section-name/]<field-name>`
+ *
+ * see more <https://developer.1password.com/docs/cli/secret-references/>
+ */
+export const ref_regex =
+  /^op:\/\/(?<vault_name>[^/]+)\/(?<item_name>[^/]+)\/((?<section_name>[^/]+)\/)?(?<field_name>[^/]+)$/;
+
 export const validateAuth = (): void => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
 	const isServiceAccount = process.env[envServiceAccountToken];
@@ -82,9 +90,16 @@ export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
 };
 
 export const loadSecretRefsFromEnv = (): string[] => {
-	// secret references `op://<vault-name>/<item-name>/[section-name/]<field-name>`
 	return Object.entries(process.env)
-		.filter(([, v]) => v && v.startsWith("op://"))
+		.filter(([, v]) => {
+      if (v && v.startsWith("op://")) {
+        if (v.match(ref_regex)) {
+          return true;
+        }
+        core.warning(`omitted '${v}' seems not a valid secret reference, please check https://developer.1password.com/docs/cli/secret-references`)
+      }
+      return false;
+    })
 		.map(([k]) => k);
 };
 

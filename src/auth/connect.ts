@@ -4,12 +4,7 @@ import { envConnectHost, envConnectToken } from "../constants";
 import assert from "node:assert";
 import { OnePasswordConnect } from "@1password/connect";
 import { OPConnect } from "@1password/connect/dist/lib/op-connect";
-
-/**
- * `op://<vault-name>/<item-name>/[section-name/]<field-name>`
- */
-export const ref_regex =
-	/^op:\/\/(?<vault_name>[^/]+)\/(?<item_name>[^/]+)\/((?<section_name>[^/]+)\/)?(?<field_name>[^/]+)$/;
+import { ref_regex } from "../utils";
 
 export class Connect implements SecretReferenceResolver {
 	op: OPConnect;
