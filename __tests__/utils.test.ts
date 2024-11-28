@@ -8,6 +8,7 @@ import {
 } from "../src/constants";
 import * as utils from "../src/utils";
 import type { SecretReferenceResolver } from "../src/auth/types";
+import { expect } from "@jest/globals";
 
 jest.mock("@actions/core");
 
@@ -157,3 +158,73 @@ describe("unsetPrevious", () => {
     expect(core.exportVariable).toHaveBeenCalledWith("TEST_SECRET", "");
   });
 });
+
+describe("ref_regex", () => {
+  it("with space", () => {
+    const ref = "op://vault/Secure Note/field";
+    expect(ref).toMatch(utils.ref_regex);
+
+    const exec = utils.ref_regex.exec(ref);
+    expect(exec).not.toBeNull();
+    expect(exec?.groups).not.toBeNull();
+    expect(exec?.groups?.vault_name).toBe("vault");
+    expect(exec?.groups?.item_name).toBe("Secure Note");
+    expect(exec?.groups?.section_name).toBeUndefined();
+    expect(exec?.groups?.field_name).toBe("field");
+  });
+
+  it("with section", () => {
+    const ref = "op://vault/item/section/text";
+    expect(ref).toMatch(utils.ref_regex);
+
+    const exec = utils.ref_regex.exec(ref);
+    expect(exec).not.toBeNull();
+    expect(exec?.groups).not.toBeNull();
+    expect(exec?.groups?.vault_name).toBe("vault");
+    expect(exec?.groups?.item_name).toBe("item");
+    expect(exec?.groups?.section_name).toBe("section");
+    expect(exec?.groups?.field_name).toBe("text");
+  });
+});
+
+describe("loadSecretRefsFromEnv", () => {
+  const OLD_ENV = process.env;
+  let spy: jest.SpiedFunction<typeof core.warning>;
+
+  beforeAll(() => {
+    jest.restoreAllMocks();
+  })
+
+  beforeEach(() => {
+    spy = jest.spyOn(core, "warning")
+    process.env = {
+      ...OLD_ENV,
+    };
+  })
+
+  afterAll(() => {
+    process.env = OLD_ENV;
+  })
+
+  it("load from env", () => {
+    process.env.TEST_SECRET = "op://vault/item/section/field";
+    const paths = utils.loadSecretRefsFromEnv();
+    expect(paths).toStrictEqual(["TEST_SECRET"]);
+    expect(spy).toHaveBeenCalledTimes(0)
+  })
+
+  it("exist invalid secret ref", () => {
+    process.env.TEST_SECRET = "op://vault/item/section/something-else/field/a";
+    const paths = utils.loadSecretRefsFromEnv();
+    expect(paths).toStrictEqual([]);
+    expect(spy).toHaveBeenCalledWith("omitted 'op://vault/item/section/something-else/field/a' seems not a valid secret reference, please check https://developer.1password.com/docs/cli/secret-references")
+  })
+
+  it("mixed valid and invalid secret refs", () => {
+    process.env.TEST_SECRET = "op://vault/item/section/field";
+    process.env.INVALID_SECRET = "op://vault/item/section/something-else/field/a";
+    const paths = utils.loadSecretRefsFromEnv();
+    expect(paths).toStrictEqual(["TEST_SECRET"])
+    expect(spy).toHaveBeenCalledTimes(1)
+  })
+})
