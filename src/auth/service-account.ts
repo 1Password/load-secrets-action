@@ -14,7 +14,7 @@ export class ServiceAccount implements SecretReferenceResolver {
 		if (!this.client) {
 			this.client = await createClient({
 				auth: this.token,
-				integrationName: "GitHub Action load-secrets-action",
+				integrationName: "1Password - Load Secrets GitHub Action",
 				integrationVersion: version,
 			});
 		}
