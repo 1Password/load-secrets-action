@@ -39,24 +39,24 @@ describe("validateAuth", () => {
 	});
 
 	it("should throw an error when no config is provided", () => {
-		expect(validateAuth).toThrowError(authErr);
+		expect(validateAuth).toThrow(authErr);
 	});
 
 	it("should throw an error when partial Connect config is provided", () => {
 		process.env[envConnectHost] = testConnectHost;
-		expect(validateAuth).toThrowError(authErr);
+		expect(validateAuth).toThrow(authErr);
 	});
 
 	it("should be authenticated as a Connect client", () => {
 		process.env[envConnectHost] = testConnectHost;
 		process.env[envConnectToken] = testConnectToken;
-		expect(validateAuth).not.toThrowError(authErr);
+		expect(validateAuth).not.toThrow(authErr);
 		expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
 	});
 
 	it("should be authenticated as a service account", () => {
 		process.env[envServiceAccountToken] = testServiceAccountToken;
-		expect(validateAuth).not.toThrowError(authErr);
+		expect(validateAuth).not.toThrow(authErr);
 		expect(core.info).toHaveBeenCalledWith(
 			"Authenticated with Service account.",
 		);
@@ -66,7 +66,7 @@ describe("validateAuth", () => {
 		process.env[envServiceAccountToken] = testServiceAccountToken;
 		process.env[envConnectHost] = testConnectHost;
 		process.env[envConnectToken] = testConnectToken;
-		expect(validateAuth).not.toThrowError(authErr);
+		expect(validateAuth).not.toThrow(authErr);
 		expect(core.warning).toHaveBeenCalled();
 		expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
 	});
