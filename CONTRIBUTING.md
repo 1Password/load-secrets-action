@@ -3,6 +3,7 @@
 Thank you for your interest in contributing to the 1Password load-secrets-action project 👋! Before you start, please take a moment to read through this guide to understand our contribution process.
 
 ## Testing
+
 Unit tests can be run with `npm run test`.
 
 After following the steps below for signing commits, you can test against your PR with these steps:
@@ -10,13 +11,15 @@ After following the steps below for signing commits, you can test against your P
 1. Create or use an existing repo to run the `load-secrets` GitHub Action.
 2. In a workflow yaml file that uses the GitHub Action, modify the `uses: 1Password/load-secrets-action` line to be
 
-    ```yaml
-    uses: 1Password/load-secrets-action@<branch-name>
-    ```
-    OR
-    ```yaml
-    uses: 1Password/load-secrets-action@<commit-hash>
-    ```
+   ```yaml
+   uses: 1Password/load-secrets-action@<branch-name>
+   ```
+
+   OR
+
+   ```yaml
+   uses: 1Password/load-secrets-action@<commit-hash>
+   ```
 
 3. Trigger the action, which now includes your changes.
 
