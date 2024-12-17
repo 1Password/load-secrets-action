@@ -1,4 +1,7 @@
-on: pull_request
+on:
+  push:
+    branch: [main]
+  pull_request:
 name: Lint
 
 jobs:
