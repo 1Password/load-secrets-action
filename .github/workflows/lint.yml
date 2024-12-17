@@ -14,3 +14,16 @@ jobs:
         with:
           ignore_paths: >-
             .husky
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install Dependencies
+        id: install
+        run: npm ci
+      - name: Check formatting
+        run: npm run format:check
+      - name: Check lint
+        run: npm run lint
