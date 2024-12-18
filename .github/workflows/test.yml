@@ -1,6 +1,6 @@
 on:
   push:
-    branch: [main]
+    branches: [main]
   pull_request:
 name: Run acceptance tests
 
