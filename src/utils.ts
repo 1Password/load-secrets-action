@@ -1,3 +1,4 @@
+import process from "node:process";
 import * as core from "@actions/core";
 import {
 	authErr,
@@ -9,7 +10,6 @@ import {
 import type { SecretReferenceResolver } from "./auth/types";
 import { ServiceAccount } from "./auth/service-account";
 import { Connect } from "./auth/connect";
-import process from "node:process";
 
 /**
  * `op://<vault-name>/<item-name>/[section-name/]<field-name>`
@@ -85,8 +85,7 @@ export const loadSecrets = async (auth: SecretReferenceResolver, shouldExportEnv
 	}
 };
 
-export const loadSecretRefsFromEnv = (): string[] => {
-	return Object.entries(process.env)
+export const loadSecretRefsFromEnv = (): string[] => Object.entries(process.env)
 		.filter(([, v]) => {
       if (v && v.startsWith("op://")) {
         if (v.match(ref_regex)) {
@@ -97,7 +96,6 @@ export const loadSecretRefsFromEnv = (): string[] => {
       return false;
     })
 		.map(([k]) => k);
-};
 
 export const unsetPrevious = (): void => {
 	if (process.env[envManagedVariables]) {

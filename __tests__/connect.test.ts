@@ -1,11 +1,10 @@
-import { Connect } from "../src/auth/connect";
 import { expect } from "@jest/globals";
-import { describe } from "node:test";
 import { OPConnect } from "@1password/connect/dist/lib/op-connect";
 import { FullItem } from "@1password/connect/dist/model/fullItem";
+import { Connect } from "../src/auth/connect";
 
 describe("test connect with different secret refs", () => {
-
+  // eslint-disable-next-line no-restricted-syntax
   const host = "http://localhost:8080";
   const token = "token";
 

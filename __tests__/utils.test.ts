@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import { expect } from "@jest/globals";
 import {
   authErr,
   envConnectHost,
@@ -8,7 +9,6 @@ import {
 } from "../src/constants";
 import * as utils from "../src/utils";
 import type { SecretReferenceResolver } from "../src/auth/types";
-import { expect } from "@jest/globals";
 
 jest.mock("@actions/core");
 
@@ -67,7 +67,7 @@ describe("extractSecret", () => {
   const testSecretValue = "Secret1@3$";
 
   class DumbResolver implements SecretReferenceResolver {
-    async resolve(): Promise<string> {
+    public async resolve(): Promise<string> {
       return Promise.resolve(testSecretValue);
     }
   }
