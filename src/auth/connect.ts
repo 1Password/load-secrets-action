@@ -41,18 +41,20 @@ export class Connect implements SecretReferenceResolver {
 		const item = await this.op.getItem(vault.id, itemName);
 
 		let itemFields = item.fields;
-    const errFiledName = sectionName ? `${sectionName}.${fieldName}` : fieldName;
+		const errFiledName = sectionName
+			? `${sectionName}.${fieldName}`
+			: fieldName;
 		if (sectionName) {
 			const section = item.sections?.filter(
 				(s) => s.label === sectionName || s.id === sectionName,
 			);
-      if (section === undefined || section.length === 0) {
-        throw new Error(`The item does not have a field '${errFiledName}'`)
-      }
-      const sectionIds= section.map(s => s.id!);
-      itemFields = itemFields?.filter(
-        (f) => f.section && sectionIds.includes(f.section.id!)
-      );
+			if (section === undefined || section.length === 0) {
+				throw new Error(`The item does not have a field '${errFiledName}'`);
+			}
+			const sectionIds = section.map((s) => s.id!);
+			itemFields = itemFields?.filter(
+				(f) => f.section && sectionIds.includes(f.section.id!),
+			);
 		}
 
 		const matchedFields = itemFields?.filter(

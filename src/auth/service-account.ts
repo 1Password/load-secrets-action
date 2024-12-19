@@ -7,8 +7,8 @@ export class ServiceAccount implements SecretReferenceResolver {
 	private client?: Client;
 
 	public constructor(token: string) {
-    this.token = token;
-  }
+		this.token = token;
+	}
 
 	public async init(): Promise<Client> {
 		if (!this.client) {
@@ -21,7 +21,7 @@ export class ServiceAccount implements SecretReferenceResolver {
 		return this.client;
 	}
 
-  public async resolve(ref: string): Promise<string> {
+	public async resolve(ref: string): Promise<string> {
 		const client = await this.init();
 		return client.secrets.resolve(ref);
 	}

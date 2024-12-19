@@ -17,7 +17,7 @@ import { Connect } from "./auth/connect";
  * see more <https://developer.1password.com/docs/cli/secret-references/>
  */
 export const ref_regex =
-  /^op:\/\/(?<vaultName>[^/]+)\/(?<itemName>[^/]+)\/((?<sectionName>[^/]+)\/)?(?<fieldName>[^/]+)$/;
+	/^op:\/\/(?<vaultName>[^/]+)\/(?<itemName>[^/]+)\/((?<sectionName>[^/]+)\/)?(?<fieldName>[^/]+)$/;
 
 export const getAuth = (): SecretReferenceResolver => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
@@ -37,11 +37,14 @@ export const getAuth = (): SecretReferenceResolver => {
 
 	core.info(`Authenticated with ${authType}.`);
 
-  if (authType === "Connect") {
-    return new Connect(process.env[envConnectHost]!, process.env[envConnectToken]!);
-  } else {
-    return new ServiceAccount(process.env[envServiceAccountToken]!);
-  }
+	if (authType === "Connect") {
+		return new Connect(
+			process.env[envConnectHost]!,
+			process.env[envConnectToken]!,
+		);
+	} else {
+		return new ServiceAccount(process.env[envServiceAccountToken]!);
+	}
 };
 
 export const extractSecret = async (
@@ -69,7 +72,10 @@ export const extractSecret = async (
 	core.setSecret(secretValue);
 };
 
-export const loadSecrets = async (auth: SecretReferenceResolver, shouldExportEnv: boolean): Promise<void> => {
+export const loadSecrets = async (
+	auth: SecretReferenceResolver,
+	shouldExportEnv: boolean,
+): Promise<void> => {
 	const refs = loadSecretRefsFromEnv();
 
 	if (refs.length === 0) {
@@ -85,16 +91,19 @@ export const loadSecrets = async (auth: SecretReferenceResolver, shouldExportEnv
 	}
 };
 
-export const loadSecretRefsFromEnv = (): string[] => Object.entries(process.env)
+export const loadSecretRefsFromEnv = (): string[] =>
+	Object.entries(process.env)
 		.filter(([, v]) => {
-      if (v && v.startsWith("op://")) {
-        if (v.match(ref_regex)) {
-          return true;
-        }
-        core.warning(`omitted '${v}' seems not a valid secret reference, please check https://developer.1password.com/docs/cli/secret-references`)
-      }
-      return false;
-    })
+			if (v && v.startsWith("op://")) {
+				if (v.match(ref_regex)) {
+					return true;
+				}
+				core.warning(
+					`omitted '${v}' seems not a valid secret reference, please check https://developer.1password.com/docs/cli/secret-references`,
+				);
+			}
+			return false;
+		})
 		.map(([k]) => k);
 
 export const unsetPrevious = (): void => {
