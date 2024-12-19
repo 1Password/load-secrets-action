@@ -7,17 +7,9 @@ import {
 	envManagedVariables,
 	envServiceAccountToken,
 } from "./constants";
-import type { SecretReferenceResolver } from "./auth/types";
+import type { SecretReference, SecretReferenceResolver } from "./auth/types";
 import { ServiceAccount } from "./auth/service-account";
 import { Connect } from "./auth/connect";
-
-/**
- * `op://<vault-name>/<item-name>/[section-name/]<field-name>`
- *
- * see more <https://developer.1password.com/docs/cli/secret-references/>
- */
-export const ref_regex =
-	/^op:\/\/(?<vaultName>[^/]+)\/(?<itemName>[^/]+)\/((?<sectionName>[^/]+)\/)?(?<fieldName>[^/]+)$/;
 
 export const getAuth = (): SecretReferenceResolver => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
@@ -95,7 +87,7 @@ export const loadSecretRefsFromEnv = (): string[] =>
 	Object.entries(process.env)
 		.filter(([, v]) => {
 			if (v && v.startsWith("op://")) {
-				if (v.match(ref_regex)) {
+				if (parseSecretRef(v)) {
 					return true;
 				}
 				core.warning(
@@ -115,4 +107,22 @@ export const unsetPrevious = (): void => {
 			core.exportVariable(envName, "");
 		}
 	}
+};
+
+/**
+ * `op://<vault-name>/<item-name>/[section-name/]<field-name>`
+ *
+ * see more <https://developer.1password.com/docs/cli/secret-references/>
+ *
+ * each part only support alphanumeric, space, _, . or - characters
+ */
+export const ref_regex =
+	/^op:\/\/(?<vaultName>[a-zA-Z0-9_.\- ]+)\/(?<itemName>[a-zA-Z0-9_.\- ]+)\/((?<sectionName>[a-zA-Z0-9_.\- ]+)\/)?(?<fieldName>[a-zA-Z0-9_.\- ]+)$/;
+
+export const parseSecretRef = (ref: string): SecretReference | null => {
+	const match = ref.match(ref_regex);
+	if (match) {
+		return match.groups as unknown as SecretReference;
+	}
+	return null;
 };

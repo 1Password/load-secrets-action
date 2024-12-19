@@ -1,7 +1,7 @@
 import { OnePasswordConnect } from "@1password/connect";
 import { OPConnect } from "@1password/connect/dist/lib/op-connect";
-import { ref_regex } from "../utils";
-import type { SecretReference, SecretReferenceResolver } from "./types";
+import { parseSecretRef } from "../utils";
+import type { SecretReferenceResolver } from "./types";
 
 export class Connect implements SecretReferenceResolver {
 	private op: OPConnect;
@@ -27,12 +27,11 @@ export class Connect implements SecretReferenceResolver {
 	 * @param path Secret reference path, match `ref_regex`
 	 */
 	private async resolveByPath(path: string): Promise<string | undefined> {
-		const match = ref_regex.exec(path);
-		if (!match) {
+		const matched = parseSecretRef(path);
+		if (!matched) {
 			throw new Error(`Invalid secret reference: ${path}`);
 		}
-		const { vaultName, itemName, sectionName, fieldName } =
-			match.groups as unknown as SecretReference;
+		const { vaultName, itemName, sectionName, fieldName } = matched;
 
 		const vault = await this.op.getVault(vaultName);
 		if (!vault.id) {

@@ -5,6 +5,6 @@ export interface SecretReferenceResolver {
 export interface SecretReference {
 	vaultName: string;
 	itemName: string;
-	sectionName: string | null;
+	sectionName?: string;
 	fieldName: string;
 }
