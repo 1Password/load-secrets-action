@@ -1,16 +1,17 @@
+import process from "node:process";
 import * as core from "@actions/core";
-import * as exec from "@actions/exec";
-import { read, setClientInfo, semverToInt } from "@1password/op-js";
-import { version } from "../package.json";
 import {
 	authErr,
 	envConnectHost,
 	envConnectToken,
-	envServiceAccountToken,
 	envManagedVariables,
+	envServiceAccountToken,
 } from "./constants";
+import type { SecretReference, SecretReferenceResolver } from "./auth/types";
+import { ServiceAccount } from "./auth/service-account";
+import { Connect } from "./auth/connect";
 
-export const validateAuth = (): void => {
+export const getAuth = (): SecretReferenceResolver => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
 	const isServiceAccount = process.env[envServiceAccountToken];
 
@@ -27,12 +28,22 @@ export const validateAuth = (): void => {
 	const authType = isConnect ? "Connect" : "Service account";
 
 	core.info(`Authenticated with ${authType}.`);
+
+	if (authType === "Connect") {
+		return new Connect(
+			process.env[envConnectHost]!,
+			process.env[envConnectToken]!,
+		);
+	} else {
+		return new ServiceAccount(process.env[envServiceAccountToken]!);
+	}
 };
 
-export const extractSecret = (
+export const extractSecret = async (
+	resolver: SecretReferenceResolver,
 	envName: string,
 	shouldExportEnv: boolean,
-): void => {
+): Promise<void> => {
 	core.info(`Populating variable: ${envName}`);
 
 	const ref = process.env[envName];
@@ -40,7 +51,7 @@ export const extractSecret = (
 		return;
 	}
 
-	const secretValue = read.parse(ref);
+	const secretValue = await resolver.resolve(ref);
 	if (!secretValue) {
 		return;
 	}
@@ -53,31 +64,39 @@ export const extractSecret = (
 	core.setSecret(secretValue);
 };
 
-export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
-	// Pass User-Agent Information to the 1Password CLI
-	setClientInfo({
-		name: "1Password GitHub Action",
-		id: "GHA",
-		build: semverToInt(version),
-	});
+export const loadSecrets = async (
+	auth: SecretReferenceResolver,
+	shouldExportEnv: boolean,
+): Promise<void> => {
+	const refs = loadSecretRefsFromEnv();
 
-	// Load secrets from environment variables using 1Password CLI.
-	// Iterate over them to find 1Password references, extract the secret values,
-	// and make them available in the next steps either as step outputs or as environment variables.
-	const res = await exec.getExecOutput(`sh -c "op env ls"`);
-
-	if (res.stdout === "") {
+	if (refs.length === 0) {
 		return;
 	}
 
-	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
-	for (const envName of envs) {
-		extractSecret(envName, shouldExportEnv);
+	for (const key of refs) {
+		await extractSecret(auth, key, shouldExportEnv);
 	}
+
 	if (shouldExportEnv) {
-		core.exportVariable(envManagedVariables, envs.join());
+		core.exportVariable(envManagedVariables, refs.join());
 	}
 };
+
+export const loadSecretRefsFromEnv = (): string[] =>
+	Object.entries(process.env)
+		.filter(([, v]) => {
+			if (v && v.startsWith("op://")) {
+				if (parseSecretRef(v)) {
+					return true;
+				}
+				core.warning(
+					`omitted '${v}' seems not a valid secret reference, please check https://developer.1password.com/docs/cli/secret-references`,
+				);
+			}
+			return false;
+		})
+		.map(([k]) => k);
 
 export const unsetPrevious = (): void => {
 	if (process.env[envManagedVariables]) {
@@ -88,4 +107,22 @@ export const unsetPrevious = (): void => {
 			core.exportVariable(envName, "");
 		}
 	}
+};
+
+/**
+ * `op://<vault-name>/<item-name>/[section-name/]<field-name>`
+ *
+ * see more <https://developer.1password.com/docs/cli/secret-references/>
+ *
+ * each part only support alphanumeric, space, _, . or - characters
+ */
+const ref_regex =
+	/^op:\/\/(?<vaultName>[a-zA-Z0-9_.\- ]+)\/(?<itemName>[a-zA-Z0-9_.\- ]+)\/((?<sectionName>[a-zA-Z0-9_.\- ]+)\/)?(?<fieldName>[a-zA-Z0-9_.\- ]+)$/;
+
+export const parseSecretRef = (ref: string): SecretReference | null => {
+	const match = ref.match(ref_regex);
+	if (match) {
+		return match.groups as unknown as SecretReference;
+	}
+	return null;
 };

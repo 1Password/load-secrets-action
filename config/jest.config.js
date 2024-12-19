@@ -7,7 +7,7 @@ const jestConfig = {
 	 * https://jestjs.io/docs/configuration#modulefileextensions-arraystring
 	 */
 	moduleFileExtensions: ["ts", "js", "json"],
-	rootDir: "../src/",
+	rootDir: "..",
 	testEnvironment: "node",
 	testRegex: "(/__tests__/.*|(\\.|/)test)\\.ts",
 	transform: {
