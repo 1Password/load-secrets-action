@@ -116,7 +116,7 @@ export const unsetPrevious = (): void => {
  *
  * each part only support alphanumeric, space, _, . or - characters
  */
-export const ref_regex =
+const ref_regex =
 	/^op:\/\/(?<vaultName>[a-zA-Z0-9_.\- ]+)\/(?<itemName>[a-zA-Z0-9_.\- ]+)\/((?<sectionName>[a-zA-Z0-9_.\- ]+)\/)?(?<fieldName>[a-zA-Z0-9_.\- ]+)$/;
 
 export const parseSecretRef = (ref: string): SecretReference | null => {

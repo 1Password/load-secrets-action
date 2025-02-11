@@ -16,7 +16,7 @@ beforeEach(() => {
 	jest.clearAllMocks();
 });
 
-describe("validateAuth", () => {
+describe("getAuth", () => {
 	const testConnectHost = "https://localhost:8000";
 	const testConnectToken = "token";
 	const testServiceAccountToken = "ops_token";
@@ -162,34 +162,6 @@ describe("unsetPrevious", () => {
 	});
 });
 
-describe("ref_regex", () => {
-	it("with space", () => {
-		const ref = "op://vault/Secure Note/field";
-		expect(ref).toMatch(utils.ref_regex);
-
-		const exec = utils.ref_regex.exec(ref);
-		expect(exec).not.toBeNull();
-		expect(exec?.groups).not.toBeNull();
-		expect(exec?.groups?.vaultName).toBe("vault");
-		expect(exec?.groups?.itemName).toBe("Secure Note");
-		expect(exec?.groups?.sectionName).toBeUndefined();
-		expect(exec?.groups?.fieldName).toBe("field");
-	});
-
-	it("with section", () => {
-		const ref = "op://vault/item/section/text";
-		expect(ref).toMatch(utils.ref_regex);
-
-		const exec = utils.ref_regex.exec(ref);
-		expect(exec).not.toBeNull();
-		expect(exec?.groups).not.toBeNull();
-		expect(exec?.groups?.vaultName).toBe("vault");
-		expect(exec?.groups?.itemName).toBe("item");
-		expect(exec?.groups?.sectionName).toBe("section");
-		expect(exec?.groups?.fieldName).toBe("text");
-	});
-});
-
 describe("loadSecretRefsFromEnv", () => {
 	const OLD_ENV = process.env;
 	let spy: jest.SpiedFunction<typeof core.warning>;
@@ -232,5 +204,80 @@ describe("loadSecretRefsFromEnv", () => {
 		const paths = utils.loadSecretRefsFromEnv();
 		expect(paths).toStrictEqual(["TEST_SECRET"]);
 		expect(spy).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe("parseSecretRef", () => {
+	it("valid reference", () => {
+		const spaceRef = "op:// / / / ";
+		expect(utils.parseSecretRef(spaceRef)).toEqual({
+			vaultName: " ",
+			itemName: " ",
+			sectionName: " ",
+			fieldName: " ",
+		});
+
+		const spaceRef2 = "op://vault/Secure Note/          field";
+		expect(utils.parseSecretRef(spaceRef2)).toEqual({
+			vaultName: "vault",
+			itemName: "Secure Note",
+			sectionName: undefined,
+			fieldName: "          field",
+		});
+
+		const spaceRef3 = "op://vault/Secure Note/ section/          field";
+		expect(utils.parseSecretRef(spaceRef3)).toEqual({
+			vaultName: "vault",
+			itemName: "Secure Note",
+			sectionName: " section",
+			fieldName: "          field",
+		});
+
+		const spaceRef4 = "op://vault/Secure Note/field";
+		expect(utils.parseSecretRef(spaceRef4)).toEqual({
+			vaultName: "vault",
+			itemName: "Secure Note",
+			sectionName: undefined,
+			fieldName: "field",
+		});
+
+		const underscoreRef = "op://___/___/___/___";
+		expect(utils.parseSecretRef(underscoreRef)).toEqual({
+			vaultName: "___",
+			itemName: "___",
+			sectionName: "___",
+			fieldName: "___",
+		});
+
+		const underscoreRef2 = "op://vault/item/section/text_with_underscore";
+		expect(utils.parseSecretRef(underscoreRef2)).toEqual({
+			vaultName: "vault",
+			itemName: "item",
+			sectionName: "section",
+			fieldName: "text_with_underscore",
+		});
+
+		const withSection = "op://vault/item/section/text";
+		expect(utils.parseSecretRef(withSection)).toEqual({
+			vaultName: "vault",
+			itemName: "item",
+			sectionName: "section",
+			fieldName: "text",
+		});
+	});
+
+	it("invalid references", () => {
+		const empty = "";
+		expect(utils.parseSecretRef(empty)).toBeNull();
+
+		const tooLong = "op://vault/item/section/text/other";
+		expect(utils.parseSecretRef(tooLong)).toBeNull();
+
+		const tooShort = "op://vault/item";
+		expect(utils.parseSecretRef(tooShort)).toBeNull();
+
+		// https://1password.community/discussion/128319/how-to-reference-a-secret-with-its-field-name-including-unsupported-characters
+		const withUnsupportedCharacter = "op://Private/Github/私密金鑰";
+		expect(utils.parseSecretRef(withUnsupportedCharacter)).toBeNull();
 	});
 });
