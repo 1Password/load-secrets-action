@@ -1,0 +1,92 @@
+on:
+  repository_dispatch:
+    types: [ok-to-test-command]
+name: Run acceptance tests [fork]
+
+jobs:
+  test-with-output-secrets:
+    if: |
+      github.event_name == 'repository_dispatch' &&
+      github.event.client_payload.slash_command.args.named.sha != '' &&
+      contains(
+        github.event.client_payload.pull_request.head.sha,
+        github.event.client_payload.slash_command.args.named.sha
+      )
+    uses: ./.github/workflows/acceptance-test.yml
+    secrets: inherit
+    with:
+      secret: op://acceptance-tests/test-secret/password
+      secret-in-section: op://acceptance-tests/test-secret/test-section/password
+      multiline-secret: op://acceptance-tests/multiline-secret/notesPlain
+      export-env: false
+  test-with-export-env:
+    if: |
+      github.event_name == 'repository_dispatch' &&
+      github.event.client_payload.slash_command.args.named.sha != '' &&
+      contains(
+        github.event.client_payload.pull_request.head.sha,
+        github.event.client_payload.slash_command.args.named.sha
+      )
+    uses: ./.github/workflows/acceptance-test.yml
+    secrets: inherit
+    with:
+      secret: op://acceptance-tests/test-secret/password
+      secret-in-section: op://acceptance-tests/test-secret/test-section/password
+      multiline-secret: op://acceptance-tests/multiline-secret/notesPlain
+      export-env: true
+  test-references-with-ids:
+    if: |
+      github.event_name == 'repository_dispatch' &&
+      github.event.client_payload.slash_command.args.named.sha != '' &&
+      contains(
+        github.event.client_payload.pull_request.head.sha,
+        github.event.client_payload.slash_command.args.named.sha
+      )
+    uses: ./.github/workflows/acceptance-test.yml
+    secrets: inherit
+    with:
+      secret: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
+      secret-in-section: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/Section_tco6nsqycj6jcbyx63h5isxcny/doxu3mhkozcznnk5vjrkpdqayy
+      multiline-secret: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
+      export-env: false
+  update-checks:
+    # required permissions for updating the status of the pull request checks
+    permissions:
+      pull-requests: write
+      checks: write
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    strategy:
+      matrix:
+        job-name:
+          [
+            test-with-output-secrets,
+            test-with-export-env,
+            test-references-with-ids,
+          ]
+    needs:
+      [test-with-output-secrets, test-with-export-env, test-references-with-ids]
+    steps:
+      - uses: actions/github-script@v6
+        env:
+          job: ${{ matrix.job-name }}
+          ref: ${{ github.event.client_payload.pull_request.head.sha }}
+          conclusion: ${{ needs[format('{0}', matrix.job-name )].result }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: checks } = await github.rest.checks.listForRef({
+              ...context.repo,
+              ref: process.env.ref
+            });
+
+            const check = checks.check_runs.filter(c => c.name === process.env.job);
+
+            const { data: result } = await github.rest.checks.update({
+              ...context.repo,
+              check_run_id: check[0].id,
+              status: 'completed',
+              conclusion: process.env.conclusion
+            });
+
+            return result;
