@@ -32,7 +32,7 @@ const loadSecretsAction = async () => {
 		if (error instanceof Error) {
 			message = error.message;
 		} else {
-			String(error);
+			message = String(error);
 		}
 		core.setFailed(message);
 	}
