@@ -50,10 +50,11 @@ export class Connect implements SecretReferenceResolver {
 			if (section === undefined || section.length === 0) {
 				throw new Error(`The item does not have a field '${errFiledName}'`);
 			}
-			const sectionIds = section.map((s) => s.id!);
-			itemFields = itemFields?.filter(
-				(f) => f.section && sectionIds.includes(f.section.id!),
-			);
+			if (section.length > 1) {
+				throw new Error("More than one section matched the secret reference");
+			}
+			const sectionId = section[0]!.id;
+			itemFields = itemFields?.filter((f) => f.section?.id === sectionId);
 		}
 
 		const matchedFields = itemFields?.filter(
@@ -64,6 +65,15 @@ export class Connect implements SecretReferenceResolver {
 			throw new Error(`The item does not have a field '${errFiledName}'`);
 		}
 		if (matchedFields.length > 1) {
+			// if section not provide, return the default section id equals to "add more" filed
+			if (!sectionName) {
+				const res = matchedFields.find(
+					(f) => f.section?.id === "add more",
+				)?.value;
+				if (res) {
+					return res;
+				}
+			}
 			throw new Error(`The item has more than one '${errFiledName}' field`);
 		}
 

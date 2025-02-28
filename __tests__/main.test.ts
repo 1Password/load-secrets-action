@@ -70,6 +70,12 @@ describe("test main action", () => {
 					put: jest.fn().mockImplementation(),
 					delete: jest.fn().mockImplementation(),
 					listAll: jest.fn().mockImplementation(),
+					shares: {
+						getAccountPolicy: jest.fn().mockImplementation(),
+						validateRecipients: jest.fn().mockImplementation(),
+						create: jest.fn().mockImplementation(),
+					},
+					archive: jest.fn().mockImplementation(),
 				},
 				vaults: {
 					listAll: jest.fn().mockImplementation(),
