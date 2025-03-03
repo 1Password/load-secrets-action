@@ -14,136 +14,27 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm test
-
   test-with-output-secrets:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        auth: [connect, service-account]
-        exclude:
-          - os: macos-latest
-            auth: connect
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Launch 1Password Connect instance
-        if: ${{ matrix.auth == 'connect' }}
-        env:
-          OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
-        run: |
-          echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
-          docker compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
-      - name: Configure Service account
-        if: ${{ matrix.auth == 'service-account' }}
-        uses: ./configure
-        with:
-          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-      - name: Configure 1Password Connect
-        if: ${{ matrix.auth == 'connect' }}
-        uses: ./configure # 1password/load-secrets-action/configure@<version>
-        with:
-          connect-host: http://localhost:8080
-          connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
-      - name: Load secrets
-        id: load_secrets
-        uses: ./ # 1password/load-secrets-action@<version>
-        with:
-          export-env: false
-        env:
-          SECRET: op://acceptance-tests/test-secret/password
-          SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
-          MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
-      - name: Assert test secret values
-        env:
-          SECRET: ${{ steps.load_secrets.outputs.SECRET }}
-          SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
-          MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
-        run: ./tests/assert-env-set.sh
+    uses: ./.github/workflows/acceptance-test.yml
+    secrets: inherit
+    with:
+      secret: op://acceptance-tests/test-secret/password
+      secret-in-section: op://acceptance-tests/test-secret/test-section/password
+      multiline-secret: op://acceptance-tests/multiline-secret/notesPlain
+      export-env: false
   test-with-export-env:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        auth: [connect, service-account]
-        exclude:
-          - os: macos-latest
-            auth: connect
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Launch 1Password Connect instance
-        if: ${{ matrix.auth == 'connect' }}
-        env:
-          OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
-        run: |
-          echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
-          docker compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
-      - name: Configure Service account
-        if: ${{ matrix.auth == 'service-account' }}
-        uses: ./configure
-        with:
-          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-      - name: Configure 1Password Connect
-        if: ${{ matrix.auth == 'connect' }}
-        uses: ./configure # 1password/load-secrets-action/configure@<version>
-        with:
-          connect-host: http://localhost:8080
-          connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
-      - name: Load secrets
-        id: load_secrets
-        uses: ./ # 1password/load-secrets-action@<version>
-        env:
-          SECRET: op://acceptance-tests/test-secret/password
-          SECRET_IN_SECTION: op://acceptance-tests/test-secret/test-section/password
-          MULTILINE_SECRET: op://acceptance-tests/multiline-secret/notesPlain
-      - name: Assert test secret values
-        run: ./tests/assert-env-set.sh
-      - name: Remove secrets
-        uses: ./ # 1password/load-secrets-action@<version>
-        with:
-          unset-previous: true
-      - name: Assert removed secrets
-        run: ./tests/assert-env-unset.sh
+    uses: ./.github/workflows/acceptance-test.yml
+    secrets: inherit
+    with:
+      secret: op://acceptance-tests/test-secret/password
+      secret-in-section: op://acceptance-tests/test-secret/test-section/password
+      multiline-secret: op://acceptance-tests/multiline-secret/notesPlain
+      export-env: true
   test-references-with-ids:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        auth: [connect, service-account]
-        exclude:
-          - os: macos-latest
-            auth: connect
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - name: Launch 1Password Connect instance
-        if: ${{ matrix.auth == 'connect' }}
-        env:
-          OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
-        run: |
-          echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
-          docker compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
-      - name: Configure Service account
-        if: ${{ matrix.auth == 'service-account' }}
-        uses: ./configure
-        with:
-          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-      - name: Configure 1Password Connect
-        if: ${{ matrix.auth == 'connect' }}
-        uses: ./configure # 1password/load-secrets-action/configure@<version>
-        with:
-          connect-host: http://localhost:8080
-          connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
-      - name: Load secrets
-        id: load_secrets
-        uses: ./ # 1password/load-secrets-action@<version>
-        with:
-          export-env: false
-        env:
-          SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
-          SECRET_IN_SECTION: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/Section_tco6nsqycj6jcbyx63h5isxcny/doxu3mhkozcznnk5vjrkpdqayy
-          MULTILINE_SECRET: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
-      - name: Assert test secret values
-        env:
-          SECRET: ${{ steps.load_secrets.outputs.SECRET }}
-          SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
-          MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
-        run: ./tests/assert-env-set.sh
+    uses: ./.github/workflows/acceptance-test.yml
+    secrets: inherit
+    with:
+      secret: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
+      secret-in-section: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/Section_tco6nsqycj6jcbyx63h5isxcny/doxu3mhkozcznnk5vjrkpdqayy
+      multiline-secret: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
+      export-env: false
