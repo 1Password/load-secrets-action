@@ -1,4 +1,4 @@
-name: Acceptance-tests
+name: Acceptance test
 
 on:
   workflow_call:
