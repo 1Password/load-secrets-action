@@ -275,7 +275,7 @@ describe("default section", () => {
 	beforeEach(() => {
 		jest
 			.spyOn(OPConnect.prototype, "getVault")
-			.mockImplementation((vaultQuery: string) => {
+			.mockImplementation(async (vaultQuery: string) => {
 				switch (vaultQuery) {
 					case "dev":
 						return Promise.resolve({
@@ -290,7 +290,7 @@ describe("default section", () => {
 		// derive from https://github.com/1Password/load-secrets-action/pull/82#discussion_r1888058279
 		jest
 			.spyOn(OPConnect.prototype, "getItem")
-			.mockImplementation((vaultId: string) => {
+			.mockImplementation(async (vaultId: string) => {
 				if (vaultId === "dev") {
 					return Promise.resolve({
 						title: "test",

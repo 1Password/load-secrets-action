@@ -1,10 +1,10 @@
 import { OnePasswordConnect } from "@1password/connect";
 import { OPConnect } from "@1password/connect/dist/lib/op-connect";
-import { parseSecretRef } from "../utils";
-import type { SecretReferenceResolver } from "./types";
 import type { FullItem } from "@1password/connect/dist/model/fullItem";
 import type { FullItemAllOfSections } from "@1password/connect/dist/model/fullItemAllOfSections";
 import type { FullItemAllOfFields } from "@1password/connect/dist/model/fullItemAllOfFields";
+import { parseSecretRef } from "../utils";
+import type { SecretReferenceResolver } from "./types";
 
 export class Connect implements SecretReferenceResolver {
 	private op: OPConnect;
@@ -80,7 +80,7 @@ export class Connect implements SecretReferenceResolver {
 
 		fields = fields?.filter((f) => f.id === query || f.label === query);
 
-		if (fields == undefined || fields.length === 0) {
+		if (fields === undefined || fields.length === 0) {
 			throw new Error(`The item does not have a field '${this.errFieldName}'`);
 		}
 
