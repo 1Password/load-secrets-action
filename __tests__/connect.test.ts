@@ -22,22 +22,22 @@ describe("test connect with different secret refs", () => {
 			},
 			fields: [
 				{
-					id: "filed_id_0",
+					id: "field_id_0",
 					label: "text",
-					value: "filed_id_0_value",
+					value: "field_id_0_value",
 				},
 				{
-					id: "filed_id_1",
+					id: "field_id_1",
 					label: "text",
-					value: "filed_id_1_value",
+					value: "field_id_1_value",
 					section: {
 						id: "section_id_1",
 					},
 				},
 				{
-					id: "filed_id_2",
+					id: "field_id_2",
 					label: "text",
-					value: "filed_id_2_value",
+					value: "field_id_2_value",
 					section: {
 						id: "section_id_2",
 					},
@@ -56,21 +56,21 @@ describe("test connect with different secret refs", () => {
 		});
 	});
 
-	it("filed section not exist", async () => {
+	it("field section not exist", async () => {
 		const connect = new Connect(host, token);
 		await expect(
 			connect.resolve("op://vault/item/not_exist/text"),
 		).rejects.toThrow("The item does not have a field 'not_exist.text'");
 	});
 
-	it("filed not exist", async () => {
+	it("field not exist", async () => {
 		const connect = new Connect(host, token);
 		await expect(
 			connect.resolve("op://vault/item/duplicate/not_exist"),
 		).rejects.toThrow("More than one section matched the secret reference");
 	});
 
-	it("filed duplicate", async () => {
+	it("field duplicate", async () => {
 		const connect = new Connect(host, token);
 		await expect(
 			connect.resolve("op://vault/item/duplicate/text"),
@@ -80,14 +80,14 @@ describe("test connect with different secret refs", () => {
 	it("duplicate section and with unique id", async () => {
 		const connect = new Connect(host, token);
 		await expect(
-			connect.resolve("op://vault/item/duplicate/filed_id_1"),
+			connect.resolve("op://vault/item/duplicate/field_id_1"),
 		).rejects.toThrow("More than one section matched the secret reference");
 	});
 
 	it("without section", async () => {
 		const connect = new Connect(host, token);
-		await expect(connect.resolve("op://vault/item/filed_id_0")).resolves.toBe(
-			"filed_id_0_value",
+		await expect(connect.resolve("op://vault/item/field_id_0")).resolves.toBe(
+			"field_id_0_value",
 		);
 	});
 });
@@ -117,7 +117,7 @@ describe("align test cases with the @1password/sdk@0.1.7", () => {
 					type: FullItemAllOfFields.TypeEnum.String,
 				},
 				{
-					id: "filed_id_0",
+					id: "field_id_0",
 					label: "text",
 					section: {
 						id: "section_id_1",
@@ -126,7 +126,7 @@ describe("align test cases with the @1password/sdk@0.1.7", () => {
 					value: "`section/text`",
 				},
 				{
-					id: "filed_id_1",
+					id: "field_id_1",
 					label: "text",
 					section: {
 						id: "section_id_0",
@@ -135,7 +135,7 @@ describe("align test cases with the @1password/sdk@0.1.7", () => {
 					value: "`add more/text`",
 				},
 				{
-					id: "filed_id_2",
+					id: "field_id_2",
 					label: "cs",
 					section: {
 						id: "section_id_0",
@@ -144,7 +144,7 @@ describe("align test cases with the @1password/sdk@0.1.7", () => {
 					value: "`add more/cs`",
 				},
 				{
-					id: "filed_id_3",
+					id: "field_id_3",
 					label: "text",
 					section: {
 						id: "add more",
@@ -153,7 +153,7 @@ describe("align test cases with the @1password/sdk@0.1.7", () => {
 					value: "hello world",
 				},
 				{
-					id: "filed_id_4",
+					id: "field_id_4",
 					label: "text",
 					section: {
 						id: "section_id_2",
@@ -162,7 +162,7 @@ describe("align test cases with the @1password/sdk@0.1.7", () => {
 					value: "1",
 				},
 				{
-					id: "filed_id_5",
+					id: "field_id_5",
 					label: "url",
 					section: {
 						id: "section_id_3",
@@ -264,5 +264,141 @@ describe("align test cases with the @1password/sdk@0.1.7", () => {
 		await expect(
 			connect.resolve("op://dev/GitHub Action Test Bak/section_id_2/text"),
 		).resolves.toBe("1");
+	});
+});
+
+describe("default section", () => {
+	// eslint-disable-next-line no-restricted-syntax
+	const host = "http://localhost:8080";
+	const token = "token";
+
+	beforeEach(() => {
+		jest
+			.spyOn(OPConnect.prototype, "getVault")
+			.mockImplementation((vaultQuery: string) => {
+				switch (vaultQuery) {
+					case "dev":
+						return Promise.resolve({
+							id: "dev",
+						});
+					default:
+						return Promise.resolve({
+							id: "default",
+						});
+				}
+			});
+		// derive from https://github.com/1Password/load-secrets-action/pull/82#discussion_r1888058279
+		jest
+			.spyOn(OPConnect.prototype, "getItem")
+			.mockImplementation((vaultId: string) => {
+				if (vaultId === "dev") {
+					return Promise.resolve({
+						title: "test",
+						extractOTP: jest.fn(),
+						category: FullItem.CategoryEnum.Login,
+						vault: {
+							id: "dev",
+						},
+						fields: [
+							{
+								id: "username",
+								label: "username",
+								purpose: FullItemAllOfFields.PurposeEnum.Username,
+								type: FullItemAllOfFields.TypeEnum.String,
+								value: "username",
+							},
+							{
+								id: "password",
+								label: "password",
+								purpose: FullItemAllOfFields.PurposeEnum.Password,
+								type: FullItemAllOfFields.TypeEnum.Concealed,
+								value: "password",
+							},
+							{
+								id: "field-id-0",
+								label: "password",
+								section: {
+									id: "section-id-0",
+								},
+								type: FullItemAllOfFields.TypeEnum.Concealed,
+								value: "cs-password",
+							},
+						],
+						id: "item_id_0",
+						sections: [
+							{
+								id: "add more",
+							},
+							{
+								id: "section-id-0",
+								label: "cs",
+							},
+						],
+					});
+				}
+				return Promise.resolve({
+					title: "test",
+					extractOTP: jest.fn(),
+					category: FullItem.CategoryEnum.Login,
+					vault: {
+						id: "default",
+					},
+					fields: [
+						{
+							id: "username",
+							label: "username",
+							purpose: FullItemAllOfFields.PurposeEnum.Username,
+							type: FullItemAllOfFields.TypeEnum.String,
+							value: "username",
+						},
+						{
+							id: "password",
+							label: "password",
+							purpose: FullItemAllOfFields.PurposeEnum.Password,
+							type: FullItemAllOfFields.TypeEnum.Concealed,
+							value: "password",
+						},
+						{
+							id: "field-id-0",
+							label: "password",
+							section: {
+								id: "add more",
+							},
+							type: FullItemAllOfFields.TypeEnum.Concealed,
+							value: "add more-password",
+						},
+					],
+					id: "item_id_0",
+					sections: [
+						{
+							id: "add more",
+						},
+					],
+				});
+			});
+	});
+
+	it("test multiple matched fields, but only one default section exists", async () => {
+		const connect = new Connect(host, token);
+		await expect(connect.resolve("op://dev/test/password")).resolves.toBe(
+			"password",
+		);
+	});
+
+	it("test the correct behaviour", async () => {
+		const connect = new Connect(host, token);
+		await expect(connect.resolve("op://dev/test/cs/password")).resolves.toBe(
+			"cs-password",
+		);
+		await expect(connect.resolve("op://default/test/field-id-0")).resolves.toBe(
+			"add more-password",
+		);
+	});
+
+	it("test multiple matched fields and multiple default sections", async () => {
+		const connect = new Connect(host, token);
+		await expect(connect.resolve("op://default/test/password")).rejects.toThrow(
+			"The item has more than one 'password' field",
+		);
 	});
 });
