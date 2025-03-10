@@ -42270,6 +42270,7 @@ var op_connect = __nccwpck_require__(6534);
 
 class Connect {
     op;
+    errFieldName;
     constructor(serverURL, token) {
         this.op = (0,dist/* OnePasswordConnect */.Cy)({
             serverURL,
@@ -42299,36 +42300,41 @@ class Connect {
             return undefined;
         }
         const item = await this.op.getItem(vault.id, itemName);
-        let itemFields = item.fields;
-        const errFiledName = sectionName
-            ? `${sectionName}.${fieldName}`
-            : fieldName;
+        this.errFieldName = sectionName ? `${sectionName}.${fieldName}` : fieldName;
+        let sectionId;
         if (sectionName) {
-            const section = item.sections?.filter((s) => s.label === sectionName || s.id === sectionName);
-            if (section === undefined || section.length === 0) {
-                throw new Error(`The item does not have a field '${errFiledName}'`);
-            }
-            if (section.length > 1) {
-                throw new Error("More than one section matched the secret reference");
-            }
-            const sectionId = section[0].id;
-            itemFields = itemFields?.filter((f) => f.section?.id === sectionId);
+            sectionId = this.getSection(item, sectionName).id;
         }
-        const matchedFields = itemFields?.filter((f) => f.id === fieldName || f.label === fieldName);
-        if (matchedFields === undefined || matchedFields.length === 0) {
-            throw new Error(`The item does not have a field '${errFiledName}'`);
+        const matchedField = this.getField(item, sectionId, fieldName);
+        return matchedField.value;
+    }
+    getSection(item, query) {
+        const sections = item.sections?.filter((s) => s.label === query || s.id === query);
+        if (sections === undefined || sections.length === 0) {
+            throw new Error(`The item does not have a field '${this.errFieldName}'`);
         }
-        if (matchedFields.length > 1) {
-            // if section not provide, return the default section id equals to "add more" filed
-            if (!sectionName) {
-                const res = matchedFields.find((f) => f.section?.id === "add more")?.value;
-                if (res) {
-                    return res;
-                }
-            }
-            throw new Error(`The item has more than one '${errFiledName}' field`);
+        if (sections.length > 1) {
+            throw new Error("More than one section matched the secret reference");
         }
-        return matchedFields[0].value;
+        return sections[0];
+    }
+    getField(item, sectionId, query) {
+        let fields = item.fields;
+        if (sectionId) {
+            fields = fields?.filter((f) => f.section?.id === sectionId);
+        }
+        fields = fields?.filter((f) => f.id === query || f.label === query);
+        if (fields === undefined || fields.length === 0) {
+            throw new Error(`The item does not have a field '${this.errFieldName}'`);
+        }
+        // if section part not provided, return fields with default section(empty or 'add more')
+        if (!sectionId && fields.length > 1) {
+            fields = fields.filter((f) => !f.section || f.section.id === "add more");
+        }
+        if (fields.length > 1) {
+            throw new Error(`The item has more than one '${this.errFieldName}' field`);
+        }
+        return fields[0];
     }
 }
 
