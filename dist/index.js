@@ -2587,11 +2587,11 @@ module.exports.release_client = function(client_id) {
 };
 
 function __wbg_adapter_30(arg0, arg1, arg2) {
-    wasm.closure1820_externref_shim(arg0, arg1, arg2);
+    wasm.closure2088_externref_shim(arg0, arg1, arg2);
 }
 
 function __wbg_adapter_145(arg0, arg1, arg2, arg3) {
-    wasm.closure1902_externref_shim(arg0, arg1, arg2, arg3);
+    wasm.closure2172_externref_shim(arg0, arg1, arg2, arg3);
 }
 
 const __wbindgen_enum_RequestCredentials = ["omit", "same-origin", "include"];
@@ -3001,8 +3001,8 @@ module.exports.__wbindgen_cb_drop = function(arg0) {
     return ret;
 };
 
-module.exports.__wbindgen_closure_wrapper6409 = function(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 1821, __wbg_adapter_30);
+module.exports.__wbindgen_closure_wrapper7666 = function(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 2089, __wbg_adapter_30);
     return ret;
 };
 
@@ -3214,20 +3214,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SharedCore = void 0;
 const sdk_core_1 = __nccwpck_require__(2872);
+const types_1 = __nccwpck_require__(8267);
 const errors_1 = __nccwpck_require__(8203);
+// In empirical tests, we determined that maximum message size that can cross the FFI boundary
+// is ~64MB. Past this limit, the wasm-bingen FFI will throw an error and the program will crash.
+// We set the limit to 50MB to be safe, to be reconsidered upon further testing.
+const messageLimit = 50 * 1024 * 1024;
 /**
  *  An implementation of the `Core` interface that shares resources across all clients.
  */
 class SharedCore {
-    invoke_sync(config) {
-        const serializedConfig = JSON.stringify(config);
-        try {
-            return (0, sdk_core_1.invoke_sync)(serializedConfig);
-        }
-        catch (e) {
-            (0, errors_1.throwError)(e);
-        }
-    }
     initClient(config) {
         return __awaiter(this, void 0, void 0, function* () {
             const serializedConfig = JSON.stringify(config);
@@ -3241,7 +3237,12 @@ class SharedCore {
     }
     invoke(config) {
         return __awaiter(this, void 0, void 0, function* () {
-            const serializedConfig = JSON.stringify(config);
+            const serializedConfig = JSON.stringify(config, types_1.ReplacerFunc);
+            // Encoding to bytes as JS uses UTF-16 under the hood, but the messages
+            // that are sent across the FFI boundary are encoded in UTF-8.
+            if (new TextEncoder().encode(serializedConfig).length > messageLimit) {
+                (0, errors_1.throwError)(`message size exceeds the limit of ${messageLimit} bytes, please contact 1Password at support@1password.com or https://developer.1password.com/joinslack if you need help."`);
+            }
             try {
                 return yield (0, sdk_core_1.invoke)(serializedConfig);
             }
@@ -3249,6 +3250,20 @@ class SharedCore {
                 (0, errors_1.throwError)(e);
             }
         });
+    }
+    invoke_sync(config) {
+        const serializedConfig = JSON.stringify(config, types_1.ReplacerFunc);
+        // Encoding to bytes as JS uses UTF-16 under the hood, but the messages
+        // that are sent across the FFI boundary are encoded in UTF-8.
+        if (new TextEncoder().encode(serializedConfig).length > messageLimit) {
+            (0, errors_1.throwError)(`message size exceeds the limit of ${messageLimit} bytes, please contact 1Password at support@1password.com or https://developer.1password.com/joinslack if you need help.`);
+        }
+        try {
+            return (0, sdk_core_1.invoke_sync)(serializedConfig);
+        }
+        catch (e) {
+            (0, errors_1.throwError)(e);
+        }
     }
     releaseClient(clientId) {
         const serializedId = JSON.stringify(clientId);
@@ -3323,12 +3338,15 @@ var _Items_inner;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Items = void 0;
 const iterator_js_1 = __nccwpck_require__(1702);
+const types_js_1 = __nccwpck_require__(8267);
 const items_shares_js_1 = __nccwpck_require__(985);
+const items_files_js_1 = __nccwpck_require__(4782);
 class Items {
     constructor(inner) {
         _Items_inner.set(this, void 0);
         __classPrivateFieldSet(this, _Items_inner, inner, "f");
         this.shares = new items_shares_js_1.ItemsShares(inner);
+        this.files = new items_files_js_1.ItemsFiles(inner);
     }
     /**
      * Create a new item.
@@ -3346,7 +3364,7 @@ class Items {
                     },
                 },
             };
-            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").core.invoke(invocationConfig));
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
         });
     }
     /**
@@ -3366,7 +3384,7 @@ class Items {
                     },
                 },
             };
-            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").core.invoke(invocationConfig));
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
         });
     }
     /**
@@ -3385,7 +3403,7 @@ class Items {
                     },
                 },
             };
-            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").core.invoke(invocationConfig));
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
         });
     }
     /**
@@ -3444,7 +3462,7 @@ class Items {
                     },
                 },
             };
-            return new iterator_js_1.SdkIterable(JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").core.invoke(invocationConfig)));
+            return new iterator_js_1.SdkIterable(JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc));
         });
     }
 }
@@ -3454,8 +3472,131 @@ _Items_inner = new WeakMap();
 
 /***/ }),
 
+/***/ 4782:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _ItemsFiles_inner;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ItemsFiles = void 0;
+const types_js_1 = __nccwpck_require__(8267);
+class ItemsFiles {
+    constructor(inner) {
+        _ItemsFiles_inner.set(this, void 0);
+        __classPrivateFieldSet(this, _ItemsFiles_inner, inner, "f");
+    }
+    /**
+     * Attach files to Items
+     */
+    attach(item, fileParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsFiles_inner, "f").id,
+                    parameters: {
+                        name: "ItemsFilesAttach",
+                        parameters: {
+                            item,
+                            file_params: fileParams,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsFiles_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Read file content from the Item
+     */
+    read(vaultId, itemId, attr) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsFiles_inner, "f").id,
+                    parameters: {
+                        name: "ItemsFilesRead",
+                        parameters: {
+                            vault_id: vaultId,
+                            item_id: itemId,
+                            attr,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsFiles_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Delete a field file from Item using the section and field IDs
+     */
+    delete(item, sectionId, fieldId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsFiles_inner, "f").id,
+                    parameters: {
+                        name: "ItemsFilesDelete",
+                        parameters: {
+                            item,
+                            section_id: sectionId,
+                            field_id: fieldId,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsFiles_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Replace the document file within a document item
+     */
+    replaceDocument(item, docParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsFiles_inner, "f").id,
+                    parameters: {
+                        name: "ItemsFilesReplaceDocument",
+                        parameters: {
+                            item,
+                            doc_params: docParams,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsFiles_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+}
+exports.ItemsFiles = ItemsFiles;
+_ItemsFiles_inner = new WeakMap();
+
+
+/***/ }),
+
 /***/ 985:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
 // Code generated by op-codegen - DO NOT EDIT MANUALLY
@@ -3482,6 +3623,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _ItemsShares_inner;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ItemsShares = void 0;
+const types_js_1 = __nccwpck_require__(8267);
 class ItemsShares {
     constructor(inner) {
         _ItemsShares_inner.set(this, void 0);
@@ -3504,7 +3646,7 @@ class ItemsShares {
                     },
                 },
             };
-            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").core.invoke(invocationConfig));
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
         });
     }
     /**
@@ -3524,7 +3666,7 @@ class ItemsShares {
                     },
                 },
             };
-            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").core.invoke(invocationConfig));
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
         });
     }
     /**
@@ -3545,7 +3687,7 @@ class ItemsShares {
                     },
                 },
             };
-            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").core.invoke(invocationConfig));
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
         });
     }
 }
@@ -3559,6 +3701,7 @@ _ItemsShares_inner = new WeakMap();
 /***/ (function(__unused_webpack_module, exports) {
 
 
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
 var __await = (this && this.__await) || function (v) { return this instanceof __await ? (this.v = v, this) : new __await(v); }
 var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _arguments, generator) {
     if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
@@ -3598,6 +3741,7 @@ exports.SdkIterable = SdkIterable;
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -3672,6 +3816,7 @@ var _Secrets_inner;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Secrets = void 0;
 const core_js_1 = __nccwpck_require__(747);
+const types_js_1 = __nccwpck_require__(8267);
 class Secrets {
     constructor(inner) {
         _Secrets_inner.set(this, void 0);
@@ -3693,7 +3838,7 @@ class Secrets {
                     },
                 },
             };
-            return JSON.parse(yield __classPrivateFieldGet(this, _Secrets_inner, "f").core.invoke(invocationConfig));
+            return JSON.parse(yield __classPrivateFieldGet(this, _Secrets_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc);
         });
     }
     /**
@@ -3725,7 +3870,7 @@ class Secrets {
                 },
             },
         };
-        return JSON.parse(sharedCore.invoke_sync(invocationConfig));
+        return JSON.parse(sharedCore.invoke_sync(invocationConfig), types_js_1.ReviverFunc);
     }
 }
 exports.Secrets = Secrets;
@@ -3742,7 +3887,7 @@ _Secrets_inner = new WeakMap();
  Generated by typeshare 1.13.2
 */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.WordListType = exports.SeparatorType = exports.AllowedRecipientType = exports.AllowedType = exports.ItemShareDuration = exports.AutofillBehavior = exports.ItemFieldType = exports.ItemCategory = void 0;
+exports.ReplacerFunc = exports.ReviverFunc = exports.WordListType = exports.SeparatorType = exports.AllowedRecipientType = exports.AllowedType = exports.ItemShareDuration = exports.AutofillBehavior = exports.ItemFieldType = exports.ItemCategory = void 0;
 var ItemCategory;
 (function (ItemCategory) {
     ItemCategory["Login"] = "Login";
@@ -3781,6 +3926,9 @@ var ItemFieldType;
     ItemFieldType["Totp"] = "Totp";
     ItemFieldType["Email"] = "Email";
     ItemFieldType["Reference"] = "Reference";
+    ItemFieldType["SshKey"] = "SshKey";
+    ItemFieldType["Menu"] = "Menu";
+    ItemFieldType["MonthYear"] = "MonthYear";
     ItemFieldType["Unsupported"] = "Unsupported";
 })(ItemFieldType || (exports.ItemFieldType = ItemFieldType = {}));
 /**
@@ -3877,6 +4025,22 @@ var WordListType;
     /** Three (random) letter "words" */
     WordListType["ThreeLetters"] = "threeLetters";
 })(WordListType || (exports.WordListType = WordListType = {}));
+const ReviverFunc = (key, value) => {
+    if (Array.isArray(value) &&
+        value.every((v) => Number.isInteger(v) && v >= 0 && v <= 255) &&
+        value.length > 0) {
+        return new Uint8Array(value);
+    }
+    return value;
+};
+exports.ReviverFunc = ReviverFunc;
+const ReplacerFunc = (key, value) => {
+    if (value instanceof Uint8Array) {
+        return Array.from(value);
+    }
+    return value;
+};
+exports.ReplacerFunc = ReplacerFunc;
 
 
 /***/ }),
@@ -3910,6 +4074,7 @@ var _Vaults_inner;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Vaults = void 0;
 const iterator_js_1 = __nccwpck_require__(1702);
+const types_js_1 = __nccwpck_require__(8267);
 class Vaults {
     constructor(inner) {
         _Vaults_inner.set(this, void 0);
@@ -3929,7 +4094,7 @@ class Vaults {
                     },
                 },
             };
-            return new iterator_js_1.SdkIterable(JSON.parse(yield __classPrivateFieldGet(this, _Vaults_inner, "f").core.invoke(invocationConfig)));
+            return new iterator_js_1.SdkIterable(JSON.parse(yield __classPrivateFieldGet(this, _Vaults_inner, "f").core.invoke(invocationConfig), types_js_1.ReviverFunc));
         });
     }
 }
@@ -3945,9 +4110,9 @@ _Vaults_inner = new WeakMap();
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SDK_BUILD_NUMBER = exports.SDK_VERSION = void 0;
-exports.SDK_VERSION = "0.1.7";
-exports.SDK_BUILD_NUMBER = "0010701";
-const SDK_CORE_VERSION = "0.1.7";
+exports.SDK_VERSION = "0.2.0";
+exports.SDK_BUILD_NUMBER = "0020001";
+const SDK_CORE_VERSION = "0.2.0";
 
 
 /***/ }),
