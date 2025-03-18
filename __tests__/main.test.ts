@@ -1,6 +1,8 @@
 import * as core from "@actions/core";
 import * as op from "@1password/sdk";
 import * as connect from "@1password/connect";
+import type { VaultsApi } from "@1password/sdk/dist/vaults";
+import type { ItemsApi } from "@1password/sdk/dist/items";
 import * as main from "../src/main";
 
 const runMock = jest.spyOn(main, "run");
@@ -64,22 +66,8 @@ describe("test main action", () => {
 				secrets: {
 					resolve: jest.fn().mockResolvedValue("test-secret"),
 				},
-				items: {
-					get: jest.fn().mockImplementation(),
-					create: jest.fn().mockImplementation(),
-					put: jest.fn().mockImplementation(),
-					delete: jest.fn().mockImplementation(),
-					listAll: jest.fn().mockImplementation(),
-					shares: {
-						getAccountPolicy: jest.fn().mockImplementation(),
-						validateRecipients: jest.fn().mockImplementation(),
-						create: jest.fn().mockImplementation(),
-					},
-					archive: jest.fn().mockImplementation(),
-				},
-				vaults: {
-					listAll: jest.fn().mockImplementation(),
-				},
+				items: {} as ItemsApi,
+				vaults: {} as VaultsApi,
 			});
 
 		await main.run();
