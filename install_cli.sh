@@ -37,6 +37,9 @@ install_op_cli() {
     pkgutil --expand op.pkg temp-pkg
     tar -xvf temp-pkg/op.pkg/Payload -C "$OP_INSTALL_DIR"
     rm -rf temp-pkg && rm op.pkg
+  elif [ "$RUNNER_OS" = "Windows" ]; then
+    pwsh -Command "Invoke-WebRequest -Uri https://cache.agilebits.com/dist/1P/op2/pkg/${CLI_VERSION}/op_windows_amd64_${CLI_VERSION}.zip -OutFile op.zip"
+    pwsh -Command "Expand-Archive -Path op.zip -DestinationPath '${OP_INSTALL_DIR}'; Remove-Item op.zip"
   else
     echo "Operating system not supported yet for this GitHub Action: $OSTYPE."
     exit 1
