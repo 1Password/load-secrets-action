@@ -60,11 +60,13 @@ jobs:
         if: ${{ matrix.auth == 'service-account' }}
         uses: ./configure
         with:
+          runner: ${{ runner.os }}
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
       - name: Configure 1Password Connect
         if: ${{ matrix.auth == 'connect' }}
         uses: ./configure # 1password/load-secrets-action/configure@<version>
         with:
+          runner: ${{ runner.os }}
           connect-host: http://localhost:8080
           connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
       - name: Load secrets
