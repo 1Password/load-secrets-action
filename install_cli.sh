@@ -14,7 +14,7 @@ install_op_cli() {
   # Get the latest stable version of the CLI
   CLI_VERSION="v$(curl https://app-updates.agilebits.com/check/1/0/CLI2/en/2.0.0/N -s | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')"
 
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  if [[ "$RUNNER_OS" == "Linux" ]]; then
     # Get runner's architecture
     ARCH=$(uname -m)
     if [[ "$(getconf LONG_BIT)" = 32 ]]; then
@@ -32,7 +32,7 @@ install_op_cli() {
 
     curl -sSfLo op.zip "https://cache.agilebits.com/dist/1P/op2/pkg/${CLI_VERSION}/op_linux_${ARCH}_${CLI_VERSION}.zip"
     unzip -od "$OP_INSTALL_DIR" op.zip && rm op.zip
-  elif [[ "$OSTYPE" == "darwin"* ]]; then
+  elif [[ "$RUNNER_OS" == "macOS" ]]; then
     curl -sSfLo op.pkg "https://cache.agilebits.com/dist/1P/op2/pkg/${CLI_VERSION}/op_apple_universal_${CLI_VERSION}.pkg"
     pkgutil --expand op.pkg temp-pkg
     tar -xvf temp-pkg/op.pkg/Payload -C "$OP_INSTALL_DIR"
@@ -41,7 +41,7 @@ install_op_cli() {
     pwsh -Command "Invoke-WebRequest -Uri https://cache.agilebits.com/dist/1P/op2/pkg/${CLI_VERSION}/op_windows_amd64_${CLI_VERSION}.zip -OutFile op.zip"
     pwsh -Command "Expand-Archive -Path op.zip -DestinationPath '${OP_INSTALL_DIR}'; Remove-Item op.zip"
   else
-    echo "Operating system not supported yet for this GitHub Action: $OSTYPE."
+    echo "Operating system not supported yet for this GitHub Action: $RUNNER_OS."
     exit 1
   fi
 }
