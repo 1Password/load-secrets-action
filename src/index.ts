@@ -1,9 +1,6 @@
-import path from "path";
-import url from "url";
 import * as core from "@actions/core";
-import * as exec from "@actions/exec";
-import { validateCli } from "@1password/op-js";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
+import { validateCli } from "@1password/op-js";
 
 const loadSecretsAction = async () => {
 	try {
@@ -46,21 +43,8 @@ const installCLI = async (): Promise<void> => {
 	// If there's no CLI installed, then validateCli will throw an error, which we will use
 	// as an indicator that we need to execute the installation script.
 	await validateCli().catch(async () => {
-		const currentFile = url.fileURLToPath(import.meta.url);
-		const currentDir = path.dirname(currentFile);
-		const parentDir = path.resolve(currentDir, "..");
-
-		// Execute bash script
-		const cmdOut = await exec.getExecOutput(
-			`sh -c "` + parentDir + `/install_cli.sh"`,
-		);
-
-		// Add path to 1Password CLI to $PATH
-		const outArr = cmdOut.stdout.split("\n");
-		if (outArr[0] && process.env.PATH) {
-			const cliPath = outArr[0]?.replace(/^(::debug::OP_INSTALL_DIR: )/, "");
-			core.addPath(cliPath);
-		}
+		const { install } = require("@1password/install-cli-action");
+		await install();
 	});
 };
 

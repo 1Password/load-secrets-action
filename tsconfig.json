@@ -18,6 +18,7 @@
 		"resolveJsonModule": true,
 		"strict": true,
 		"target": "es2022",
-		"verbatimModuleSyntax": true
+		"verbatimModuleSyntax": true,
+		"skipLibCheck": true
 	}
 }

@@ -5,6 +5,9 @@ branding:
   icon: lock
   color: blue
 inputs:
+  version:
+    description: Version of the 1Password CLI to install
+    default: latest
   unset-previous:
     description: Whether to unset environment variables populated by 1Password in earlier job steps
     default: "false"
