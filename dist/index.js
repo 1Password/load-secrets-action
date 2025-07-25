@@ -62300,8 +62300,6 @@ const unsetPrevious = () => {
 ;// CONCATENATED MODULE: ./src/index.ts
 
 
-// import { newCliInstaller } from "@1password/install-cli-action/src/cli-installer";
-// import { VersionResolver } from "@1password/install-cli-action/src/version";
 
 
 const loadSecretsAction = async () => {

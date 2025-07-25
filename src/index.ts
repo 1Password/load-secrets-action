@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import { validateCli } from "@1password/op-js";
-import { install } from "@1password/install-cli-action/dist";
+import { install } from "@1password/install-cli-action";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
 
 const loadSecretsAction = async () => {
