@@ -9,6 +9,7 @@
 	},
 	"scripts": {
 		"build": "ncc build ./src/index.ts",
+		"build:configure": "ncc build ./configure/index.js -o ./configure/dist",
 		"format": "prettier --ignore-path ./config/.prettierignore",
 		"format:check": "npm run format -- --check ./",
 		"format:write": "npm run format -- --write ./",
