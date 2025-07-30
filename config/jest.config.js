@@ -25,4 +25,4 @@ const jestConfig = {
 	verbose: true,
 };
 
-export default jestConfig;
+module.exports = jestConfig;
