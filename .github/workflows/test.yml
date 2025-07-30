@@ -14,6 +14,7 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm test
+
   test-with-output-secrets:
     if: |
       github.ref == 'refs/heads/main' ||
@@ -21,13 +22,27 @@ jobs:
         github.event_name == 'pull_request' && 
         github.event.pull_request.head.repo.full_name == github.repository
       )
-    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@main
+    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@vzt/use-op-cli-installer #TODO: after merge, this to main, revert to consume yml file from main (delete '@vzt/use-op-cli-installer')
     secrets: inherit
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        version: [latest, latest-beta, 2.30.0, 2.30.0-beta.03]
+        auth: [connect, service-account]
+        exclude:
+          - os: macos-latest
+            auth: connect
+          - os: windows-latest
+            auth: connect
     with:
+      os: ${{ matrix.os }}
+      version: ${{ matrix.version }}
+      auth: ${{ matrix.auth }}
       secret: op://acceptance-tests/test-secret/password
       secret-in-section: op://acceptance-tests/test-secret/test-section/password
       multiline-secret: op://acceptance-tests/multiline-secret/notesPlain
       export-env: false
+
   test-with-export-env:
     if: |
       github.ref == 'refs/heads/main' ||
@@ -35,13 +50,27 @@ jobs:
         github.event_name == 'pull_request' && 
         github.event.pull_request.head.repo.full_name == github.repository
       )
-    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@main
+    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@vzt/use-op-cli-installer #TODO: after merge, this to main, revert to consume yml file from main (delete '@vzt/use-op-cli-installer')
     secrets: inherit
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        version: [latest, latest-beta, 2.30.0, 2.30.0-beta.03]
+        auth: [connect, service-account]
+        exclude:
+          - os: macos-latest
+            auth: connect
+          - os: windows-latest
+            auth: connect
     with:
+      os: ${{ matrix.os }}
+      version: ${{ matrix.version }}
+      auth: ${{ matrix.auth }}
       secret: op://acceptance-tests/test-secret/password
       secret-in-section: op://acceptance-tests/test-secret/test-section/password
       multiline-secret: op://acceptance-tests/multiline-secret/notesPlain
       export-env: true
+
   test-references-with-ids:
     if: |
       github.ref == 'refs/heads/main' ||
@@ -49,9 +78,22 @@ jobs:
         github.event_name == 'pull_request' && 
         github.event.pull_request.head.repo.full_name == github.repository
       )
-    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@main
+    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@vzt/use-op-cli-installer #TODO: after merge, this to main, revert to consume yml file from main (delete '@vzt/use-op-cli-installer')
     secrets: inherit
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        version: [latest, latest-beta, 2.30.0, 2.30.0-beta.03]
+        auth: [connect, service-account]
+        exclude:
+          - os: macos-latest
+            auth: connect
+          - os: windows-latest
+            auth: connect
     with:
+      os: ${{ matrix.os }}
+      version: ${{ matrix.version }}
+      auth: ${{ matrix.auth }}
       secret: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/password
       secret-in-section: op://v5pz6venw4roosmkzdq2nhpv6u/hrgkzhrlvscomepxlgafb2m3ca/Section_tco6nsqycj6jcbyx63h5isxcny/doxu3mhkozcznnk5vjrkpdqayy
       multiline-secret: op://v5pz6venw4roosmkzdq2nhpv6u/ghtz3jvcc6dqmzc53d3r3eskge/notesPlain
