@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
-import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
 import { validateCli } from "@1password/op-js";
+import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
 
 const loadSecretsAction = async () => {
 	try {
@@ -43,7 +43,9 @@ const installCLI = async (): Promise<void> => {
 	// If there's no CLI installed, then validateCli will throw an error, which we will use
 	// as an indicator that we need to execute the installation script.
 	await validateCli().catch(async () => {
+		// eslint-disable-next-line
 		const { install } = require("@1password/install-cli-action");
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 		await install();
 	});
 };
