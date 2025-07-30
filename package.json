@@ -2,7 +2,7 @@
 	"name": "load-secrets-action",
 	"version": "2.0.0",
 	"description": "Load Secrets from 1Password",
-	"type": "module",
+	"type": "commonjs",
 	"main": "dist/index.js",
 	"directories": {
 		"test": "tests"
