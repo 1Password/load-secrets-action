@@ -62611,10 +62611,10 @@ var __webpack_exports__ = {};
 
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(7484);
-// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
-var exec = __nccwpck_require__(5236);
 // EXTERNAL MODULE: ./node_modules/@1password/op-js/dist/index.js
 var dist = __nccwpck_require__(7521);
+// EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
+var exec = __nccwpck_require__(5236);
 ;// CONCATENATED MODULE: ./package.json
 const package_namespaceObject = {"rE":"2.0.0"};
 ;// CONCATENATED MODULE: ./src/constants.ts
@@ -62735,7 +62735,9 @@ const installCLI = async () => {
     // If there's no CLI installed, then validateCli will throw an error, which we will use
     // as an indicator that we need to execute the installation script.
     await (0,dist.validateCli)().catch(async () => {
+        // eslint-disable-next-line
         const { install } = __nccwpck_require__(9530);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         await install();
     });
 };
