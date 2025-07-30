@@ -58670,285 +58670,6 @@ module.exports = {
 
 /***/ }),
 
-/***/ 1897:
-/***/ ((module, __nested_webpack_exports__, __nccwpck_require2_) => {
-
-"use strict";
-// ESM COMPAT FLAG
-__nccwpck_require2_.r(__nested_webpack_exports__);
-
-// EXPORTS
-__nccwpck_require2_.d(__nested_webpack_exports__, {
-  install: () => (/* binding */ install)
-});
-
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require2_(7484);
-// EXTERNAL MODULE: external "os"
-var external_os_ = __nccwpck_require2_(857);
-var external_os_default = /*#__PURE__*/__nccwpck_require2_.n(external_os_);
-// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
-var tool_cache = __nccwpck_require2_(3472);
-;// CONCATENATED MODULE: ./src/cli-installer/cli-installer.ts
-
-
-
-// maps OS architecture names to 1Password CLI installer architecture names
-const archMap = {
-    ia32: "386",
-    x64: "amd64",
-    arm: "arm",
-    arm64: "arm64",
-};
-// Builds the download URL for the 1Password CLI based on the platform and version.
-const cliUrlBuilder = {
-    linux: (version, arch) => `https://cache.agilebits.com/dist/1P/op2/pkg/${version}/op_linux_${arch}_${version}.zip`,
-    darwin: (version) => `https://cache.agilebits.com/dist/1P/op2/pkg/${version}/op_apple_universal_${version}.pkg`,
-    win32: (version, arch) => `https://cache.agilebits.com/dist/1P/op2/pkg/${version}/op_windows_${arch}_${version}.zip`,
-};
-class CliInstaller {
-    version;
-    arch;
-    constructor(version) {
-        this.version = version;
-        this.arch = this.getArch();
-    }
-    async install(url) {
-        console.info(`Downloading 1Password CLI from: ${url}`);
-        const downloadPath = await tool_cache.downloadTool(url);
-        console.info("Installing 1Password CLI");
-        const extractedPath = await tool_cache.extractZip(downloadPath);
-        core.addPath(extractedPath);
-        core.info("1Password CLI installed");
-    }
-    getArch() {
-        const arch = archMap[external_os_default().arch()];
-        if (!arch) {
-            throw new Error("Unsupported architecture");
-        }
-        return arch;
-    }
-}
-
-;// CONCATENATED MODULE: ./src/cli-installer/linux.ts
-
-class LinuxInstaller extends CliInstaller {
-    platform = "linux"; // Node.js platform identifier for Linux
-    constructor(version) {
-        super(version);
-    }
-    async installCli() {
-        const urlBuilder = cliUrlBuilder[this.platform];
-        await super.install(urlBuilder(this.version, this.arch));
-    }
-}
-
-// EXTERNAL MODULE: external "child_process"
-var external_child_process_ = __nccwpck_require2_(5317);
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require2_(9896);
-// EXTERNAL MODULE: external "path"
-var external_path_ = __nccwpck_require2_(6928);
-// EXTERNAL MODULE: external "util"
-var external_util_ = __nccwpck_require2_(9023);
-;// CONCATENATED MODULE: ./src/cli-installer/macos.ts
-
-
-
-
-
-
-
-
-const execAsync = (0,external_util_.promisify)(external_child_process_.exec);
-class MacOsInstaller extends CliInstaller {
-    platform = "darwin"; // Node.js platform identifier for macOS
-    constructor(version) {
-        super(version);
-    }
-    async installCli() {
-        const urlBuilder = cliUrlBuilder[this.platform];
-        await this.install(urlBuilder(this.version));
-    }
-    // @actions/tool-cache package does not support .pkg files, so we need to handle the installation manually
-    async install(downloadUrl) {
-        console.info(`Downloading 1Password CLI from: ${downloadUrl}`);
-        const pkgPath = await tool_cache.downloadTool(downloadUrl);
-        const pkgWithExtension = `${pkgPath}.pkg`;
-        external_fs_.renameSync(pkgPath, pkgWithExtension);
-        const expandDir = "temp-pkg";
-        await execAsync(`pkgutil --expand "${pkgWithExtension}" "${expandDir}"`);
-        const payloadPath = external_path_.join(expandDir, "op.pkg", "Payload");
-        console.info("Installing 1Password CLI");
-        const cliPath = await tool_cache.extractTar(payloadPath);
-        core.addPath(cliPath);
-        external_fs_.rmSync(expandDir, { recursive: true, force: true });
-        external_fs_.rmSync(pkgPath, { force: true });
-        core.info("1Password CLI installed");
-    }
-}
-
-;// CONCATENATED MODULE: ./src/cli-installer/windows.ts
-
-class WindowsInstaller extends CliInstaller {
-    platform = "win32"; // Node.js platform identifier for Windows
-    constructor(version) {
-        super(version);
-    }
-    async installCli() {
-        const urlBuilder = cliUrlBuilder[this.platform];
-        await super.install(urlBuilder(this.version, this.arch));
-    }
-}
-
-;// CONCATENATED MODULE: ./src/cli-installer/installer.ts
-
-
-
-
-const newCliInstaller = (version) => {
-    const platform = external_os_default().platform();
-    switch (platform) {
-        case "linux":
-            return new LinuxInstaller(version);
-        case "darwin":
-            return new MacOsInstaller(version);
-        case "win32":
-            return new WindowsInstaller(version);
-        default:
-            throw new Error(`Unsupported platform: ${platform}`);
-    }
-};
-
-;// CONCATENATED MODULE: ./src/cli-installer/index.ts
-
-
-;// CONCATENATED MODULE: ./src/version/constants.ts
-/* eslint-disable @typescript-eslint/naming-convention */
-var ReleaseChannel;
-(function (ReleaseChannel) {
-    ReleaseChannel["Stable"] = "latest";
-    ReleaseChannel["Beta"] = "latest-beta";
-})(ReleaseChannel || (ReleaseChannel = {}));
-/* eslint-enable @typescript-eslint/naming-convention */
-
-;// CONCATENATED MODULE: ./src/version/helper.ts
-
-
-// Returns the latest version of the 1Password CLI based on the specified channel.
-const getLatestVersion = async (channel) => {
-    core.info(`Getting ${channel} version number`);
-    const res = await fetch("https://app-updates.agilebits.com/latest");
-    const json = (await res.json());
-    const latestStable = json?.CLI2?.release?.version;
-    const latestBeta = json?.CLI2?.beta?.version;
-    const version = channel === ReleaseChannel.Beta ? latestBeta : latestStable;
-    if (!version) {
-        core.error(`No ${channel} versions found`);
-        throw new Error(`No ${channel} versions found`);
-    }
-    return version;
-};
-
-// EXTERNAL MODULE: ./node_modules/semver/index.js
-var semver = __nccwpck_require2_(2088);
-var semver_default = /*#__PURE__*/__nccwpck_require2_.n(semver);
-;// CONCATENATED MODULE: ./src/version/validate.ts
-
-
-// Validates if the provided version type is a valid enum value or a valid semver version.
-const validateVersion = (input) => {
-    if (Object.values(ReleaseChannel).includes(input)) {
-        return;
-    }
-    // 1Password beta releases (aka 2.19.0-beta.01) are not semver compliant.
-    // According to semver, it should be "2.19.0-beta.1".
-    // That's why we need to normalize them before validating.
-    // Accepts valid semver versions like "2.18.0" or beta-releases like "2.19.0-beta.01"
-    // or versions with 'v' prefix like "v2.19.0"
-    const normalized = input.replace(/-beta\.0*(\d+)/, "-beta.$1");
-    const normInput = new (semver_default()).SemVer(normalized);
-    if (semver_default().valid(normInput)) {
-        return;
-    }
-    throw new Error(`Invalid version input: ${input}`);
-};
-
-;// CONCATENATED MODULE: ./src/version/version-resolver.ts
-
-
-
-
-class VersionResolver {
-    version;
-    constructor(version) {
-        this.validate(version);
-        this.version = version;
-    }
-    get() {
-        return this.version;
-    }
-    async resolve() {
-        core.info(`Resolving version: ${this.version}`);
-        if (!this.version) {
-            core.error("Version is not provided");
-            throw new Error("Version is not provided");
-        }
-        if (this.isReleaseChannel(this.version)) {
-            this.version = await getLatestVersion(this.version);
-        }
-        // add `v` prefix if not already present
-        this.version = this.version.startsWith("v")
-            ? this.version
-            : `v${this.version}`;
-    }
-    validate(version) {
-        core.info(`Validating version number: '${version}'`);
-        validateVersion(version);
-        core.info(`Version number '${version}' is valid`);
-    }
-    isReleaseChannel(value) {
-        return Object.values(ReleaseChannel).includes(value);
-    }
-}
-
-;// CONCATENATED MODULE: ./src/version/index.ts
-
-
-;// CONCATENATED MODULE: ./src/index.ts
-/* module decorator */ module = __nccwpck_require2_.hmd(module);
-
-
-
-/**
- * Entry point for the GitHub Action.
- */
-const install = async () => {
-    try {
-        const versionResolver = new VersionResolver(core.getInput("version"));
-        await versionResolver.resolve();
-        const installer = newCliInstaller(versionResolver.get());
-        await installer.installCli();
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            console.error("error:", error);
-            core.setFailed(error.message);
-        }
-        else {
-            console.error("Unknown error:", error);
-            core.setFailed("Unknown error occurred");
-        }
-    }
-};
-// Only run if this is the entry point (not when imported)
-if (__nccwpck_require2_.c[__nccwpck_require2_.s] === module) {
-    void install();
-}
-
-
-/***/ }),
-
 /***/ 2613:
 /***/ ((module) => {
 
@@ -60836,8 +60557,8 @@ module.exports = parseParams
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			id: moduleId,
-/******/ 			loaded: false,
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
 /******/ 	
@@ -60850,15 +60571,9 @@ module.exports = parseParams
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
 /******/ 		}
 /******/ 	
-/******/ 		// Flag the module as loaded
-/******/ 		module.loaded = true;
-/******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
-/******/ 	// expose the module cache
-/******/ 	__nccwpck_require2_.c = __webpack_module_cache__;
 /******/ 	
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat get default export */
@@ -60885,35 +60600,9 @@ module.exports = parseParams
 /******/ 		};
 /******/ 	})();
 /******/ 	
-/******/ 	/* webpack/runtime/harmony module decorator */
-/******/ 	(() => {
-/******/ 		__nccwpck_require2_.hmd = (module) => {
-/******/ 			module = Object.create(module);
-/******/ 			if (!module.children) module.children = [];
-/******/ 			Object.defineProperty(module, 'exports', {
-/******/ 				enumerable: true,
-/******/ 				set: () => {
-/******/ 					throw new Error('ES Modules may not assign module.exports or exports.*, Use ESM export syntax, instead: ' + module.id);
-/******/ 				}
-/******/ 			});
-/******/ 			return module;
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__nccwpck_require2_.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__nccwpck_require2_.r = (exports) => {
-/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 			}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 		};
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/compat */
@@ -60921,13 +60610,277 @@ module.exports = parseParams
 /******/ 	if (typeof __nccwpck_require2_ !== 'undefined') __nccwpck_require2_.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// module cache are used so entry inlining is disabled
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	var __nested_webpack_exports__ = __nccwpck_require2_(__nccwpck_require2_.s = 1897);
-/******/ 	module.exports = __nested_webpack_exports__;
-/******/ 	
+var __nested_webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require2_(7484);
+// EXTERNAL MODULE: external "os"
+var external_os_ = __nccwpck_require2_(857);
+var external_os_default = /*#__PURE__*/__nccwpck_require2_.n(external_os_);
+// EXTERNAL MODULE: ./node_modules/@actions/tool-cache/lib/tool-cache.js
+var tool_cache = __nccwpck_require2_(3472);
+;// CONCATENATED MODULE: ./src/cli-installer/cli-installer.ts
+
+
+
+// maps OS architecture names to 1Password CLI installer architecture names
+const archMap = {
+    ia32: "386",
+    x64: "amd64",
+    arm: "arm",
+    arm64: "arm64",
+};
+// Builds the download URL for the 1Password CLI based on the platform and version.
+const cliUrlBuilder = {
+    linux: (version, arch) => `https://cache.agilebits.com/dist/1P/op2/pkg/${version}/op_linux_${arch}_${version}.zip`,
+    darwin: (version) => `https://cache.agilebits.com/dist/1P/op2/pkg/${version}/op_apple_universal_${version}.pkg`,
+    win32: (version, arch) => `https://cache.agilebits.com/dist/1P/op2/pkg/${version}/op_windows_${arch}_${version}.zip`,
+};
+class CliInstaller {
+    version;
+    arch;
+    constructor(version) {
+        this.version = version;
+        this.arch = this.getArch();
+    }
+    async install(url) {
+        console.info(`Downloading 1Password CLI from: ${url}`);
+        const downloadPath = await tool_cache.downloadTool(url);
+        console.info("Installing 1Password CLI");
+        const extractedPath = await tool_cache.extractZip(downloadPath);
+        core.addPath(extractedPath);
+        core.info("1Password CLI installed");
+    }
+    getArch() {
+        const arch = archMap[external_os_default().arch()];
+        if (!arch) {
+            throw new Error("Unsupported architecture");
+        }
+        return arch;
+    }
+}
+
+;// CONCATENATED MODULE: ./src/cli-installer/linux.ts
+
+class LinuxInstaller extends CliInstaller {
+    platform = "linux"; // Node.js platform identifier for Linux
+    constructor(version) {
+        super(version);
+    }
+    async installCli() {
+        const urlBuilder = cliUrlBuilder[this.platform];
+        await super.install(urlBuilder(this.version, this.arch));
+    }
+}
+
+// EXTERNAL MODULE: external "child_process"
+var external_child_process_ = __nccwpck_require2_(5317);
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require2_(9896);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require2_(6928);
+// EXTERNAL MODULE: external "util"
+var external_util_ = __nccwpck_require2_(9023);
+;// CONCATENATED MODULE: ./src/cli-installer/macos.ts
+
+
+
+
+
+
+
+
+const execAsync = (0,external_util_.promisify)(external_child_process_.exec);
+class MacOsInstaller extends CliInstaller {
+    platform = "darwin"; // Node.js platform identifier for macOS
+    constructor(version) {
+        super(version);
+    }
+    async installCli() {
+        const urlBuilder = cliUrlBuilder[this.platform];
+        await this.install(urlBuilder(this.version));
+    }
+    // @actions/tool-cache package does not support .pkg files, so we need to handle the installation manually
+    async install(downloadUrl) {
+        console.info(`Downloading 1Password CLI from: ${downloadUrl}`);
+        const pkgPath = await tool_cache.downloadTool(downloadUrl);
+        const pkgWithExtension = `${pkgPath}.pkg`;
+        external_fs_.renameSync(pkgPath, pkgWithExtension);
+        const expandDir = "temp-pkg";
+        await execAsync(`pkgutil --expand "${pkgWithExtension}" "${expandDir}"`);
+        const payloadPath = external_path_.join(expandDir, "op.pkg", "Payload");
+        console.info("Installing 1Password CLI");
+        const cliPath = await tool_cache.extractTar(payloadPath);
+        core.addPath(cliPath);
+        external_fs_.rmSync(expandDir, { recursive: true, force: true });
+        external_fs_.rmSync(pkgPath, { force: true });
+        core.info("1Password CLI installed");
+    }
+}
+
+;// CONCATENATED MODULE: ./src/cli-installer/windows.ts
+
+class WindowsInstaller extends CliInstaller {
+    platform = "win32"; // Node.js platform identifier for Windows
+    constructor(version) {
+        super(version);
+    }
+    async installCli() {
+        const urlBuilder = cliUrlBuilder[this.platform];
+        await super.install(urlBuilder(this.version, this.arch));
+    }
+}
+
+;// CONCATENATED MODULE: ./src/cli-installer/installer.ts
+
+
+
+
+const newCliInstaller = (version) => {
+    const platform = external_os_default().platform();
+    switch (platform) {
+        case "linux":
+            return new LinuxInstaller(version);
+        case "darwin":
+            return new MacOsInstaller(version);
+        case "win32":
+            return new WindowsInstaller(version);
+        default:
+            throw new Error(`Unsupported platform: ${platform}`);
+    }
+};
+
+;// CONCATENATED MODULE: ./src/cli-installer/index.ts
+
+
+;// CONCATENATED MODULE: ./src/version/constants.ts
+/* eslint-disable @typescript-eslint/naming-convention */
+var ReleaseChannel;
+(function (ReleaseChannel) {
+    ReleaseChannel["Stable"] = "latest";
+    ReleaseChannel["Beta"] = "latest-beta";
+})(ReleaseChannel || (ReleaseChannel = {}));
+/* eslint-enable @typescript-eslint/naming-convention */
+
+;// CONCATENATED MODULE: ./src/version/helper.ts
+
+
+// Returns the latest version of the 1Password CLI based on the specified channel.
+const getLatestVersion = async (channel) => {
+    core.info(`Getting ${channel} version number`);
+    const res = await fetch("https://app-updates.agilebits.com/latest");
+    const json = (await res.json());
+    const latestStable = json?.CLI2?.release?.version;
+    const latestBeta = json?.CLI2?.beta?.version;
+    const version = channel === ReleaseChannel.Beta ? latestBeta : latestStable;
+    if (!version) {
+        core.error(`No ${channel} versions found`);
+        throw new Error(`No ${channel} versions found`);
+    }
+    return version;
+};
+
+// EXTERNAL MODULE: ./node_modules/semver/index.js
+var semver = __nccwpck_require2_(2088);
+var semver_default = /*#__PURE__*/__nccwpck_require2_.n(semver);
+;// CONCATENATED MODULE: ./src/version/validate.ts
+
+
+// Validates if the provided version type is a valid enum value or a valid semver version.
+const validateVersion = (input) => {
+    if (Object.values(ReleaseChannel).includes(input)) {
+        return;
+    }
+    // 1Password beta releases (aka 2.19.0-beta.01) are not semver compliant.
+    // According to semver, it should be "2.19.0-beta.1".
+    // That's why we need to normalize them before validating.
+    // Accepts valid semver versions like "2.18.0" or beta-releases like "2.19.0-beta.01"
+    // or versions with 'v' prefix like "v2.19.0"
+    const normalized = input.replace(/-beta\.0*(\d+)/, "-beta.$1");
+    const normInput = new (semver_default()).SemVer(normalized);
+    if (semver_default().valid(normInput)) {
+        return;
+    }
+    throw new Error(`Invalid version input: ${input}`);
+};
+
+;// CONCATENATED MODULE: ./src/version/version-resolver.ts
+
+
+
+
+class VersionResolver {
+    version;
+    constructor(version) {
+        this.validate(version);
+        this.version = version;
+    }
+    get() {
+        return this.version;
+    }
+    async resolve() {
+        core.info(`Resolving version: ${this.version}`);
+        if (!this.version) {
+            core.error("Version is not provided");
+            throw new Error("Version is not provided");
+        }
+        if (this.isReleaseChannel(this.version)) {
+            this.version = await getLatestVersion(this.version);
+        }
+        // add `v` prefix if not already present
+        this.version = this.version.startsWith("v")
+            ? this.version
+            : `v${this.version}`;
+    }
+    validate(version) {
+        core.info(`Validating version number: '${version}'`);
+        validateVersion(version);
+        core.info(`Version number '${version}' is valid`);
+    }
+    isReleaseChannel(value) {
+        return Object.values(ReleaseChannel).includes(value);
+    }
+}
+
+;// CONCATENATED MODULE: ./src/version/index.ts
+
+
+;// CONCATENATED MODULE: ./src/index.ts
+
+
+
+/**
+ * Entry point for the GitHub Action.
+ */
+const install = async () => {
+    try {
+        const versionResolver = new VersionResolver(core.getInput("version"));
+        await versionResolver.resolve();
+        const installer = newCliInstaller(versionResolver.get());
+        await installer.installCli();
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            console.error("error:", error);
+            core.setFailed(error.message);
+        }
+        else {
+            console.error("Unknown error:", error);
+            core.setFailed("Unknown error occurred");
+        }
+    }
+};
+
+;// CONCATENATED MODULE: ./src/action/index.ts
+
+install();
+
+})();
+
+module.exports = __nested_webpack_exports__;
 /******/ })()
 ;
 
