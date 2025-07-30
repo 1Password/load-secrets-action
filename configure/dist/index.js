@@ -27563,15 +27563,11 @@ const core = __nccwpck_require__(7484);
 // We cannot use `core.exportVariable` because it will set env var for the current process
 // therefore those env vars will not be available for the next steps in the workflow
 const configure = () => {
-	const OP_CONNECT_HOST =
-		process.env.INPUT_CONNECT_HOST || process.env.OP_CONNECT_HOST;
-	const OP_CONNECT_TOKEN =
-		process.env.INPUT_CONNECT_TOKEN || process.env.CONNECT_TOKEN;
-	const OP_SERVICE_ACCOUNT_TOKEN =
-		process.env.INPUT_SERVICE_ACCOUNT_TOKEN ||
-		process.env.SERVICE_ACCOUNT_TOKEN;
-	const githubEnvPath = process.env["GITHUB_ENV"];
+	const OP_CONNECT_HOST = core.getInput("connect-host", { required: false }) || process.env.OP_CONNECT_HOST;
+	const OP_CONNECT_TOKEN = core.getInput("connect-token", { required: false }) || process.env.OP_CONNECT_TOKEN;
+	const OP_SERVICE_ACCOUNT_TOKEN = core.getInput("service-account-token", { required: false }) || process.env.OP_SERVICE_ACCOUNT_TOKEN;
 
+	const githubEnvPath = process.env["GITHUB_ENV"];
 	if (!githubEnvPath) {
 		core.setFailed("GITHUB_ENV is not defined");
 		return;
