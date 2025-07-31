@@ -2,7 +2,7 @@
 	"name": "load-secrets-action",
 	"version": "2.0.0",
 	"description": "Load Secrets from 1Password",
-	"type": "commonjs",
+	"type": "module",
 	"main": "dist/index.js",
 	"directories": {
 		"test": "tests"
@@ -40,8 +40,7 @@
 	},
 	"homepage": "https://github.com/1Password/load-secrets-action#readme",
 	"dependencies": {
-		"@1password/install-cli-action": "github:1password/install-cli-action#vzt/test-module-package",
-		"@1password/op-js": "^0.1.11",
+		"@1password/op-js": "^0.1.14-alpha.1",
 		"@actions/core": "^1.11.1",
 		"@actions/exec": "^1.1.1",
 		"@actions/tool-cache": "^2.0.2"
