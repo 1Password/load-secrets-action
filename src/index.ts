@@ -1,6 +1,5 @@
 import * as core from "@actions/core";
-import { validateCli } from "@1password/op-js";
-import { install } from "@1password/install-cli-action/dist-lib/lib";
+import { validateCli, installCliOnGithubRunner } from "@1password/op-js";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
 
 const loadSecretsAction = async () => {
@@ -44,7 +43,7 @@ const installCLI = async (): Promise<void> => {
 	// If there's no CLI installed, then validateCli will throw an error, which we will use
 	// as an indicator that we need to execute the installation script.
 	await validateCli().catch(async () => {
-		await install();
+		await installCliOnGithubRunner();
 	});
 };
 
