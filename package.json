@@ -40,7 +40,7 @@
 	},
 	"homepage": "https://github.com/1Password/load-secrets-action#readme",
 	"dependencies": {
-		"@1password/install-cli-action": "github:1password/install-cli-action#vzt/export-install-function",
+		"@1password/install-cli-action": "github:1password/install-cli-action#vzt/test-module-package",
 		"@1password/op-js": "^0.1.11",
 		"@actions/core": "^1.11.1",
 		"@actions/exec": "^1.1.1",
