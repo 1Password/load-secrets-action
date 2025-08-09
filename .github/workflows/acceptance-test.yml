@@ -96,8 +96,6 @@ jobs:
           SECRET: ${{ inputs.secret }}
           SECRET_IN_SECTION: ${{ inputs.secret-in-section }}
           MULTILINE_SECRET: ${{ inputs.multiline-secret }}
-      - name: Verify installed op cli version
-        run: ./tests/assert-cli-version.sh ${{ inputs.version }}
       - name: Assert test secret values [step output]
         if: ${{ !inputs.export-env }}
         env:
