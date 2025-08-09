@@ -34447,6 +34447,8 @@ exports.cliUrlBuilder = {
     win32: (version, arch) => `https://cache.agilebits.com/dist/1P/op2/pkg/${version}/op_windows_${arch}_${version}.zip`,
 };
 class CliInstaller {
+    version;
+    arch;
     constructor(version) {
         this.version = version;
         this.arch = this.getArch();
@@ -34523,9 +34525,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LinuxInstaller = void 0;
 const cli_installer_1 = __nccwpck_require__(8733);
 class LinuxInstaller extends cli_installer_1.CliInstaller {
+    platform = "linux"; // Node.js platform identifier for Linux
     constructor(version) {
         super(version);
-        this.platform = "linux"; // Node.js platform identifier for Linux
     }
     async installCli() {
         const urlBuilder = cli_installer_1.cliUrlBuilder[this.platform];
@@ -34585,9 +34587,9 @@ const tc = __importStar(__nccwpck_require__(3472));
 const cli_installer_1 = __nccwpck_require__(8733);
 const execAsync = (0, util_1.promisify)(child_process_1.exec);
 class MacOsInstaller extends cli_installer_1.CliInstaller {
+    platform = "darwin"; // Node.js platform identifier for macOS
     constructor(version) {
         super(version);
-        this.platform = "darwin"; // Node.js platform identifier for macOS
     }
     async installCli() {
         const urlBuilder = cli_installer_1.cliUrlBuilder[this.platform];
@@ -34623,9 +34625,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.WindowsInstaller = void 0;
 const cli_installer_1 = __nccwpck_require__(8733);
 class WindowsInstaller extends cli_installer_1.CliInstaller {
+    platform = "win32"; // Node.js platform identifier for Windows
     constructor(version) {
         super(version);
-        this.platform = "win32"; // Node.js platform identifier for Windows
     }
     async installCli() {
         const urlBuilder = cli_installer_1.cliUrlBuilder[this.platform];
@@ -34713,13 +34715,11 @@ __webpack_unused_export__ = ({ enumerable: true, get: function () { return versi
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReleaseChannel = void 0;
-/* eslint-disable @typescript-eslint/naming-convention */
 var ReleaseChannel;
 (function (ReleaseChannel) {
-    ReleaseChannel["Stable"] = "latest";
-    ReleaseChannel["Beta"] = "latest-beta";
+    ReleaseChannel["latest"] = "latest";
+    ReleaseChannel["latestBeta"] = "latest-beta";
 })(ReleaseChannel || (exports.ReleaseChannel = ReleaseChannel = {}));
-/* eslint-enable @typescript-eslint/naming-convention */
 
 
 /***/ }),
@@ -34772,7 +34772,7 @@ const getLatestVersion = async (channel) => {
     const json = (await res.json());
     const latestStable = json?.CLI2?.release?.version;
     const latestBeta = json?.CLI2?.beta?.version;
-    const version = channel === constants_1.ReleaseChannel.Beta ? latestBeta : latestStable;
+    const version = channel === constants_1.ReleaseChannel.latestBeta ? latestBeta : latestStable;
     if (!version) {
         core.error(`No ${channel} versions found`);
         throw new Error(`No ${channel} versions found`);
@@ -34875,6 +34875,7 @@ const constants_1 = __nccwpck_require__(4823);
 const helper_1 = __nccwpck_require__(1592);
 const validate_1 = __nccwpck_require__(2946);
 class VersionResolver {
+    version;
     constructor(version) {
         this.validate(version);
         this.version = version;

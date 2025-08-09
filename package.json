@@ -43,7 +43,7 @@
 		"@1password/op-js": "^0.1.11",
 		"@actions/core": "^1.10.1",
 		"@actions/exec": "^1.1.1",
-		"op-cli-installer": "github:1Password/op-cli-installer#8ea4bf402c6385a90f6d2d98efe31ac845633412"
+		"op-cli-installer": "github:1Password/op-cli-installer#f3ef8d8e0651def3e5fe6234043f09b3298d2148"
 	},
 	"devDependencies": {
 		"@1password/eslint-config": "^4.3.1",
