@@ -24,6 +24,7 @@ Read more on the [1Password Developer Portal](https://developer.1password.com/do
 ## ✨ Quickstart
 
 ### Use secrets from step output (recommended)
+
 ```yml
 on: push
 jobs:
@@ -45,6 +46,7 @@ jobs:
 ```
 
 ### Export secrets as env variables
+
 ```yml
 on: push
 jobs:
@@ -57,7 +59,7 @@ jobs:
         id: load_secret
         uses: 1password/load-secrets-action@v3
         with:
-          export-env: 'true'
+          export-env: "true"
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://app-cicd/hello-world/secret
