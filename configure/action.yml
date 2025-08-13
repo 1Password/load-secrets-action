@@ -9,12 +9,5 @@ inputs:
   service-account-token:
     description: Your 1Password service account token
 runs:
-  using: composite
-  steps:
-    - shell: bash
-      env:
-        INPUT_CONNECT_HOST: ${{ inputs.connect-host }}
-        INPUT_CONNECT_TOKEN: ${{ inputs.connect-token }}
-        INPUT_SERVICE_ACCOUNT_TOKEN: ${{ inputs.service-account-token }}
-      run: |
-        ${{ github.action_path }}/entrypoint.sh
+  using: "node20"
+  main: "dist/index.js"
