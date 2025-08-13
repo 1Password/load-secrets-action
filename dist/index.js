@@ -35164,7 +35164,7 @@ var op_cli_installer_dist = __nccwpck_require__(1621);
 // EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
 var exec = __nccwpck_require__(5236);
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"rE":"2.0.0"};
+const package_namespaceObject = {"rE":"3.0.0"};
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
