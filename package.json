@@ -2,7 +2,6 @@
 	"name": "load-secrets-action",
 	"version": "2.0.0",
 	"description": "Load Secrets from 1Password",
-	"type": "module",
 	"main": "dist/index.js",
 	"directories": {
 		"test": "tests"
@@ -10,6 +9,7 @@
 	"scripts": {
 		"build": "ncc build ./src/index.ts",
 		"build:configure": "ncc build ./configure/index.js -o ./configure/dist",
+		"build:all": "npm run build && npm run build:configure",
 		"format": "prettier --ignore-path ./config/.prettierignore",
 		"format:check": "npm run format -- --check ./",
 		"format:write": "npm run format -- --write ./",
