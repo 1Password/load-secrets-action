@@ -10,7 +10,7 @@ inputs:
     default: "false"
   export-env:
     description: Export the secrets as environment variables
-    default: "true"
+    default: "false"
   version:
     description: Specify which 1Password CLI version to install. Defaults to "latest".
     default: "latest"
