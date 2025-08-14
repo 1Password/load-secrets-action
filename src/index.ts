@@ -44,7 +44,9 @@ const installCLI = async (): Promise<void> => {
 	// If there's no CLI installed, then validateCli will throw an error, which we will use
 	// as an indicator that we need to execute the installation script.
 	await validateCli().catch(async () => {
-		await installCliOnGithubActionRunner();
+		// defaults to `latest` if not provided
+		const cliVersion = core.getInput("cli-version");
+		await installCliOnGithubActionRunner(cliVersion);
 	});
 };
 
