@@ -22,7 +22,7 @@ jobs:
         github.event_name == 'pull_request' && 
         github.event.pull_request.head.repo.full_name == github.repository
       )
-    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@main
+    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@vzt/rename-version-input # TODO: temporary point to this branch so tests can run with update input
     secrets: inherit
     strategy:
       matrix:
@@ -50,7 +50,7 @@ jobs:
         github.event_name == 'pull_request' && 
         github.event.pull_request.head.repo.full_name == github.repository
       )
-    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@main
+    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@vzt/rename-version-input # TODO: temporary point to this branch so tests can run with update input
     secrets: inherit
     strategy:
       matrix:
@@ -78,7 +78,7 @@ jobs:
         github.event_name == 'pull_request' && 
         github.event.pull_request.head.repo.full_name == github.repository
       )
-    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@main
+    uses: 1password/load-secrets-action/.github/workflows/acceptance-test.yml@vzt/rename-version-input # TODO: temporary point to this branch so tests can run with update input
     secrets: inherit
     strategy:
       matrix:
