@@ -23,16 +23,40 @@ Read more on the [1Password Developer Portal](https://developer.1password.com/do
 
 ## ✨ Quickstart
 
+### Export secrets as a step's output (recommended)
+
 ```yml
 on: push
 jobs:
   hello-world:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Load secret
-        uses: 1password/load-secrets-action@v2
+        id: load_secret
+        uses: 1password/load-secrets-action@v3
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          SECRET: op://app-cicd/hello-world/secret
+
+      - name: Print masked secret
+        run: 'echo "Secret: ${{ steps.load_secrets.outputs.SECRET }}"'
+        # Prints: Secret: ***
+```
+
+### Export secrets as env variables
+
+```yml
+on: push
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load secret
+        uses: 1password/load-secrets-action@v3
         with:
           # Export loaded secrets as environment variables
           export-env: true
