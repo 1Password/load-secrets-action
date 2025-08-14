@@ -34870,7 +34870,9 @@ const version_1 = __nccwpck_require__(8950);
 const cli_installer_1 = __nccwpck_require__(2846);
 // Installs the 1Password CLI on a GitHub Action runner.
 const installCliOnGithubActionRunner = async (version) => {
-    const versionResolver = new version_1.VersionResolver(version ?? core.getInput("version"));
+    // Get the version from parameter, if not passed - from the job input. Defaults to latest if no version is provided
+    const providedVersion = version || core.getInput("version") || version_1.ReleaseChannel.latest;
+    const versionResolver = new version_1.VersionResolver(providedVersion);
     await versionResolver.resolve();
     const installer = (0, cli_installer_1.newCliInstaller)(versionResolver.get());
     await installer.installCli();
@@ -35284,7 +35286,9 @@ const installCLI = async () => {
     // If there's no CLI installed, then validateCli will throw an error, which we will use
     // as an indicator that we need to execute the installation script.
     await (0,dist.validateCli)().catch(async () => {
-        await (0,op_cli_installer_dist/* installCliOnGithubActionRunner */.Cq)();
+        // defaults to `latest` if not provided
+        const cliVersion = core.getInput("cli-version");
+        await (0,op_cli_installer_dist/* installCliOnGithubActionRunner */.Cq)(cliVersion);
     });
 };
 void loadSecretsAction();
