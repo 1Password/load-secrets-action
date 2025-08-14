@@ -34870,7 +34870,9 @@ const version_1 = __nccwpck_require__(8950);
 const cli_installer_1 = __nccwpck_require__(2846);
 // Installs the 1Password CLI on a GitHub Action runner.
 const installCliOnGithubActionRunner = async (version) => {
-    const versionResolver = new version_1.VersionResolver(version ?? core.getInput("version"));
+    // Get the version from parameter, if not passed - from the job input. Defaults to latest if no version is provided
+    const providedVersion = version || core.getInput("version") || version_1.ReleaseChannel.latest;
+    const versionResolver = new version_1.VersionResolver(providedVersion);
     await versionResolver.resolve();
     const installer = (0, cli_installer_1.newCliInstaller)(versionResolver.get());
     await installer.installCli();
@@ -35164,7 +35166,7 @@ var op_cli_installer_dist = __nccwpck_require__(1621);
 // EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
 var exec = __nccwpck_require__(5236);
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"rE":"2.0.0"};
+const package_namespaceObject = {"rE":"3.0.0"};
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
