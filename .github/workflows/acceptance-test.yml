@@ -15,7 +15,7 @@ on:
       export-env:
         required: true
         type: boolean
-      version:
+      cli-version:
         required: false
         type: string
         default: "latest"
@@ -90,7 +90,7 @@ jobs:
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
         with:
-          version: ${{ inputs.version }}
+          cli-version: ${{ inputs.cli-version }}
           export-env: ${{ inputs.export-env }}
         env:
           SECRET: ${{ inputs.secret }}
