@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Load secret
-        id: load_secret
+        id: load_secrets
         uses: 1password/load-secrets-action@v3
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
