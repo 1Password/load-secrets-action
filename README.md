@@ -39,7 +39,7 @@ jobs:
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://app-cicd/hello-world/secret
-          OP_ENV_FILE: "./path/to/.env.tpl" # see tests/.env.tpl forexample
+          OP_ENV_FILE: "./path/to/.env.tpl" # see tests/.env.tpl for example
 
       - name: Print masked secret
         run: 'echo "Secret: ${{ steps.load_secrets.outputs.SECRET }}"'
@@ -64,7 +64,7 @@ jobs:
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://app-cicd/hello-world/secret
-          OP_ENV_FILE: "./path/to/.env.tpl" # see tests/.env.tpl forexample
+          OP_ENV_FILE: "./path/to/.env.tpl" # see tests/.env.tpl for example
 
       - name: Print masked secret
         run: 'echo "Secret: $SECRET"'
