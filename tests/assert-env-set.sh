@@ -9,11 +9,8 @@ assert_env_equals() {
   fi
 }
 
-assert_env_equals "SECRET" "RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLCB0aGlzIGlzIGp1c3QgYSBkdW1teSBzZWNyZXQuIFBsZWFzZSBkb24ndCByZXBvcnQgaXQu"
-
-assert_env_equals "SECRET_IN_SECTION" "RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLCB0aGlzIGlzIGp1c3QgYSBkdW1teSBzZWNyZXQuIFBsZWFzZSBkb24ndCByZXBvcnQgaXQu"
-
-assert_env_equals "MULTILINE_SECRET" "$(cat << EOF
+readonly SECRET="RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLCB0aGlzIGlzIGp1c3QgYSBkdW1teSBzZWNyZXQuIFBsZWFzZSBkb24ndCByZXBvcnQgaXQu"
+MULTILINE_SECRET="$(cat << EOF
 -----BEGIN PRIVATE KEY-----
 RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLApXaGls
 ZSB3ZSBkZWVwbHkgYXBwcmVjaWF0ZSB5b3VyIHZp
@@ -28,3 +25,13 @@ IApTbyBwbGVhc2UgZG9uJ3QgcmVwb3J0IGl0IQo=
 -----END PRIVATE KEY-----
 EOF
 )"
+readonly MULTILINE_SECRET
+
+assert_env_equals "SECRET" "${SECRET}"
+assert_env_equals "FILE_SECRET" "${SECRET}"
+
+assert_env_equals "SECRET_IN_SECTION" "${SECRET}"
+assert_env_equals "FILE_SECRET_IN_SECTION" "${SECRET}"
+
+assert_env_equals "MULTILINE_SECRET" "${MULTILINE_SECRET}"
+assert_env_equals "FILE_MULTILINE_SECRET" "${MULTILINE_SECRET}"

@@ -2,9 +2,7 @@ import * as core from "@actions/core";
 import { validateCli } from "@1password/op-js";
 import { installCliOnGithubActionRunner } from "op-cli-installer";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
-import {
-	envFilePath,
-} from "./constants";
+import { envFilePath } from "./constants";
 
 const loadSecretsAction = async () => {
 	try {
@@ -20,15 +18,15 @@ const loadSecretsAction = async () => {
 		// Validate that a proper authentication configuration is set for the CLI
 		validateAuth();
 
-		// Download and install the CLI
-		await installCLI();
-
 		// Set environment variables from OP_ENV_FILE
 		const file = process.env[envFilePath];
 		if (file) {
 			core.info(`Loading environment variables from file: ${file}`);
-			process.loadEnvFile(file)
+			process.loadEnvFile(file);
 		}
+
+		// Download and install the CLI
+		await installCLI();
 
 		// Load secrets
 		await loadSecrets(shouldExportEnv);
