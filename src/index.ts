@@ -1,7 +1,9 @@
 import * as core from "@actions/core";
 import { validateCli } from "@1password/op-js";
 import { installCliOnGithubActionRunner } from "op-cli-installer";
+import dotenv from "dotenv";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
+import { envFilePath } from "./constants";
 
 const loadSecretsAction = async () => {
 	try {
@@ -16,6 +18,13 @@ const loadSecretsAction = async () => {
 
 		// Validate that a proper authentication configuration is set for the CLI
 		validateAuth();
+
+		// Set environment variables from OP_ENV_FILE
+		const file = process.env[envFilePath];
+		if (file) {
+			core.info(`Loading environment variables from file: ${file}`);
+			dotenv.config({ path: file });
+		}
 
 		// Download and install the CLI
 		await installCLI();
