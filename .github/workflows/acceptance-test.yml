@@ -42,6 +42,7 @@ jobs:
               github.event.pull_request.head.repo.full_name == github.repository
             )
           )
+
       - name: Fork based /ok-to-test checkout
         uses: actions/checkout@v4
         with:
@@ -53,6 +54,7 @@ jobs:
             github.event.client_payload.pull_request.head.sha,
             github.event.client_payload.slash_command.args.named.sha
           )
+
       - name: Launch 1Password Connect instance
         if: ${{ inputs.auth == 'connect' }}
         env:
@@ -60,11 +62,13 @@ jobs:
         run: |
           echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
           docker compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
+
       - name: Configure Service account
         if: ${{ inputs.auth == 'service-account' }}
         uses: ./configure
         with:
           service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
       - name: Verify Service Account env var is set
         if: ${{ inputs.auth == 'service-account' }}
         shell: bash
@@ -73,12 +77,14 @@ jobs:
             echo "OP_SERVICE_ACCOUNT_TOKEN environment variable is not set" >&2
             exit 1
           fi
+
       - name: Configure 1Password Connect
         if: ${{ inputs.auth == 'connect' }}
         uses: ./configure # 1password/load-secrets-action/configure@<version>
         with:
           connect-host: http://localhost:8080
           connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
+
       - name: Verify Connect env vars are set
         if: ${{ inputs.auth == 'connect' }}
         run: |
@@ -86,6 +92,7 @@ jobs:
             echo "OP_CONNECT_HOST or OP_CONNECT_TOKEN environment variables are not set" >&2
             exit 1
           fi
+
       - name: Load secrets
         id: load_secrets
         uses: ./ # 1password/load-secrets-action@<version>
@@ -97,22 +104,28 @@ jobs:
           SECRET_IN_SECTION: ${{ inputs.secret-in-section }}
           MULTILINE_SECRET: ${{ inputs.multiline-secret }}
           OP_ENV_FILE: ./tests/.env.tpl
+
       - name: Assert test secret values [step output]
         if: ${{ !inputs.export-env }}
         env:
           SECRET: ${{ steps.load_secrets.outputs.SECRET }}
           SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
           MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
-          OP_ENV_FILE: ./tests/.env.tpl
+          FILE_SECRET: ${{ steps.load_secrets.outputs.FILE_SECRET }}
+          FILE_SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.FILE_SECRET_IN_SECTION }}
+          FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
         run: ./tests/assert-env-set.sh
+
       - name: Assert test secret values [exported env]
         if: ${{ inputs.export-env }}
         run: ./tests/assert-env-set.sh
+
       - name: Remove secrets [exported env]
         if: ${{ inputs.export-env }}
         uses: ./ # 1password/load-secrets-action@<version>
         with:
           unset-previous: true
+
       - name: Assert removed secrets [exported env]
         if: ${{ inputs.export-env }}
         run: ./tests/assert-env-unset.sh
