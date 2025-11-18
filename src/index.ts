@@ -10,6 +10,7 @@ const loadSecretsAction = async () => {
 		// Get action inputs
 		const shouldUnsetPrevious = core.getBooleanInput("unset-previous");
 		const shouldExportEnv = core.getBooleanInput("export-env");
+		const shouldConvertSshKeys = core.getBooleanInput("convert-ssh-keys");
 
 		// Unset all secrets managed by 1Password if `unset-previous` is set.
 		if (shouldUnsetPrevious) {
@@ -29,8 +30,8 @@ const loadSecretsAction = async () => {
 		// Download and install the CLI
 		await installCLI();
 
-		// Load secrets
-		await loadSecrets(shouldExportEnv);
+		// Load secrets and optionally convert SSH keys
+		await loadSecrets(shouldExportEnv, shouldConvertSshKeys);
 	} catch (error) {
 		// It's possible for the Error constructor to be modified to be anything
 		// in JavaScript, so the following code accounts for this possibility.

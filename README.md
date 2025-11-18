@@ -71,6 +71,44 @@ jobs:
         # Prints: Secret: ***
 ```
 
+### Loading SSH Keys
+
+When loading SSH private keys from 1Password, you may need to convert them to OpenSSH format. 1Password stores SSH keys in PKCS8/PKCS1 format (`-----BEGIN PRIVATE KEY-----`), but many SSH tools require OpenSSH format (`-----BEGIN OPENSSH PRIVATE KEY-----`).
+
+```yml
+on: push
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load SSH key
+        id: load_ssh_key
+        uses: 1password/load-secrets-action@v3
+        with:
+          # Convert SSH keys from PKCS format to OpenSSH format
+          convert-ssh-keys: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          SSH_PRIVATE_KEY: op://vault/server/private_key
+
+      - name: Use SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ steps.load_ssh_key.outputs.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh -i ~/.ssh/id_ed25519 user@example.com
+```
+
+**Notes:**
+- The `convert-ssh-keys` option requires `ssh-keygen` to be available (pre-installed on all GitHub-hosted runners)
+- Conversion automatically detects PKCS-format private keys (headers: `BEGIN PRIVATE KEY`, `BEGIN RSA PRIVATE KEY`, `BEGIN EC PRIVATE KEY`) and converts them to OpenSSH format
+- Keys already in OpenSSH format are not modified
+- Encrypted private keys are skipped with a warning (they require a passphrase to convert)
+- PEM certificates (`BEGIN CERTIFICATE`) are not affected
+- **Important**: Any unencrypted PEM private key will be converted when this option is enabled, regardless of whether it's intended for SSH use. Only enable this option if you specifically need OpenSSH format keys.
+
 ## 💙 Community & Support
 
 - File an [issue](https://github.com/1Password/load-secrets-action/issues) for bugs and feature requests.
