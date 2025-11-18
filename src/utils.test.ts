@@ -105,7 +105,8 @@ describe("SSH Key Detection", () => {
 		});
 
 		it("should not detect OpenSSH private key", () => {
-			const sshKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjE...";
+			const sshKey =
+				"-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjE...";
 			expect(isPkcsPrivateKey(sshKey)).toBe(false);
 		});
 
@@ -117,7 +118,8 @@ describe("SSH Key Detection", () => {
 
 	describe("isOpenSshPrivateKey", () => {
 		it("should detect OpenSSH private key", () => {
-			const sshKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjE...";
+			const sshKey =
+				"-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjE...";
 			expect(isOpenSshPrivateKey(sshKey)).toBe(true);
 		});
 
@@ -129,17 +131,20 @@ describe("SSH Key Detection", () => {
 
 	describe("isEncryptedPem", () => {
 		it("should detect encrypted private key", () => {
-			const encryptedKey = "-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIFHDBOBgkqhk...";
+			const encryptedKey =
+				"-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIFHDBOBgkqhk...";
 			expect(isEncryptedPem(encryptedKey)).toBe(true);
 		});
 
 		it("should detect Proc-Type encryption marker", () => {
-			const encryptedKey = "-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info...";
+			const encryptedKey =
+				"-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info...";
 			expect(isEncryptedPem(encryptedKey)).toBe(true);
 		});
 
 		it("should detect DEK-Info encryption marker", () => {
-			const encryptedKey = "-----BEGIN RSA PRIVATE KEY-----\nDEK-Info: AES-256-CBC,12345...";
+			const encryptedKey =
+				"-----BEGIN RSA PRIVATE KEY-----\nDEK-Info: AES-256-CBC,12345...";
 			expect(isEncryptedPem(encryptedKey)).toBe(true);
 		});
 
@@ -188,29 +193,38 @@ describe("extractSecret", () => {
 	it("should not convert non-SSH secrets", async () => {
 		const regularSecret = "just-a-password";
 		read.parse = jest.fn().mockReturnValue(regularSecret);
-		
+
 		await extractSecret(envTestSecretEnv, false, true);
-		
-		expect(core.setOutput).toHaveBeenCalledWith(envTestSecretEnv, regularSecret);
-		expect(core.info).not.toHaveBeenCalledWith(expect.stringContaining("Converting"));
+
+		expect(core.setOutput).toHaveBeenCalledWith(
+			envTestSecretEnv,
+			regularSecret,
+		);
+		expect(core.info).not.toHaveBeenCalledWith(
+			expect.stringContaining("Converting"),
+		);
 	});
 
 	it("should skip conversion for OpenSSH keys", async () => {
-		const openSSHKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjE...";
+		const openSSHKey =
+			"-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjE...";
 		read.parse = jest.fn().mockReturnValue(openSSHKey);
-		
+
 		await extractSecret(envTestSecretEnv, false, true);
-		
+
 		expect(core.setOutput).toHaveBeenCalledWith(envTestSecretEnv, openSSHKey);
-		expect(core.info).not.toHaveBeenCalledWith(expect.stringContaining("Converting"));
+		expect(core.info).not.toHaveBeenCalledWith(
+			expect.stringContaining("Converting"),
+		);
 	});
 
 	it("should warn about encrypted keys", async () => {
-		const encryptedKey = "-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIFHDBOBgkqhk...";
+		const encryptedKey =
+			"-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIFHDBOBgkqhk...";
 		read.parse = jest.fn().mockReturnValue(encryptedKey);
-		
+
 		await extractSecret(envTestSecretEnv, false, true);
-		
+
 		expect(core.warning).toHaveBeenCalledWith(
 			expect.stringContaining("encrypted private keys require a passphrase"),
 		);
@@ -218,77 +232,82 @@ describe("extractSecret", () => {
 
 	it("should convert PKCS key to OpenSSH format (success path)", async () => {
 		const pkcsKey = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...";
-		const openSSHKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjE...";
-		
+		const openSSHKey =
+			"-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXktdjE...";
+
 		read.parse = jest.fn().mockReturnValue(pkcsKey);
-		
+
 		// Mock fs operations
 		const fs = require("fs");
 		fs.writeFileSync = jest.fn();
 		fs.chmodSync = jest.fn();
 		fs.readFileSync = jest.fn().mockReturnValue(openSSHKey);
 		fs.unlinkSync = jest.fn();
-		
+
 		// Mock ssh-keygen execution success
 		(exec.getExecOutput as jest.Mock).mockResolvedValue({
 			stdout: "",
 			exitCode: 0,
 		});
-		
+
 		await extractSecret(envTestSecretEnv, false, true);
-		
+
 		// Should log conversion
-		expect(core.info).toHaveBeenCalledWith(expect.stringContaining("Converting"));
-		expect(core.info).toHaveBeenCalledWith(expect.stringContaining("Successfully converted"));
-		
+		expect(core.info).toHaveBeenCalledWith(
+			expect.stringContaining("Converting"),
+		);
+		expect(core.info).toHaveBeenCalledWith(
+			expect.stringContaining("Successfully converted"),
+		);
+
 		// Should call ssh-keygen
 		expect(exec.getExecOutput).toHaveBeenCalledWith(
 			"ssh-keygen",
 			expect.arrayContaining(["-p", "-f"]),
 			expect.objectContaining({ silent: true }),
 		);
-		
+
 		// Should output the converted key
 		expect(core.setOutput).toHaveBeenCalledWith(envTestSecretEnv, openSSHKey);
-		
+
 		// Should mask both original and converted
 		expect(core.setSecret).toHaveBeenCalledWith(pkcsKey);
 		expect(core.setSecret).toHaveBeenCalledWith(openSSHKey);
-		
+
 		// Should clean up temp file
 		expect(fs.unlinkSync).toHaveBeenCalled();
 	});
 
 	it("should handle conversion failure gracefully", async () => {
 		const pkcsKey = "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...";
-		
+
 		read.parse = jest.fn().mockReturnValue(pkcsKey);
-		
+
 		// Mock fs operations
 		const fs = require("fs");
 		fs.writeFileSync = jest.fn();
 		fs.chmodSync = jest.fn();
 		fs.unlinkSync = jest.fn();
-		
+
 		// Mock ssh-keygen execution failure
 		(exec.getExecOutput as jest.Mock).mockResolvedValue({
 			stdout: "",
 			exitCode: 1,
 		});
-		
+
 		await extractSecret(envTestSecretEnv, false, true);
-		
+
 		// Should log warning about failure
 		expect(core.warning).toHaveBeenCalledWith(
 			expect.stringContaining("Failed to convert SSH key"),
 		);
-		
+
 		// Should use original PKCS key
 		expect(core.setOutput).toHaveBeenCalledWith(envTestSecretEnv, pkcsKey);
-		
+
 		// Should still mask the original
 		expect(core.setSecret).toHaveBeenCalledWith(pkcsKey);
-		
+
 		// Should still clean up temp file
 		expect(fs.unlinkSync).toHaveBeenCalled();
 	});

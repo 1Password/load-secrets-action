@@ -102,6 +102,7 @@ jobs:
 ```
 
 **Notes:**
+
 - The `convert-ssh-keys` option requires `ssh-keygen` to be available (pre-installed on all GitHub-hosted runners)
 - Conversion automatically detects PKCS-format private keys (headers: `BEGIN PRIVATE KEY`, `BEGIN RSA PRIVATE KEY`, `BEGIN EC PRIVATE KEY`) and converts them to OpenSSH format
 - Keys already in OpenSSH format are not modified
