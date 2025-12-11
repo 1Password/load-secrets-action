@@ -2,6 +2,8 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["**"] # run for PRs targeting any branch (main and others)
 name: Run acceptance tests
 
 jobs:
