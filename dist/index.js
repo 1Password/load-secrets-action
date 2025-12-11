@@ -5764,6 +5764,444 @@ function coerce (version, options) {
 
 /***/ }),
 
+/***/ 8889:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const fs = __nccwpck_require__(9896)
+const path = __nccwpck_require__(6928)
+const os = __nccwpck_require__(857)
+const crypto = __nccwpck_require__(6982)
+const packageJson = __nccwpck_require__(56)
+
+const version = packageJson.version
+
+// Array of tips to display randomly
+const TIPS = [
+  '🔐 encrypt with Dotenvx: https://dotenvx.com',
+  '🔐 prevent committing .env to code: https://dotenvx.com/precommit',
+  '🔐 prevent building .env in docker: https://dotenvx.com/prebuild',
+  '📡 observe env with Radar: https://dotenvx.com/radar',
+  '📡 auto-backup env with Radar: https://dotenvx.com/radar',
+  '📡 version env with Radar: https://dotenvx.com/radar',
+  '🛠️  run anywhere with `dotenvx run -- yourcommand`',
+  '⚙️  specify custom .env file path with { path: \'/custom/path/.env\' }',
+  '⚙️  enable debug logging with { debug: true }',
+  '⚙️  override existing env vars with { override: true }',
+  '⚙️  suppress all logs with { quiet: true }',
+  '⚙️  write to custom object with { processEnv: myObject }',
+  '⚙️  load multiple .env files with { path: [\'.env.local\', \'.env\'] }'
+]
+
+// Get a random tip from the tips array
+function _getRandomTip () {
+  return TIPS[Math.floor(Math.random() * TIPS.length)]
+}
+
+function parseBoolean (value) {
+  if (typeof value === 'string') {
+    return !['false', '0', 'no', 'off', ''].includes(value.toLowerCase())
+  }
+  return Boolean(value)
+}
+
+function supportsAnsi () {
+  return process.stdout.isTTY // && process.env.TERM !== 'dumb'
+}
+
+function dim (text) {
+  return supportsAnsi() ? `\x1b[2m${text}\x1b[0m` : text
+}
+
+const LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg
+
+// Parse src into an Object
+function parse (src) {
+  const obj = {}
+
+  // Convert buffer to string
+  let lines = src.toString()
+
+  // Convert line breaks to same format
+  lines = lines.replace(/\r\n?/mg, '\n')
+
+  let match
+  while ((match = LINE.exec(lines)) != null) {
+    const key = match[1]
+
+    // Default undefined or null to empty string
+    let value = (match[2] || '')
+
+    // Remove whitespace
+    value = value.trim()
+
+    // Check if double quoted
+    const maybeQuote = value[0]
+
+    // Remove surrounding quotes
+    value = value.replace(/^(['"`])([\s\S]*)\1$/mg, '$2')
+
+    // Expand newlines if double quoted
+    if (maybeQuote === '"') {
+      value = value.replace(/\\n/g, '\n')
+      value = value.replace(/\\r/g, '\r')
+    }
+
+    // Add to object
+    obj[key] = value
+  }
+
+  return obj
+}
+
+function _parseVault (options) {
+  options = options || {}
+
+  const vaultPath = _vaultPath(options)
+  options.path = vaultPath // parse .env.vault
+  const result = DotenvModule.configDotenv(options)
+  if (!result.parsed) {
+    const err = new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`)
+    err.code = 'MISSING_DATA'
+    throw err
+  }
+
+  // handle scenario for comma separated keys - for use with key rotation
+  // example: DOTENV_KEY="dotenv://:key_1234@dotenvx.com/vault/.env.vault?environment=prod,dotenv://:key_7890@dotenvx.com/vault/.env.vault?environment=prod"
+  const keys = _dotenvKey(options).split(',')
+  const length = keys.length
+
+  let decrypted
+  for (let i = 0; i < length; i++) {
+    try {
+      // Get full key
+      const key = keys[i].trim()
+
+      // Get instructions for decrypt
+      const attrs = _instructions(result, key)
+
+      // Decrypt
+      decrypted = DotenvModule.decrypt(attrs.ciphertext, attrs.key)
+
+      break
+    } catch (error) {
+      // last key
+      if (i + 1 >= length) {
+        throw error
+      }
+      // try next key
+    }
+  }
+
+  // Parse decrypted .env string
+  return DotenvModule.parse(decrypted)
+}
+
+function _warn (message) {
+  console.error(`[dotenv@${version}][WARN] ${message}`)
+}
+
+function _debug (message) {
+  console.log(`[dotenv@${version}][DEBUG] ${message}`)
+}
+
+function _log (message) {
+  console.log(`[dotenv@${version}] ${message}`)
+}
+
+function _dotenvKey (options) {
+  // prioritize developer directly setting options.DOTENV_KEY
+  if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
+    return options.DOTENV_KEY
+  }
+
+  // secondary infra already contains a DOTENV_KEY environment variable
+  if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
+    return process.env.DOTENV_KEY
+  }
+
+  // fallback to empty string
+  return ''
+}
+
+function _instructions (result, dotenvKey) {
+  // Parse DOTENV_KEY. Format is a URI
+  let uri
+  try {
+    uri = new URL(dotenvKey)
+  } catch (error) {
+    if (error.code === 'ERR_INVALID_URL') {
+      const err = new Error('INVALID_DOTENV_KEY: Wrong format. Must be in valid uri format like dotenv://:key_1234@dotenvx.com/vault/.env.vault?environment=development')
+      err.code = 'INVALID_DOTENV_KEY'
+      throw err
+    }
+
+    throw error
+  }
+
+  // Get decrypt key
+  const key = uri.password
+  if (!key) {
+    const err = new Error('INVALID_DOTENV_KEY: Missing key part')
+    err.code = 'INVALID_DOTENV_KEY'
+    throw err
+  }
+
+  // Get environment
+  const environment = uri.searchParams.get('environment')
+  if (!environment) {
+    const err = new Error('INVALID_DOTENV_KEY: Missing environment part')
+    err.code = 'INVALID_DOTENV_KEY'
+    throw err
+  }
+
+  // Get ciphertext payload
+  const environmentKey = `DOTENV_VAULT_${environment.toUpperCase()}`
+  const ciphertext = result.parsed[environmentKey] // DOTENV_VAULT_PRODUCTION
+  if (!ciphertext) {
+    const err = new Error(`NOT_FOUND_DOTENV_ENVIRONMENT: Cannot locate environment ${environmentKey} in your .env.vault file.`)
+    err.code = 'NOT_FOUND_DOTENV_ENVIRONMENT'
+    throw err
+  }
+
+  return { ciphertext, key }
+}
+
+function _vaultPath (options) {
+  let possibleVaultPath = null
+
+  if (options && options.path && options.path.length > 0) {
+    if (Array.isArray(options.path)) {
+      for (const filepath of options.path) {
+        if (fs.existsSync(filepath)) {
+          possibleVaultPath = filepath.endsWith('.vault') ? filepath : `${filepath}.vault`
+        }
+      }
+    } else {
+      possibleVaultPath = options.path.endsWith('.vault') ? options.path : `${options.path}.vault`
+    }
+  } else {
+    possibleVaultPath = path.resolve(process.cwd(), '.env.vault')
+  }
+
+  if (fs.existsSync(possibleVaultPath)) {
+    return possibleVaultPath
+  }
+
+  return null
+}
+
+function _resolveHome (envPath) {
+  return envPath[0] === '~' ? path.join(os.homedir(), envPath.slice(1)) : envPath
+}
+
+function _configVault (options) {
+  const debug = parseBoolean(process.env.DOTENV_CONFIG_DEBUG || (options && options.debug))
+  const quiet = parseBoolean(process.env.DOTENV_CONFIG_QUIET || (options && options.quiet))
+
+  if (debug || !quiet) {
+    _log('Loading env from encrypted .env.vault')
+  }
+
+  const parsed = DotenvModule._parseVault(options)
+
+  let processEnv = process.env
+  if (options && options.processEnv != null) {
+    processEnv = options.processEnv
+  }
+
+  DotenvModule.populate(processEnv, parsed, options)
+
+  return { parsed }
+}
+
+function configDotenv (options) {
+  const dotenvPath = path.resolve(process.cwd(), '.env')
+  let encoding = 'utf8'
+  let processEnv = process.env
+  if (options && options.processEnv != null) {
+    processEnv = options.processEnv
+  }
+  let debug = parseBoolean(processEnv.DOTENV_CONFIG_DEBUG || (options && options.debug))
+  let quiet = parseBoolean(processEnv.DOTENV_CONFIG_QUIET || (options && options.quiet))
+
+  if (options && options.encoding) {
+    encoding = options.encoding
+  } else {
+    if (debug) {
+      _debug('No encoding is specified. UTF-8 is used by default')
+    }
+  }
+
+  let optionPaths = [dotenvPath] // default, look for .env
+  if (options && options.path) {
+    if (!Array.isArray(options.path)) {
+      optionPaths = [_resolveHome(options.path)]
+    } else {
+      optionPaths = [] // reset default
+      for (const filepath of options.path) {
+        optionPaths.push(_resolveHome(filepath))
+      }
+    }
+  }
+
+  // Build the parsed data in a temporary object (because we need to return it).  Once we have the final
+  // parsed data, we will combine it with process.env (or options.processEnv if provided).
+  let lastError
+  const parsedAll = {}
+  for (const path of optionPaths) {
+    try {
+      // Specifying an encoding returns a string instead of a buffer
+      const parsed = DotenvModule.parse(fs.readFileSync(path, { encoding }))
+
+      DotenvModule.populate(parsedAll, parsed, options)
+    } catch (e) {
+      if (debug) {
+        _debug(`Failed to load ${path} ${e.message}`)
+      }
+      lastError = e
+    }
+  }
+
+  const populated = DotenvModule.populate(processEnv, parsedAll, options)
+
+  // handle user settings DOTENV_CONFIG_ options inside .env file(s)
+  debug = parseBoolean(processEnv.DOTENV_CONFIG_DEBUG || debug)
+  quiet = parseBoolean(processEnv.DOTENV_CONFIG_QUIET || quiet)
+
+  if (debug || !quiet) {
+    const keysCount = Object.keys(populated).length
+    const shortPaths = []
+    for (const filePath of optionPaths) {
+      try {
+        const relative = path.relative(process.cwd(), filePath)
+        shortPaths.push(relative)
+      } catch (e) {
+        if (debug) {
+          _debug(`Failed to load ${filePath} ${e.message}`)
+        }
+        lastError = e
+      }
+    }
+
+    _log(`injecting env (${keysCount}) from ${shortPaths.join(',')} ${dim(`-- tip: ${_getRandomTip()}`)}`)
+  }
+
+  if (lastError) {
+    return { parsed: parsedAll, error: lastError }
+  } else {
+    return { parsed: parsedAll }
+  }
+}
+
+// Populates process.env from .env file
+function config (options) {
+  // fallback to original dotenv if DOTENV_KEY is not set
+  if (_dotenvKey(options).length === 0) {
+    return DotenvModule.configDotenv(options)
+  }
+
+  const vaultPath = _vaultPath(options)
+
+  // dotenvKey exists but .env.vault file does not exist
+  if (!vaultPath) {
+    _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`)
+
+    return DotenvModule.configDotenv(options)
+  }
+
+  return DotenvModule._configVault(options)
+}
+
+function decrypt (encrypted, keyStr) {
+  const key = Buffer.from(keyStr.slice(-64), 'hex')
+  let ciphertext = Buffer.from(encrypted, 'base64')
+
+  const nonce = ciphertext.subarray(0, 12)
+  const authTag = ciphertext.subarray(-16)
+  ciphertext = ciphertext.subarray(12, -16)
+
+  try {
+    const aesgcm = crypto.createDecipheriv('aes-256-gcm', key, nonce)
+    aesgcm.setAuthTag(authTag)
+    return `${aesgcm.update(ciphertext)}${aesgcm.final()}`
+  } catch (error) {
+    const isRange = error instanceof RangeError
+    const invalidKeyLength = error.message === 'Invalid key length'
+    const decryptionFailed = error.message === 'Unsupported state or unable to authenticate data'
+
+    if (isRange || invalidKeyLength) {
+      const err = new Error('INVALID_DOTENV_KEY: It must be 64 characters long (or more)')
+      err.code = 'INVALID_DOTENV_KEY'
+      throw err
+    } else if (decryptionFailed) {
+      const err = new Error('DECRYPTION_FAILED: Please check your DOTENV_KEY')
+      err.code = 'DECRYPTION_FAILED'
+      throw err
+    } else {
+      throw error
+    }
+  }
+}
+
+// Populate process.env with parsed values
+function populate (processEnv, parsed, options = {}) {
+  const debug = Boolean(options && options.debug)
+  const override = Boolean(options && options.override)
+  const populated = {}
+
+  if (typeof parsed !== 'object') {
+    const err = new Error('OBJECT_REQUIRED: Please check the processEnv argument being passed to populate')
+    err.code = 'OBJECT_REQUIRED'
+    throw err
+  }
+
+  // Set process.env
+  for (const key of Object.keys(parsed)) {
+    if (Object.prototype.hasOwnProperty.call(processEnv, key)) {
+      if (override === true) {
+        processEnv[key] = parsed[key]
+        populated[key] = parsed[key]
+      }
+
+      if (debug) {
+        if (override === true) {
+          _debug(`"${key}" is already defined and WAS overwritten`)
+        } else {
+          _debug(`"${key}" is already defined and was NOT overwritten`)
+        }
+      }
+    } else {
+      processEnv[key] = parsed[key]
+      populated[key] = parsed[key]
+    }
+  }
+
+  return populated
+}
+
+const DotenvModule = {
+  configDotenv,
+  _configVault,
+  _parseVault,
+  config,
+  decrypt,
+  parse,
+  populate
+}
+
+module.exports.configDotenv = DotenvModule.configDotenv
+module.exports._configVault = DotenvModule._configVault
+module.exports._parseVault = DotenvModule._parseVault
+module.exports.config = DotenvModule.config
+module.exports.decrypt = DotenvModule.decrypt
+module.exports.parse = DotenvModule.parse
+module.exports.populate = DotenvModule.populate
+
+module.exports = DotenvModule
+
+
+/***/ }),
+
 /***/ 5340:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -35112,6 +35550,14 @@ exports.VersionResolver = VersionResolver;
 "use strict";
 module.exports = /*#__PURE__*/JSON.parse('{"name":"@1password/op-js","version":"0.1.13","description":"A typed JS wrapper for the 1Password CLI","main":"./dist/index.js","types":"./dist/src/index.d.ts","files":["dist/"],"repository":{"type":"git","url":"https://github.com/1Password/op-js"},"license":"MIT","scripts":{"build":"license-checker-rseidelsohn --direct --files licenses && yarn compile --minify && tsc -p tsconfig.release.json --emitDeclarationOnly","compile":"esbuild src/index.ts src/cli.ts --platform=node --format=cjs --outdir=dist","eslint":"eslint -c .eslintrc.json \'src/*.ts\'","prepare":"husky install","prettier":"prettier --check \'src/*.ts\'","test:unit":"jest --testMatch \'<rootDir>/src/*.test.ts\'","test:integration":"jest --testMatch \'<rootDir>/tests/*.test.ts\' --setupFilesAfterEnv \'<rootDir>/jest.setup.ts\' --runInBand","typecheck":"tsc -p tsconfig.release.json --noEmit","watch":"yarn compile --watch"},"prettier":"@1password/prettier-config","lint-staged":{"src/*.ts":["prettier --write","eslint -c .eslintrc.json --fix"]},"devDependencies":{"@1password/eslint-config":"^4.3.0","@1password/prettier-config":"^1.1.3","@types/jest":"^29.5.12","@types/node":"^20.12.12","@types/semver":"^7.5.8","@typescript-eslint/eslint-plugin":"^7.9.0","esbuild":"^0.21.2","eslint":"^8.57.0","husky":"^9.0.11","jest":"^29.7.0","jest-environment-jsdom":"^29.6.2","joi":"^17.13.1","license-checker-rseidelsohn":"^4.3.0","lint-staged":"^15.2.2","prettier":"^3.2.5","prettier-plugin-organize-imports":"^3.2.4","ts-jest":"^29.1.2","typescript":"5.4.5"},"dependencies":{"lookpath":"^1.2.2","semver":"^7.6.2"}}');
 
+/***/ }),
+
+/***/ 56:
+/***/ ((module) => {
+
+"use strict";
+module.exports = /*#__PURE__*/JSON.parse('{"name":"dotenv","version":"17.2.2","description":"Loads environment variables from .env file","main":"lib/main.js","types":"lib/main.d.ts","exports":{".":{"types":"./lib/main.d.ts","require":"./lib/main.js","default":"./lib/main.js"},"./config":"./config.js","./config.js":"./config.js","./lib/env-options":"./lib/env-options.js","./lib/env-options.js":"./lib/env-options.js","./lib/cli-options":"./lib/cli-options.js","./lib/cli-options.js":"./lib/cli-options.js","./package.json":"./package.json"},"scripts":{"dts-check":"tsc --project tests/types/tsconfig.json","lint":"standard","pretest":"npm run lint && npm run dts-check","test":"tap run --allow-empty-coverage --disable-coverage --timeout=60000","test:coverage":"tap run --show-full-coverage --timeout=60000 --coverage-report=text --coverage-report=lcov","prerelease":"npm test","release":"standard-version"},"repository":{"type":"git","url":"git://github.com/motdotla/dotenv.git"},"homepage":"https://github.com/motdotla/dotenv#readme","funding":"https://dotenvx.com","keywords":["dotenv","env",".env","environment","variables","config","settings"],"readmeFilename":"README.md","license":"BSD-2-Clause","devDependencies":{"@types/node":"^18.11.3","decache":"^4.6.2","sinon":"^14.0.1","standard":"^17.0.0","standard-version":"^9.5.0","tap":"^19.2.0","typescript":"^4.8.4"},"engines":{"node":">=12"},"browser":{"fs":false}}');
+
 /***/ })
 
 /******/ 	});
@@ -35147,6 +35593,35 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"@1password/op-js","version":"
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
@@ -35163,18 +35638,31 @@ var core = __nccwpck_require__(7484);
 var dist = __nccwpck_require__(7521);
 // EXTERNAL MODULE: ./node_modules/op-cli-installer/dist/index.js
 var op_cli_installer_dist = __nccwpck_require__(1621);
+// EXTERNAL MODULE: ./node_modules/dotenv/lib/main.js
+var main = __nccwpck_require__(8889);
+var main_default = /*#__PURE__*/__nccwpck_require__.n(main);
 // EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
 var exec = __nccwpck_require__(5236);
 ;// CONCATENATED MODULE: ./package.json
 const package_namespaceObject = {"rE":"3.0.0"};
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(9896);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(6928);
+// EXTERNAL MODULE: external "os"
+var external_os_ = __nccwpck_require__(857);
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
 const envServiceAccountToken = "OP_SERVICE_ACCOUNT_TOKEN";
 const envManagedVariables = "OP_MANAGED_VARIABLES";
+const envFilePath = "OP_ENV_FILE";
 const authErr = `Authentication error with environment variables: you must set either 1) ${envServiceAccountToken}, or 2) both ${envConnectHost} and ${envConnectToken}.`;
 
 ;// CONCATENATED MODULE: ./src/utils.ts
+
+
+
 
 
 
@@ -35192,7 +35680,129 @@ const validateAuth = () => {
     const authType = isConnect ? "Connect" : "Service account";
     core.info(`Authenticated with ${authType}.`);
 };
-const extractSecret = (envName, shouldExportEnv) => {
+/**
+ * Detects if a PEM string contains a PKCS8 or PKCS1 private key.
+ * These formats use headers like:
+ * - "-----BEGIN PRIVATE KEY-----" (PKCS8)
+ * - "-----BEGIN RSA PRIVATE KEY-----" (PKCS1)
+ * - "-----BEGIN EC PRIVATE KEY-----" (SEC1 for EC keys)
+ *
+ * @param pem - The PEM-encoded string to check
+ * @returns true if the string contains a PKCS-format private key
+ */
+const isPkcsPrivateKey = (pem) => {
+    return (pem.includes("-----BEGIN PRIVATE KEY-----") ||
+        pem.includes("-----BEGIN RSA PRIVATE KEY-----") ||
+        pem.includes("-----BEGIN EC PRIVATE KEY-----"));
+};
+/**
+ * Detects if a PEM string contains an OpenSSH format private key.
+ * OpenSSH keys use the header: "-----BEGIN OPENSSH PRIVATE KEY-----"
+ *
+ * @param pem - The PEM-encoded string to check
+ * @returns true if the string contains an OpenSSH format private key
+ */
+const isOpenSshPrivateKey = (pem) => {
+    return pem.includes("-----BEGIN OPENSSH PRIVATE KEY-----");
+};
+/**
+ * Detects if a PEM string contains an encrypted private key.
+ * Encrypted keys cannot be converted without a passphrase.
+ *
+ * Indicators of encryption:
+ * - "-----BEGIN ENCRYPTED PRIVATE KEY-----" header
+ * - "Proc-Type: 4,ENCRYPTED" in the PEM headers (case-insensitive)
+ * - "DEK-Info:" in the PEM headers (encryption algorithm info)
+ *
+ * @param pem - The PEM-encoded string to check
+ * @returns true if the string appears to be an encrypted private key
+ */
+const isEncryptedPem = (pem) => {
+    // Check only the first few lines for encryption markers
+    const header = pem.split(/\r?\n/).slice(0, 8).join("\n");
+    return (header.includes("-----BEGIN ENCRYPTED PRIVATE KEY-----") ||
+        /Proc-Type:\s*4\s*,\s*ENCRYPTED/i.test(header) ||
+        /DEK-Info:/i.test(header));
+};
+/**
+ * Converts a PKCS8/PKCS1 format SSH private key to OpenSSH format using ssh-keygen.
+ *
+ * This function:
+ * 1. Writes the key to a temporary file with secure permissions (0600)
+ * 2. Uses ssh-keygen to convert the key in-place to OpenSSH format
+ * 3. Reads the converted key back
+ * 4. Cleans up the temporary file
+ *
+ * Security considerations:
+ * - Temp file has 0600 permissions to prevent unauthorized access
+ * - ssh-keygen output is suppressed to prevent key leakage in logs
+ * - Temp file is always deleted, even if conversion fails
+ *
+ * @param pkcsKey - The PKCS-format private key to convert
+ * @returns The OpenSSH-format private key
+ * @throws Error if ssh-keygen is not available or conversion fails
+ */
+const convertPkcsToOpenSsh = async (pkcsKey) => {
+    const tempFileName = `op-ssh-key-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    const tempFilePath = (0,external_path_.join)((0,external_os_.tmpdir)(), tempFileName);
+    try {
+        // Write the PKCS key to a temporary file with secure permissions
+        (0,external_fs_.writeFileSync)(tempFilePath, pkcsKey, { mode: 0o600 });
+        // Ensure permissions are set correctly (some systems may not respect mode in writeFileSync)
+        (0,external_fs_.chmodSync)(tempFilePath, 0o600);
+        // Convert the key to OpenSSH format using ssh-keygen
+        // -p: Change passphrase of a private key file
+        // -f: Specifies the filename of the key file
+        // -N "": New passphrase (empty string for no passphrase)
+        // -P "": Old passphrase (empty string for no passphrase)
+        // This rewrites the file in OpenSSH format by default on modern OpenSSH
+        const result = await exec.getExecOutput("ssh-keygen", ["-p", "-f", tempFilePath, "-N", "", "-P", ""], {
+            silent: true, // Prevent key material from appearing in logs
+            ignoreReturnCode: false,
+        });
+        if (result.exitCode !== 0) {
+            throw new Error(`ssh-keygen conversion failed with exit code ${result.exitCode}`);
+        }
+        // Read the converted key
+        const convertedKey = (0,external_fs_.readFileSync)(tempFilePath, "utf-8");
+        return convertedKey;
+    }
+    finally {
+        // Always clean up the temporary file, even if an error occurred
+        try {
+            (0,external_fs_.unlinkSync)(tempFilePath);
+        }
+        catch (cleanupError) {
+            // Log cleanup failure but don't throw - the conversion may have succeeded
+            core.warning(`Failed to clean up temporary key file at ${tempFilePath}: ${cleanupError}`);
+        }
+    }
+};
+/**
+ * Extracts a secret from 1Password and optionally converts SSH keys to OpenSSH format.
+ *
+ * This function:
+ * 1. Retrieves the secret value using the 1Password CLI
+ * 2. Optionally converts PKCS-format SSH keys to OpenSSH format
+ * 3. Exports the secret as an environment variable or step output
+ * 4. Marks the secret as sensitive to prevent it from appearing in logs
+ *
+ * SSH Key Conversion:
+ * When convert-ssh-keys is enabled, this function will automatically detect
+ * PKCS-format SSH private keys and convert them to OpenSSH format. This is
+ * necessary because 1Password stores SSH keys in PKCS8/PKCS1 format, but
+ * many tools (like ssh, scp, etc.) expect OpenSSH format.
+ *
+ * The conversion is skipped for:
+ * - Keys already in OpenSSH format
+ * - Encrypted keys (require a passphrase)
+ * - Non-SSH PEM data (certificates, etc.)
+ *
+ * @param envName - The environment variable name containing the secret reference
+ * @param shouldExportEnv - Whether to export as environment variable (true) or step output (false)
+ * @param shouldConvertSshKeys - Whether to convert PKCS SSH keys to OpenSSH format
+ */
+const extractSecret = async (envName, shouldExportEnv, shouldConvertSshKeys) => {
     core.info(`Populating variable: ${envName}`);
     const ref = process.env[envName];
     if (!ref) {
@@ -35202,15 +35812,57 @@ const extractSecret = (envName, shouldExportEnv) => {
     if (!secretValue) {
         return;
     }
+    // Mark the secret as sensitive immediately to prevent any accidental leakage during conversion
+    core.setSecret(secretValue);
+    let finalValue = secretValue;
+    // Convert SSH keys if enabled and applicable
+    if (shouldConvertSshKeys) {
+        // Check if this is a PKCS private key that needs conversion
+        const needsConversion = isPkcsPrivateKey(secretValue) &&
+            !isOpenSshPrivateKey(secretValue) &&
+            !isEncryptedPem(secretValue);
+        if (needsConversion) {
+            try {
+                core.info(`Converting ${envName} from PKCS to OpenSSH format...`);
+                finalValue = await convertPkcsToOpenSsh(secretValue);
+                core.info(`Successfully converted ${envName} to OpenSSH format`);
+            }
+            catch (error) {
+                // If conversion fails, log a warning but continue with the original value
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                core.warning(`Failed to convert SSH key ${envName} to OpenSSH format: ${errorMessage}. Using original PKCS format.`);
+                // Keep finalValue as secretValue
+            }
+        }
+        else if (isEncryptedPem(secretValue)) {
+            core.warning(`Skipping conversion for ${envName}: encrypted private keys require a passphrase`);
+        }
+    }
+    // Export the secret as environment variable or step output
     if (shouldExportEnv) {
-        core.exportVariable(envName, secretValue);
+        core.exportVariable(envName, finalValue);
     }
     else {
-        core.setOutput(envName, secretValue);
+        core.setOutput(envName, finalValue);
     }
-    core.setSecret(secretValue);
+    // Mark the final value as sensitive as well (if conversion changed it)
+    if (finalValue !== secretValue) {
+        core.setSecret(finalValue);
+    }
 };
-const loadSecrets = async (shouldExportEnv) => {
+/**
+ * Loads secrets from 1Password and makes them available to the workflow.
+ *
+ * This function:
+ * 1. Lists all environment variables that contain 1Password secret references
+ * 2. Extracts each secret value from 1Password
+ * 3. Optionally converts SSH keys to OpenSSH format
+ * 4. Makes secrets available as environment variables or step outputs
+ *
+ * @param shouldExportEnv - Whether to export secrets as environment variables (true) or step outputs (false)
+ * @param shouldConvertSshKeys - Whether to convert PKCS SSH keys to OpenSSH format
+ */
+const loadSecrets = async (shouldExportEnv, shouldConvertSshKeys) => {
     // Pass User-Agent Information to the 1Password CLI
     (0,dist.setClientInfo)({
         name: "1Password GitHub Action",
@@ -35225,8 +35877,9 @@ const loadSecrets = async (shouldExportEnv) => {
         return;
     }
     const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
+    // Process secrets sequentially to ensure proper async handling
     for (const envName of envs) {
-        extractSecret(envName, shouldExportEnv);
+        await extractSecret(envName, shouldExportEnv, shouldConvertSshKeys);
     }
     if (shouldExportEnv) {
         core.exportVariable(envManagedVariables, envs.join());
@@ -35248,21 +35901,30 @@ const unsetPrevious = () => {
 
 
 
+
+
 const loadSecretsAction = async () => {
     try {
         // Get action inputs
         const shouldUnsetPrevious = core.getBooleanInput("unset-previous");
         const shouldExportEnv = core.getBooleanInput("export-env");
+        const shouldConvertSshKeys = core.getBooleanInput("convert-ssh-keys");
         // Unset all secrets managed by 1Password if `unset-previous` is set.
         if (shouldUnsetPrevious) {
             unsetPrevious();
         }
         // Validate that a proper authentication configuration is set for the CLI
         validateAuth();
+        // Set environment variables from OP_ENV_FILE
+        const file = process.env[envFilePath];
+        if (file) {
+            core.info(`Loading environment variables from file: ${file}`);
+            main_default().config({ path: file });
+        }
         // Download and install the CLI
         await installCLI();
-        // Load secrets
-        await loadSecrets(shouldExportEnv);
+        // Load secrets and optionally convert SSH keys
+        await loadSecrets(shouldExportEnv, shouldConvertSshKeys);
     }
     catch (error) {
         // It's possible for the Error constructor to be modified to be anything

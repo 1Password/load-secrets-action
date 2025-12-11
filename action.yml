@@ -11,6 +11,9 @@ inputs:
   export-env:
     description: Export the secrets as environment variables
     default: "false"
+  convert-ssh-keys:
+    description: Convert SSH private keys from PKCS format to OpenSSH format. 1Password stores SSH keys in PKCS8/PKCS1 format, but some tools require OpenSSH format. Requires ssh-keygen to be available.
+    default: "false"
   version:
     description: Specify which 1Password CLI version to install. Defaults to "latest".
     default: "latest"
