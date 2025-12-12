@@ -1,4 +1,4 @@
-# If someone with write access comments "/ok-to-test" on a pull request, emit a repository_dispatch event
+# Write comments "/ok-to-test sha=<hash>" on a pull request. This will emit a repository_dispatch event.
 name: Ok To Test
 
 on:
@@ -15,7 +15,7 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     steps:
       - name: Slash Command Dispatch
-        uses: peter-evans/slash-command-dispatch@v3
+        uses: volodymyrZotov/slash-command-dispatch@7c1b623a2b0eba93f684c34f689a441f0be84cf1 # TODO: use peter-evans/slash-command-dispatch when fix for team permissions is released https://github.com/peter-evans/slash-command-dispatch/pull/424
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           reaction-token: ${{ secrets.GITHUB_TOKEN }}
