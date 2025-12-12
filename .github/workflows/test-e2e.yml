@@ -3,7 +3,15 @@ name: E2E Tests
 on:
   push:
     branches: [main]
+    paths-ignore: &ignore_paths
+      - "docs/**"
+      - "config/**"
+      - "*.md"
+      - ".gitignore"
+      - "LICENSE"
+      - "tests/**"
   pull_request:
+    paths-ignore: *ignore_paths
   repository_dispatch:
     types: [ok-to-test-command]
 
@@ -93,15 +101,15 @@ jobs:
 
       - name: Create comment on PR
         uses: peter-evans/create-or-update-comment@v4
-    with:
-      issue-number: ${{ github.event.client_payload.pull_request.number }}
-      body: |
-        ${{
-            needs.e2e.result == 'success' && '✅ E2E tests passed.' ||
-            needs.e2e.result == 'failure' && '❌ E2E tests failed.' ||
-            '⚠️ E2E tests completed.'
-        }}
+        with:
+          issue-number: ${{ github.event.client_payload.pull_request.number }}
+          body: |
+            ${{
+                needs.e2e.result == 'success' && '✅ E2E tests passed.' ||
+                needs.e2e.result == 'failure' && '❌ E2E tests failed.' ||
+                '⚠️ E2E tests completed.'
+            }}
 
-        [View test run output][1]
+            [View test run output][1]
 
-        [1]: ${{ steps.vars.outputs.run-url }}
+            [1]: ${{ steps.vars.outputs.run-url }}
