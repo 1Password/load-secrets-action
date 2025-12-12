@@ -1,29 +1,36 @@
+name: Lint and Test
+
 on:
   push:
     branches: [main]
   pull_request:
-name: Lint
 
 jobs:
-  lint:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
+
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@2.0.0
         with:
           ignore_paths: >-
             .husky
+
       - name: Setup Node.js
-        id: setup-node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-      - name: Install Dependencies
-        id: install
+
+      - name: Install dependencies
         run: npm ci
+
       - name: Check formatting
         run: npm run format:check
+
       - name: Check lint
         run: npm run lint
+
+      - name: Run unit tests
+        run: npm test
