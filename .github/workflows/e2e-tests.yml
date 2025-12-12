@@ -1,0 +1,159 @@
+name: E2E Tests
+
+on:
+  # For local testing with: act push -W .github/workflows/e2e-tests.yml
+  push:
+    branches-ignore:
+      - "**" # Never runs on GitHub, only locally with act
+
+  # For test.yml to call this workflow
+  workflow_call:
+    secrets:
+      OP_CONNECT_CREDENTIALS:
+        required: true
+      OP_CONNECT_TOKEN:
+        required: true
+      OP_SERVICE_ACCOUNT_TOKEN:
+        required: true
+      VAULT:
+        description: "1Password vault name or UUID"
+        required: true
+
+jobs:
+  test-service-account:
+    name: Service Account (${{ matrix.os }}, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        version: [latest, 2.30.0]
+        export-env: [true, false]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Generate .env.tpl
+        shell: bash
+        run: |
+          echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
+          echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
+          echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
+
+      - name: Configure Service account
+        uses: ./configure
+        with:
+          service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+
+      - name: Load secrets
+        id: load_secrets
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+          export-env: ${{ matrix.export-env }}
+        env:
+          SECRET: op://${{ secrets.VAULT }}/test-secret/password
+          SECRET_IN_SECTION: op://${{ secrets.VAULT }}/test-secret/test-section/password
+          MULTILINE_SECRET: op://${{ secrets.VAULT }}/multiline-secret/notesPlain
+          OP_ENV_FILE: ./tests/.env.tpl
+
+      - name: Assert test secret values [step output]
+        if: ${{ !matrix.export-env }}
+        shell: bash
+        env:
+          SECRET: ${{ steps.load_secrets.outputs.SECRET }}
+          SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
+          MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
+          FILE_SECRET: ${{ steps.load_secrets.outputs.FILE_SECRET }}
+          FILE_SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.FILE_SECRET_IN_SECTION }}
+          FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
+        run: ./tests/assert-env-set.sh
+
+      - name: Assert test secret values [exported env]
+        if: ${{ matrix.export-env }}
+        shell: bash
+        run: ./tests/assert-env-set.sh
+
+      - name: Remove secrets [exported env]
+        if: ${{ matrix.export-env }}
+        uses: ./
+        with:
+          unset-previous: true
+
+      - name: Assert removed secrets [exported env]
+        if: ${{ matrix.export-env }}
+        shell: bash
+        run: ./tests/assert-env-unset.sh
+
+  test-connect:
+    name: Connect (ubuntu-latest, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [latest, 2.30.0]
+        export-env: [true, false]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Generate .env.tpl
+        run: |
+          mkdir -p tests
+          echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
+          echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
+          echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
+
+      - name: Launch 1Password Connect instance
+        env:
+          OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
+        run: |
+          echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
+          docker compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
+
+      - name: Configure 1Password Connect
+        uses: ./configure
+        with:
+          connect-host: http://localhost:8080
+          connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
+
+      - name: Load secrets
+        id: load_secrets
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+          export-env: ${{ matrix.export-env }}
+        env:
+          SECRET: op://${{ secrets.VAULT }}/test-secret/password
+          SECRET_IN_SECTION: op://${{ secrets.VAULT }}/test-secret/test-section/password
+          MULTILINE_SECRET: op://${{ secrets.VAULT }}/multiline-secret/notesPlain
+          OP_ENV_FILE: ./tests/.env.tpl
+
+      - name: Assert test secret values [step output]
+        if: ${{ !matrix.export-env }}
+        env:
+          SECRET: ${{ steps.load_secrets.outputs.SECRET }}
+          SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
+          MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
+          FILE_SECRET: ${{ steps.load_secrets.outputs.FILE_SECRET }}
+          FILE_SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.FILE_SECRET_IN_SECTION }}
+          FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
+        run: ./tests/assert-env-set.sh
+
+      - name: Assert test secret values [exported env]
+        if: ${{ matrix.export-env }}
+        run: ./tests/assert-env-set.sh
+
+      - name: Remove secrets [exported env]
+        if: ${{ matrix.export-env }}
+        uses: ./
+        with:
+          unset-previous: true
+
+      - name: Assert removed secrets [exported env]
+        if: ${{ matrix.export-env }}
+        run: ./tests/assert-env-unset.sh
