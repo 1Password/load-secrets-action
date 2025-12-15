@@ -9,7 +9,6 @@ on:
       - "*.md"
       - ".gitignore"
       - "LICENSE"
-      - "tests/**"
   pull_request:
     paths-ignore: *ignore_paths
   repository_dispatch:
