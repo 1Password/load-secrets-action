@@ -19,11 +19,11 @@ For the PR created by maintainer `E2E Test` workflow starts automatically. The P
 
 For the PR created by external contributor `E2E Test` workflow **won't** start automatically.
 Maintainer should make a sanity check of the changes and run it manually by:
+
 1. Putting a comment `/ok-to-test sha=<latest commit hash>` in the PR thread.
 2. `E2E Test` workflow starts.
 3. After `E2E Test` workflow finishes, a comment with a link to the workflow, along with its status will be posted in the PR.
 4. Maintainer can merge PR or request the changes based on the `E2E Test` results.
-
 
 ## Notes
 
