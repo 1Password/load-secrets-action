@@ -1,6 +1,6 @@
 {
 	"name": "load-secrets-action",
-	"version": "3.1.0",
+	"version": "3.0.0",
 	"description": "Load Secrets from 1Password",
 	"main": "dist/index.js",
 	"directories": {
@@ -43,8 +43,8 @@
 		"@1password/op-js": "^0.1.11",
 		"@actions/core": "^1.10.1",
 		"@actions/exec": "^1.1.1",
-		"dotenv": "^17.2.2",
-		"op-cli-installer": "github:1Password/op-cli-installer#e6c1c758bc3339e5fe9b06255728039f688f73fa"
+		"@actions/tool-cache": "^2.0.2",
+		"dotenv": "^17.2.2"
 	},
 	"devDependencies": {
 		"@1password/eslint-config": "^4.3.1",
