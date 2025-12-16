@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import { promisify } from "util";
@@ -13,7 +13,7 @@ import {
 } from "./cli-installer";
 import { type Installer } from "./installer";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export class MacOsInstaller extends CliInstaller implements Installer {
 	private readonly platform: SupportedPlatform = "darwin"; // Node.js platform identifier for macOS
@@ -35,7 +35,7 @@ export class MacOsInstaller extends CliInstaller implements Installer {
 		fs.renameSync(pkgPath, pkgWithExtension);
 
 		const expandDir = "temp-pkg";
-		await execAsync(`pkgutil --expand "${pkgWithExtension}" "${expandDir}"`);
+		await execFileAsync("pkgutil", ["--expand", pkgWithExtension, expandDir]);
 		const payloadPath = path.join(expandDir, "op.pkg", "Payload");
 		console.info("Installing 1Password CLI");
 		const cliPath = await tc.extractTar(payloadPath);
