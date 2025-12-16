@@ -33568,7 +33568,7 @@ const installCliOnGithubActionRunner = async (version) => {
 // EXTERNAL MODULE: ./node_modules/@actions/exec/lib/exec.js
 var exec = __nccwpck_require__(5236);
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"rE":"3.0.0"};
+const package_namespaceObject = {"rE":"3.1.0"};
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
