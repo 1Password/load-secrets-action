@@ -1,7 +1,7 @@
+import dotenv from "dotenv";
 import * as core from "@actions/core";
 import { validateCli } from "@1password/op-js";
-import { installCliOnGithubActionRunner } from "op-cli-installer";
-import dotenv from "dotenv";
+import { installCliOnGithubActionRunner } from "./op-cli-installer";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
 import { envFilePath } from "./constants";
 
