@@ -33484,7 +33484,7 @@ var external_util_ = __nccwpck_require__(9023);
 
 
 
-const execAsync = (0,external_util_.promisify)(external_child_process_.exec);
+const execFileAsync = (0,external_util_.promisify)(external_child_process_.execFile);
 class MacOsInstaller extends CliInstaller {
     platform = "darwin"; // Node.js platform identifier for macOS
     constructor(version) {
@@ -33501,7 +33501,7 @@ class MacOsInstaller extends CliInstaller {
         const pkgWithExtension = `${pkgPath}.pkg`;
         external_fs_.renameSync(pkgPath, pkgWithExtension);
         const expandDir = "temp-pkg";
-        await execAsync(`pkgutil --expand "${pkgWithExtension}" "${expandDir}"`);
+        await execFileAsync("pkgutil", ["--expand", pkgWithExtension, expandDir]);
         const payloadPath = external_path_.join(expandDir, "op.pkg", "Payload");
         console.info("Installing 1Password CLI");
         const cliPath = await tool_cache.extractTar(payloadPath);
