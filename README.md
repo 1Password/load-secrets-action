@@ -17,19 +17,6 @@ Specify in your workflow YAML file which secrets from 1Password should be loaded
 
 Read more on the [1Password Developer Portal](https://developer.1password.com/docs/ci-cd/github-actions).
 
-## 🔑 SSH Key Format
-
-When loading SSH keys, you can specify the format using the `ssh-format` query parameter. This is useful when you need the private key in a specific format like OpenSSH.
-
-```yml
-- name: Load SSH key
-  uses: 1password/load-secrets-action@v3
-  env:
-    OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-    # Load SSH private key in OpenSSH format
-    SSH_PRIVATE_KEY: op://vault/item/private key?ssh-format=openssh
-```
-
 For more details on secret reference syntax, see the [1Password CLI documentation](https://developer.1password.com/docs/cli/secret-reference-syntax/#ssh-format-parameter).
 
 ## 🪄 See it in action!
@@ -84,6 +71,19 @@ jobs:
       - name: Print masked secret
         run: 'echo "Secret: $SECRET"'
         # Prints: Secret: ***
+```
+
+### 🔑 SSH Key Format
+
+When loading SSH keys, you can specify the format using the `ssh-format` query parameter. This is useful when you need the private key in a specific format like OpenSSH.
+
+```yml
+- name: Load SSH key
+  uses: 1password/load-secrets-action@v3
+  env:
+    OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    # Load SSH private key in OpenSSH format
+    SSH_PRIVATE_KEY: op://vault/item/private key?ssh-format=openssh
 ```
 
 ## 💙 Community & Support
