@@ -41,7 +41,7 @@ export const extractSecret = (
 	}
 
 	const secretValue = read.parse(ref);
-	if (!secretValue) {
+	if (secretValue === null || secretValue === undefined) {
 		return;
 	}
 
@@ -50,7 +50,11 @@ export const extractSecret = (
 	} else {
 		core.setOutput(envName, secretValue);
 	}
-	core.setSecret(secretValue);
+	// Skip setSecret for empty strings to avoid the warning:
+	// "Can't add secret mask for empty string in ##[add-mask] command."
+	if (secretValue) {
+		core.setSecret(secretValue);
+	}
 };
 
 export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {

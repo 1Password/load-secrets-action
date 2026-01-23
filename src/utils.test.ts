@@ -106,6 +106,41 @@ describe("extractSecret", () => {
 		);
 		expect(core.setSecret).toHaveBeenCalledWith(testSecretValue);
 	});
+
+	describe("when secret value is empty string", () => {
+		const emptySecretValue = "";
+
+		beforeEach(() => {
+			(read.parse as jest.Mock).mockReturnValue(emptySecretValue);
+		});
+
+		afterEach(() => {
+			(read.parse as jest.Mock).mockReturnValue(testSecretValue);
+		});
+
+		it("should set empty string as step output", () => {
+			extractSecret(envTestSecretEnv, false);
+			expect(core.setOutput).toHaveBeenCalledWith(
+				envTestSecretEnv,
+				emptySecretValue,
+			);
+			expect(core.exportVariable).not.toHaveBeenCalled();
+		});
+
+		it("should set empty string as environment variable", () => {
+			extractSecret(envTestSecretEnv, true);
+			expect(core.exportVariable).toHaveBeenCalledWith(
+				envTestSecretEnv,
+				emptySecretValue,
+			);
+			expect(core.setOutput).not.toHaveBeenCalled();
+		});
+
+		it("should not call setSecret for empty string", () => {
+			extractSecret(envTestSecretEnv, false);
+			expect(core.setSecret).not.toHaveBeenCalled();
+		});
+	});
 });
 
 describe("loadSecrets", () => {
