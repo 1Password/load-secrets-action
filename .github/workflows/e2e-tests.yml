@@ -41,6 +41,18 @@ jobs:
           fetch-depth: 0
           ref: ${{ inputs.ref }}
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build actions
+        run: npm run build:all
+
       - name: Generate .env.tpl
         shell: bash
         run: |
@@ -108,6 +120,18 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ inputs.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build actions
+        run: npm run build:all
 
       - name: Generate .env.tpl
         run: |
