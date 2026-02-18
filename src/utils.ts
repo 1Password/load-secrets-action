@@ -124,11 +124,18 @@ const loadSecretsViaServiceAccount = async (
 		throw new Error(authErr);
 	}
 
-	const client = await createClient({
+	// Authenticate with the 1Password SDK
+	let client;
+	try {
+		client = await createClient({
 		auth: token,
 		integrationName: "1Password GitHub Action",
 		integrationVersion: version,
 	});
+	} catch (err) {
+		const message = err instanceof Error ? err.message : String(err);
+		throw new Error(`Service account authentication failed: ${message}`);
+	}
 
 	for (const envName of envs) {
 		const ref = process.env[envName];
