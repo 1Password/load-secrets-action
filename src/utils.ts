@@ -128,10 +128,10 @@ const loadSecretsViaServiceAccount = async (
 	let client;
 	try {
 		client = await createClient({
-		auth: token,
-		integrationName: "1Password GitHub Action",
-		integrationVersion: version,
-	});
+			auth: token,
+			integrationName: "1Password GitHub Action",
+			integrationVersion: version,
+		});
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
 		throw new Error(`Service account authentication failed: ${message}`);
