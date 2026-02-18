@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
+import { createClient } from "@1password/sdk";
 import {
 	extractSecret,
 	loadSecrets,
@@ -22,6 +23,9 @@ jest.mock("@actions/exec", () => ({
 	})),
 }));
 jest.mock("@1password/op-js");
+jest.mock("@1password/sdk", () => ({
+	createClient: jest.fn(),
+}));
 
 beforeEach(() => {
 	jest.clearAllMocks();
@@ -178,6 +182,92 @@ describe("loadSecrets", () => {
 
 			expect(core.exportVariable).not.toHaveBeenCalled();
 		});
+	});
+});
+
+describe("loadSecrets when using Service Account", () => {
+	const mockResolve = jest.fn();
+
+	beforeEach(() => {
+		process.env[envConnectHost] = "";
+		process.env[envConnectToken] = "";
+		process.env[envServiceAccountToken] = "ops_token";
+
+		Object.keys(process.env).forEach((key) => {
+			if (
+				typeof process.env[key] === "string" &&
+				process.env[key]?.startsWith("op://")
+			) {
+				delete process.env[key];
+			}
+		});
+		process.env.MY_SECRET = "op://vault/item/field";
+
+		(createClient as jest.Mock).mockResolvedValue({
+			secrets: { resolve: mockResolve },
+		});
+
+		mockResolve.mockResolvedValue("resolved-secret-value");
+	});
+
+
+	it("does not call op env ls when using Service Account", async () => {
+		await loadSecrets(false);
+		expect(exec.getExecOutput).not.toHaveBeenCalled();
+	});
+
+	it("sets step output with resolved value when export-env is false", async () => {
+		await loadSecrets(false);
+		expect(core.setOutput).toHaveBeenCalledTimes(1);
+		expect(core.setOutput).toHaveBeenCalledWith("MY_SECRET", "resolved-secret-value");
+	});
+
+	it("masks secret with setSecret when export-env is false", async () => {
+		await loadSecrets(false);
+		expect(core.setSecret).toHaveBeenCalledTimes(1);
+		expect(core.setSecret).toHaveBeenCalledWith("resolved-secret-value");
+	});
+
+	it("does not call exportVariable when export-env is false", async () => {
+		await loadSecrets(false);
+		expect(core.exportVariable).not.toHaveBeenCalled();
+	});
+
+	it("exports env and sets OP_MANAGED_VARIABLES when export-env is true", async () => {
+		await loadSecrets(true);
+		expect(core.exportVariable).toHaveBeenCalledWith(
+			"MY_SECRET",
+			"resolved-secret-value",
+		);
+		expect(core.exportVariable).toHaveBeenCalledWith(
+			envManagedVariables,
+			"MY_SECRET",
+		);
+	});
+
+	it("does not set step output when export-env is true", async () => {
+		await loadSecrets(true);
+		expect(core.setOutput).not.toHaveBeenCalledWith("MY_SECRET", expect.anything());
+	});
+
+	it("masks secret with setSecret when export-env is true", async () => {
+		await loadSecrets(true);
+		expect(core.setSecret).toHaveBeenCalledTimes(1);
+		expect(core.setSecret).toHaveBeenCalledWith("resolved-secret-value");
+	});
+
+	it("returns early when no env vars have op:// refs", async () => {
+		Object.keys(process.env).forEach((key) => {
+			if (
+				typeof process.env[key] === "string" &&
+				process.env[key]?.startsWith("op://")
+			) {
+				delete process.env[key];
+			}
+		});
+		await loadSecrets(true);
+		expect(exec.getExecOutput).not.toHaveBeenCalled();
+		expect(core.exportVariable).not.toHaveBeenCalled();
 	});
 });
 

@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read, setClientInfo, semverToInt } from "@1password/op-js";
+import { createClient } from "@1password/sdk";
 import { version } from "../package.json";
 import {
 	authErr,
@@ -27,6 +28,30 @@ export const validateAuth = (): void => {
 	const authType = isConnect ? "Connect" : "Service account";
 
 	core.info(`Authenticated with ${authType}.`);
+};
+
+export const getEnvVarNamesWithSecretRefs = (): string[] =>
+	Object.keys(process.env).filter(
+		(key) =>
+			typeof process.env[key] === "string" &&
+			process.env[key]?.startsWith("op://"),
+	);
+
+const setResolvedSecret = (
+	envName: string,
+	secretValue: string,
+	shouldExportEnv: boolean,
+): void => {
+	core.info(`Populating variable: ${envName}`);
+
+	if (shouldExportEnv) {
+		core.exportVariable(envName, secretValue);
+	} else {
+		core.setOutput(envName, secretValue);
+	}
+	if (secretValue) {
+		core.setSecret(secretValue);
+	}
 };
 
 export const extractSecret = (
@@ -57,8 +82,10 @@ export const extractSecret = (
 	}
 };
 
-export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
-	// Pass User-Agent Information to the 1Password CLI
+// Connect loads secrets via the 1Password CLI
+const loadSecretsViaConnect = async (
+	shouldExportEnv: boolean,
+): Promise<void> => {
 	setClientInfo({
 		name: "1Password GitHub Action",
 		id: "GHA",
@@ -81,6 +108,55 @@ export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
 	if (shouldExportEnv) {
 		core.exportVariable(envManagedVariables, envs.join());
 	}
+};
+
+// Service Account loads secrets via the 1Password SDK
+const loadSecretsViaServiceAccount = async (
+	shouldExportEnv: boolean,
+): Promise<void> => {
+	const envs = getEnvVarNamesWithSecretRefs();
+	if (envs.length === 0) {
+		return;
+	}
+
+	const token = process.env[envServiceAccountToken];
+	if (!token) {
+		throw new Error(authErr);
+	}
+
+	const client = await createClient({
+		auth: token,
+		integrationName: "1Password GitHub Action",
+		integrationVersion: version,
+	});
+
+	for (const envName of envs) {
+		const ref = process.env[envName];
+		if (!ref) {
+			continue;
+		}
+
+		// Resolve the secret value using the 1Password SDK
+		// and make it available either as step outputs or as environment variables
+		const secretValue = await client.secrets.resolve(ref);
+		setResolvedSecret(envName, secretValue, shouldExportEnv);
+	}
+
+	if (shouldExportEnv) {
+		core.exportVariable(envManagedVariables, envs.join());
+	}
+};
+
+export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
+	const isConnect =
+		process.env[envConnectHost] && process.env[envConnectToken];
+
+	if (isConnect) {
+		await loadSecretsViaConnect(shouldExportEnv);
+		return;
+	}
+
+	await loadSecretsViaServiceAccount(shouldExportEnv);
 };
 
 export const unsetPrevious = (): void => {
