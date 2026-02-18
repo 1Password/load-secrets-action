@@ -147,7 +147,7 @@ describe("extractSecret", () => {
 	});
 });
 
-describe("loadSecrets", () => {
+describe("loadSecrets when using Connect", () => {
 	it("sets the client info and gets the executed output", async () => {
 		await loadSecrets(true);
 
@@ -273,6 +273,66 @@ describe("loadSecrets when using Service Account", () => {
 		await loadSecrets(true);
 		expect(exec.getExecOutput).not.toHaveBeenCalled();
 		expect(core.exportVariable).not.toHaveBeenCalled();
+	});
+
+	describe("multiple refs", () => {
+		const ref1 = "op://vault/item/field";
+		const ref2 = "op://vault/other/item";
+		const ref3 = "op://vault/file/secret";
+
+		beforeEach(() => {
+			process.env.MY_SECRET = ref1;
+			process.env.ANOTHER_SECRET = ref2;
+			process.env.FILE_SECRET = ref3;
+
+			mockResolve
+				.mockResolvedValueOnce("value1")
+				.mockResolvedValueOnce("value2")
+				.mockResolvedValueOnce("value3");
+		});
+
+		it("resolves each ref and sets step output for each when export-env is false", async () => {
+			await loadSecrets(false);
+
+			expect(mockResolve).toHaveBeenCalledTimes(3);
+			expect(mockResolve).toHaveBeenCalledWith(ref1);
+			expect(mockResolve).toHaveBeenCalledWith(ref2);
+			expect(mockResolve).toHaveBeenCalledWith(ref3);
+
+			expect(core.setOutput).toHaveBeenCalledTimes(3);
+			expect(core.setOutput).toHaveBeenCalledWith("MY_SECRET", "value1");
+			expect(core.setOutput).toHaveBeenCalledWith("ANOTHER_SECRET", "value2");
+			expect(core.setOutput).toHaveBeenCalledWith("FILE_SECRET", "value3");
+
+			expect(core.setSecret).toHaveBeenCalledTimes(3);
+		});
+
+		it("resolves each ref and exports each and sets OP_MANAGED_VARIABLES when export-env is true", async () => {
+			await loadSecrets(true);
+
+			expect(mockResolve).toHaveBeenCalledTimes(3);
+
+			expect(core.exportVariable).toHaveBeenCalledWith("MY_SECRET", "value1");
+			expect(core.exportVariable).toHaveBeenCalledWith(
+				"ANOTHER_SECRET",
+				"value2",
+			);
+			expect(core.exportVariable).toHaveBeenCalledWith("FILE_SECRET", "value3");
+
+			const exportVariableCalls = (core.exportVariable as jest.Mock).mock
+				.calls as [string, string][];
+			const managedVarsCall = exportVariableCalls.find(
+				([name]) => name === envManagedVariables,
+			);
+			expect(managedVarsCall).toBeDefined();
+			const managedList = (managedVarsCall as [string, string])[1].split(",");
+			expect(managedList).toContain("MY_SECRET");
+			expect(managedList).toContain("ANOTHER_SECRET");
+			expect(managedList).toContain("FILE_SECRET");
+			expect(managedList).toHaveLength(3);
+
+			expect(core.setSecret).toHaveBeenCalledTimes(3);
+		});
 	});
 });
 
