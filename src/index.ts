@@ -26,7 +26,6 @@ const loadSecretsAction = async () => {
 			dotenv.config({ path: file });
 		}
 
-
 		const isConnect =
 			process.env[envConnectHost] && process.env[envConnectToken];
 		// If Connect is used, download and install the CLI

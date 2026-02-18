@@ -210,7 +210,6 @@ describe("loadSecrets when using Service Account", () => {
 		mockResolve.mockResolvedValue("resolved-secret-value");
 	});
 
-
 	it("does not call op env ls when using Service Account", async () => {
 		await loadSecrets(false);
 		expect(exec.getExecOutput).not.toHaveBeenCalled();
@@ -219,7 +218,10 @@ describe("loadSecrets when using Service Account", () => {
 	it("sets step output with resolved value when export-env is false", async () => {
 		await loadSecrets(false);
 		expect(core.setOutput).toHaveBeenCalledTimes(1);
-		expect(core.setOutput).toHaveBeenCalledWith("MY_SECRET", "resolved-secret-value");
+		expect(core.setOutput).toHaveBeenCalledWith(
+			"MY_SECRET",
+			"resolved-secret-value",
+		);
 	});
 
 	it("masks secret with setSecret when export-env is false", async () => {
@@ -247,7 +249,10 @@ describe("loadSecrets when using Service Account", () => {
 
 	it("does not set step output when export-env is true", async () => {
 		await loadSecrets(true);
-		expect(core.setOutput).not.toHaveBeenCalledWith("MY_SECRET", expect.anything());
+		expect(core.setOutput).not.toHaveBeenCalledWith(
+			"MY_SECRET",
+			expect.anything(),
+		);
 	});
 
 	it("masks secret with setSecret when export-env is true", async () => {

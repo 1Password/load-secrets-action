@@ -148,8 +148,7 @@ const loadSecretsViaServiceAccount = async (
 };
 
 export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
-	const isConnect =
-		process.env[envConnectHost] && process.env[envConnectToken];
+	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
 
 	if (isConnect) {
 		await loadSecretsViaConnect(shouldExportEnv);
