@@ -110,7 +110,7 @@ jobs:
         continue-on-error: true
         uses: ./
         env:
-          BAD_REF: "op://x"
+          BAD_REF: "op://${{ secrets.VAULT }}/test-secret/password"
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         with:
           export-env: true
