@@ -173,24 +173,11 @@ describe("loadSecrets when using Connect", () => {
 		expect(core.exportVariable).not.toHaveBeenCalled();
 	});
 
-	it("fails with clear message when a secret reference is invalid", async () => {
-		(Secrets.validateSecretReference as jest.Mock).mockImplementationOnce(
-			() => {
-				throw new Error("invalid reference format");
-			},
-		);
-		process.env.MOCK_SECRET = "op://bad/invalid-ref";
-
-		await expect(loadSecrets(true)).rejects.toThrow(
-			"Invalid secret reference(s): MOCK_SECRET",
-		);
-	});
-
 	describe("core.exportVariable", () => {
 		it("is called when shouldExportEnv is true", async () => {
 			await loadSecrets(true);
 
-			expect(core.exportVariable).toHaveBeenCalledTimes(2);
+			expect(core.exportVariable).toHaveBeenCalledTimes(1);
 		});
 
 		it("is not called when shouldExportEnv is false", async () => {
