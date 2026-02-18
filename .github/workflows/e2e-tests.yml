@@ -110,7 +110,7 @@ jobs:
         continue-on-error: true
         uses: ./
         env:
-          BAD_REF: "op://${{ secrets.VAULT }}/test-secret/password"
+          BAD_REF: "op://x"
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         with:
           export-env: true
@@ -205,3 +205,18 @@ jobs:
       - name: Assert removed secrets [exported env]
         if: ${{ matrix.export-env }}
         run: ./tests/assert-env-unset.sh
+
+      - name: Load secrets (invalid ref - expect failure)
+        id: load_invalid
+        continue-on-error: true
+        uses: ./
+        env:
+          BAD_REF: "op://x"
+        with:
+          export-env: true
+
+      - name: Assert invalid ref failed
+        shell: bash
+        run: ./tests/assert-invalid-ref-failed.sh
+        env:
+          STEP_OUTCOME: ${{ steps.load_invalid.outcome }}
