@@ -116,6 +116,7 @@ jobs:
           export-env: true
 
       - name: Assert invalid ref failed
+        shell: bash
         run: ./tests/assert-invalid-ref-failed.sh
         env:
           STEP_OUTCOME: ${{ steps.load_invalid.outcome }}
