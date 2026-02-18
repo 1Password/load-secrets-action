@@ -125,8 +125,6 @@ const loadSecretsViaConnect = async (
 	}
 
 	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
-	validateSecretRefs(envs);
-
 	for (const envName of envs) {
 		extractSecret(envName, shouldExportEnv);
 	}
