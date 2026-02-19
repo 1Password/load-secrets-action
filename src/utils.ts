@@ -69,7 +69,6 @@ export const extractSecret = (
 	}
 
 	setResolvedSecret(envName, secretValue, shouldExportEnv);
-
 };
 
 // Connect loads secrets via the 1Password CLI
