@@ -443,8 +443,21 @@ const loadSecretsViaConnect = async (
 
 function getErrorMessage(err: unknown): string {
 	if (err instanceof Error) return err.message;
-	if (err && typeof (err as { message?: unknown }).message === "string")
-		return (err as { message: string }).message;
+	if (!err || typeof err !== "object") return String(err);
+	const e = err as Record<string, unknown>;
+	// Node HTTP response object (thrown by SDK on HTTP errors)
+	if (typeof e.statusCode === "number") {
+		const statusMsg = e.statusMessage != null ? String(e.statusMessage) : "";
+		return `HTTP ${e.statusCode}${statusMsg ? `: ${statusMsg}` : ""}`.trim();
+	}
+	if (typeof e.message === "string") return e.message;
+	if (e.response && typeof e.response === "object") {
+		const res = e.response as Record<string, unknown>;
+		if (typeof res.status === "number")
+			return `HTTP ${res.status}${res.statusText ? `: ${res.statusText}` : ""}`.trim();
+	}
+	if (typeof e.code === "string") return e.code;
+	if (e.cause instanceof Error) return e.cause.message;
 	return String(err);
 }
 
