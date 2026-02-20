@@ -19,7 +19,7 @@ interface ParsedOpRef {
 	field: string;
 }
 
-const parseOpRef = (ref: string): ParsedOpRef => {
+export const parseOpRef = (ref: string): ParsedOpRef => {
 	// Safety check: refs are validated by validateSecretRefs before this runs
 	// this guards against parseOpRef being called directly with invalid input
 	if (!ref.startsWith("op://")) {
@@ -113,7 +113,7 @@ const getSecretFromConnectItem = async (
 	);
 };
 
-const findSectionIdsByQuery = (
+export const findSectionIdsByQuery = (
 	sections: FullItem["sections"],
 	sectionQuery: string | undefined,
 ): string[] => {
@@ -126,8 +126,7 @@ const findSectionIdsByQuery = (
 
 	const ids = sections
 		.filter((s) => s.id === sectionQuery || s.label === sectionQuery)
-		.map((s) => s.id!)
-		.filter(Boolean);
+		.flatMap((s) => (s.id ? [s.id] : []));
 
 	// If no sections were found with the given query throw an error
 	if (ids.length === 0) {
@@ -139,116 +138,76 @@ const findSectionIdsByQuery = (
 	return ids;
 };
 
-const findMatchingFieldAndFile = (
+export const findMatchingFieldAndFile = (
 	item: FullItem,
 	fieldOrFileQuery: string,
 	sectionIds: string[],
 ): { fieldValue?: string; fileId?: string } => {
-	const errMultiple = `multiple fields ${fieldOrFileQuery} that match the provided reference have been found`;
-
+	// Get the fields/files from the item and check if the ref has a section filter
 	const fields = item.fields ?? [];
 	const files = item.files ?? [];
 	const sectionFilter = sectionIds.length > 0;
+
+	const fieldMatchesQuery = (f: (typeof fields)[0]) =>
+		f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
+	const fileMatchesQuery = (f: (typeof files)[0]) =>
+		f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
 
 	let matchedField: (typeof fields)[0] | undefined;
 	let matchedFile: (typeof files)[0] | undefined;
 
 	if (sectionFilter) {
-		// Filter fields by section
+		// If the ref has a section filter only accept matches inside the referenced sections
 		const matchingFields = fields.filter((f) => {
-			const fieldIdOrLabelMatchesQuery =
-				f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
 			const sectionId = f.section?.id;
-			const fieldSectionIsInRefSections =
+			const inRefSections =
 				sectionId !== null &&
 				sectionId !== undefined &&
 				sectionIds.includes(sectionId);
-			return fieldIdOrLabelMatchesQuery && fieldSectionIsInRefSections;
+			return fieldMatchesQuery(f) && inRefSections;
 		});
-
-		// If multiple fields match the query throw an error otherwise set first matching field
-		if (matchingFields.length > 1) {
-			throw new Error(errMultiple);
-		}
-		matchedField = matchingFields[0];
+		matchedField = findSingleMatch(matchingFields);
 
 		const matchingFiles = files.filter((f) => {
-			const fileIdOrNameMatchesQuery =
-				f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
 			const sectionId = f.section?.id;
-			const fileSectionIsInRefSections =
+			const inRefSections =
 				sectionId !== null &&
 				sectionId !== undefined &&
 				sectionIds.includes(sectionId);
-			return fileIdOrNameMatchesQuery && fileSectionIsInRefSections;
+			return fileMatchesQuery(f) && inRefSections;
 		});
-
-		// If multiple files match the query throw an error otherwise set first matching file
-		if (matchingFiles.length > 1) {
-			throw new Error(errMultiple);
-		}
-		matchedFile = matchingFiles[0];
+		matchedFile = findSingleMatch(matchingFiles);
 	} else {
+		// If the ref has no section filter search for matches with no section
 		const matchingFields = fields.filter((f) => {
-			const fieldIdOrLabelMatchesQuery =
-				f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
-			const fieldHasNoSection =
+			const hasNoSection =
 				f.section?.id === null || f.section?.id === undefined;
-			return fieldIdOrLabelMatchesQuery && fieldHasNoSection;
+			return fieldMatchesQuery(f) && hasNoSection;
 		});
+		matchedField = findSingleMatch(matchingFields);
 
-		// If multiple fields match the query throw an error otherwise set first matching field
-		if (matchingFields.length > 1) {
-			throw new Error(errMultiple);
-		}
-		matchedField = matchingFields[0];
-
-		// If no field was found with no section, find a field in any section
+		// If no matches were found with no section, search for matches in any section
 		if (!matchedField) {
-			const matchingFieldsInAnySection = fields.filter((f) => {
-				const fieldIdOrLabelMatchesQuery =
-					f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
-				return fieldIdOrLabelMatchesQuery;
-			});
-
-			if (matchingFieldsInAnySection.length > 1) {
-				throw new Error(errMultiple);
-			}
-			matchedField = matchingFieldsInAnySection[0];
+			const matchingFieldsInAnySection = fields.filter(fieldMatchesQuery);
+			matchedField = findSingleMatch(matchingFieldsInAnySection);
 		}
 
 		const matchingFiles = files.filter((f) => {
-			const fileIdOrNameMatchesQuery =
-				f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
-			const fileHasNoSection =
+			const hasNoSection =
 				f.section?.id === null || f.section?.id === undefined;
-			return fileIdOrNameMatchesQuery && fileHasNoSection;
+			return fileMatchesQuery(f) && hasNoSection;
 		});
+		matchedFile = findSingleMatch(matchingFiles);
 
-		// If multiple files match the query throw an error otherwise set first matching file
-		if (matchingFiles.length > 1) {
-			throw new Error(errMultiple);
-		}
-		matchedFile = matchingFiles[0];
-
-		// If no file was found with no section, find a file in any section
 		if (!matchedFile) {
-			const matchingFilesInAnySection = files.filter((f) => {
-				const fileIdOrNameMatchesQuery =
-					f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
-				return fileIdOrNameMatchesQuery;
-			});
-
-			if (matchingFilesInAnySection.length > 1) {
-				throw new Error(errMultiple);
-			}
-			matchedFile = matchingFilesInAnySection[0];
+			const matchingFilesInAnySection = files.filter(fileMatchesQuery);
+			matchedFile = findSingleMatch(matchingFilesInAnySection);
 		}
 	}
 
 	if (matchedField && matchedFile) {
 		throw new Error(
-			`you cannot query fields/files that are identically named.`,
+			`Both a field and a file match "${fieldOrFileQuery}". Rename one or use the ID in your op:// reference.`,
 		);
 	}
 
@@ -262,16 +221,24 @@ const findMatchingFieldAndFile = (
 	}
 
 	if (matchedFile?.id) {
-		const fileId = matchedFile.id;
-		return { fileId };
+		return { fileId: matchedFile.id };
 	}
 
 	return {};
 };
+
+const findSingleMatch = <T>(matches: T[]): T | undefined => {
+	if (matches.length > 1) {
+		throw new Error(
+			"Multiple matches found. Rename one or use an ID in your op:// reference.",
+		);
+	}
+	return matches[0];
+};
 // #endregion
 
 // #region Shared helpers and auth
-const getEnvVarNamesWithSecretRefs = (): string[] =>
+export const getEnvVarNamesWithSecretRefs = (): string[] =>
 	Object.keys(process.env).filter(
 		(key) =>
 			typeof process.env[key] === "string" &&
@@ -364,6 +331,29 @@ export const unsetPrevious = (): void => {
 		}
 	}
 };
+
+const fetchVaultId = async (
+	client: OPConnect,
+	vaultQuery: string,
+	ref: string,
+	cache: Map<string, string>,
+): Promise<string> => {
+	// Check if the vault ID is already cached
+	const cached = cache.get(vaultQuery);
+	if (cached !== undefined) {
+		return cached;
+	}
+
+	const vault = await client.getVault(vaultQuery);
+	if (!vault.id) {
+		throw new Error(
+			`Could not find valid vault "${vaultQuery}" for ref "${ref}"`,
+		);
+	}
+
+	cache.set(vaultQuery, vault.id);
+	return vault.id;
+};
 // #endregion
 
 // #region Load secrets
@@ -397,25 +387,33 @@ const loadSecretsViaConnect = async (
 		throw new Error(`Connect authentication failed: ${message}`);
 	}
 
+	const vaultIdByQuery = new Map<string, string>();
+
 	for (const envName of envs) {
 		const ref = process.env[envName];
 		if (!ref) {
 			continue;
 		}
 
-		// Parse the op ref and get the item from the Connect SDK
-		const parsed = parseOpRef(ref);
-		const vault = await client.getVault(parsed.vault);
-		if (!vault.id) {
-			throw new Error(
-				`Could not find valid vault "${parsed.vault}" for ref "${ref}"`,
-			);
-		}
-		const item = await client.getItem(vault.id, parsed.item);
+		try {
+			// Parse the op ref and get the item from the Connect SDK
+			const parsed = parseOpRef(ref);
 
-		// Get the secret value from the item as Connect returns a full item object
-		const secretValue = await getSecretFromConnectItem(client, item, parsed);
-		setResolvedSecret(envName, secretValue, shouldExportEnv);
+			const vaultId = await fetchVaultId(
+				client,
+				parsed.vault,
+				ref,
+				vaultIdByQuery,
+			);
+			const item = await client.getItem(vaultId, parsed.item);
+
+			// Get the secret value from the item as Connect returns a full item object
+			const secretValue = await getSecretFromConnectItem(client, item, parsed);
+			setResolvedSecret(envName, secretValue, shouldExportEnv);
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : String(err);
+			throw new Error(`Failed to load ref "${ref}": ${msg}`);
+		}
 	}
 
 	if (shouldExportEnv) {

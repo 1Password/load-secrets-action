@@ -27,21 +27,14 @@ const loadSecretsAction = async () => {
 		// Load secrets
 		await loadSecrets(shouldExportEnv);
 	} catch (error) {
+		// It's possible for the Error constructor to be modified to be anything
+		// in JavaScript, so the following code accounts for this possibility.
+		// https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
 		let message = "Unknown Error";
 		if (error instanceof Error) {
 			message = error.message;
-			if (message === "Unknown Error" && error.cause instanceof Error) {
-				message = error.cause.message;
-			}
-		} else if (
-			error &&
-			typeof error === "object" &&
-			"message" in error &&
-			typeof (error as { message: unknown }).message === "string"
-		) {
-			message = (error as { message: string }).message;
-		} else if (error !== null && error !== undefined) {
-			message = typeof error === "string" ? error : JSON.stringify(error);
+		} else {
+			message = String(error);
 		}
 		core.setFailed(message);
 	}

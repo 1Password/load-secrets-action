@@ -17,7 +17,8 @@ This document explains how to run e2e tests locally using `act`.
 | Secret                     | Description           |
 | -------------------------- | --------------------- |
 | `OP_SERVICE_ACCOUNT_TOKEN` | Service Account token |
-| `VAULT`                    | Vault name or UUID    |
+| `VAULT`                    | Vault name            |
+| `VAULT_ID`                 | Vault UUID            |
 
 ## Building Before Testing
 

@@ -33684,7 +33684,7 @@ const loadSecretsAction = async () => {
             message = error.message;
         }
         else {
-           message = String(error);
+          String(error);
         }
         core.setFailed(message);
     }

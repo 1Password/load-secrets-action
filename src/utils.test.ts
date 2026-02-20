@@ -2,12 +2,16 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read } from "@1password/op-js";
 import { createClient, Secrets } from "@1password/sdk";
-import { OnePasswordConnect } from "@1password/connect";
+import { OnePasswordConnect, FullItem } from "@1password/connect";
 import {
 	extractSecret,
 	loadSecrets,
 	unsetPrevious,
 	validateAuth,
+	findMatchingFieldAndFile,
+	findSectionIdsByQuery,
+	parseOpRef,
+	getEnvVarNamesWithSecretRefs,
 } from "./utils";
 import {
 	authErr,
@@ -592,5 +596,362 @@ describe("unsetPrevious", () => {
 		expect(core.info).toHaveBeenCalledWith("Unsetting previous values ...");
 		expect(core.info).toHaveBeenCalledWith("Unsetting TEST_SECRET");
 		expect(core.exportVariable).toHaveBeenCalledWith("TEST_SECRET", "");
+	});
+});
+
+describe("findMatchingFieldAndFile", () => {
+	interface TestField {
+		id?: string;
+		label?: string;
+		value?: string | null;
+		section?: { id: string } | null | undefined;
+	}
+	interface TestFile {
+		id?: string;
+		name?: string;
+		section?: { id: string } | null | undefined;
+	}
+
+	const item = (opts: { fields?: TestField[]; files?: TestFile[] }): FullItem =>
+		({
+			fields: opts.fields ?? [],
+			files: opts.files ?? [],
+			sections: [],
+		}) as unknown as FullItem;
+
+	const find = (
+		opts: { fields?: TestField[]; files?: TestFile[] },
+		sectionIds: string[] = [],
+	) => findMatchingFieldAndFile(item(opts), "password", sectionIds);
+
+	describe("when section filter is used (sectionIds.length > 0)", () => {
+		it.each<{
+			name: string;
+			itemOpts: { fields?: TestField[]; files?: TestFile[] };
+			expected: { fieldValue?: string; fileId?: string };
+		}>([
+			{
+				name: "returns field value when one field matches query and is in ref sections",
+				itemOpts: {
+					fields: [
+						{
+							id: "f1",
+							label: "password",
+							value: "secret123",
+							section: { id: "section-1" },
+						},
+					],
+				},
+				expected: { fieldValue: "secret123" },
+			},
+			{
+				name: "returns file id when one file matches query and is in ref sections",
+				itemOpts: {
+					files: [
+						{
+							id: "file-uuid",
+							name: "password",
+							section: { id: "section-1" },
+						},
+					],
+				},
+				expected: { fileId: "file-uuid" },
+			},
+			{
+				name: "returns empty object when no field or file matches",
+				itemOpts: {
+					fields: [
+						{ label: "other", value: "x", section: { id: "section-1" } },
+					],
+					files: [],
+				},
+				expected: {},
+			},
+			{
+				name: "returns field value when field matches by id",
+				itemOpts: {
+					fields: [
+						{
+							id: "password",
+							label: "Password Label",
+							value: "secret-by-id",
+							section: { id: "section-1" },
+						},
+					],
+				},
+				expected: { fieldValue: "secret-by-id" },
+			},
+		])("$name", ({ itemOpts, expected }) => {
+			expect(find(itemOpts, ["section-1"])).toEqual(expected);
+		});
+
+		it.each<{
+			name: string;
+			itemOpts: { fields?: TestField[]; files?: TestFile[] };
+			error: RegExp;
+		}>([
+			{
+				name: "throws when multiple fields match",
+				itemOpts: {
+					fields: [
+						{ label: "password", value: "a", section: { id: "section-1" } },
+						{ label: "password", value: "b", section: { id: "section-1" } },
+					],
+				},
+				error: /Multiple matches/,
+			},
+			{
+				name: "throws when multiple files match",
+				itemOpts: {
+					files: [
+						{ id: "id1", name: "password", section: { id: "section-1" } },
+						{ id: "id2", name: "password", section: { id: "section-1" } },
+					],
+				},
+				error: /Multiple matches/,
+			},
+			{
+				name: "throws when both a field and a file match",
+				itemOpts: {
+					fields: [
+						{ label: "password", value: "v", section: { id: "section-1" } },
+					],
+					files: [
+						{ id: "fid", name: "password", section: { id: "section-1" } },
+					],
+				},
+				error: /Both a field and a file match/,
+			},
+			{
+				name: "throws when field has no value",
+				itemOpts: {
+					fields: [
+						{ label: "password", value: null, section: { id: "section-1" } },
+					],
+				},
+				error: /has no value/,
+			},
+		])("$name", ({ itemOpts, error }) => {
+			expect(() => find(itemOpts, ["section-1"])).toThrow(error);
+		});
+	});
+
+	describe("when no section filter (sectionIds.length === 0)", () => {
+		const sectionIds: string[] = [];
+
+		it.each<{
+			name: string;
+			itemOpts: { fields?: TestField[]; files?: TestFile[] };
+			expected: { fieldValue?: string; fileId?: string };
+		}>([
+			{
+				name: "returns field value when one field has no section and matches query",
+				itemOpts: {
+					fields: [{ label: "password", value: "secret", section: undefined }],
+				},
+				expected: { fieldValue: "secret" },
+			},
+			{
+				name: "returns file id when one file has no section and matches query",
+				itemOpts: {
+					files: [{ id: "file-id", name: "password", section: undefined }],
+				},
+				expected: { fileId: "file-id" },
+			},
+			{
+				name: "returns field value from fallback (any section) when no field with no section matches",
+				itemOpts: {
+					fields: [
+						{ label: "other", value: "x", section: undefined },
+						{
+							label: "password",
+							value: "from-any-section",
+							section: { id: "sec" },
+						},
+					],
+				},
+				expected: { fieldValue: "from-any-section" },
+			},
+			{
+				name: "returns file id from fallback (any section) when no file with no section matches",
+				itemOpts: {
+					files: [
+						{ id: "other", name: "x", section: undefined },
+						{ id: "file-any", name: "password", section: { id: "sec" } },
+					],
+				},
+				expected: { fileId: "file-any" },
+			},
+			{
+				name: "returns empty object when no match",
+				itemOpts: {
+					fields: [{ label: "other", value: "x", section: undefined }],
+					files: [],
+				},
+				expected: {},
+			},
+		])("$name", ({ itemOpts, expected }) => {
+			expect(find(itemOpts, sectionIds)).toEqual(expected);
+		});
+
+		it.each<{
+			name: string;
+			itemOpts: { fields?: TestField[]; files?: TestFile[] };
+			error: RegExp;
+		}>([
+			{
+				name: "throws when multiple fields with no section match",
+				itemOpts: {
+					fields: [
+						{ label: "password", value: "a", section: undefined },
+						{ label: "password", value: "b", section: undefined },
+					],
+				},
+				error: /Multiple matches/,
+			},
+			{
+				name: "throws when multiple files with no section match",
+				itemOpts: {
+					files: [
+						{ id: "1", name: "password", section: undefined },
+						{ id: "2", name: "password", section: undefined },
+					],
+				},
+				error: /Multiple matches/,
+			},
+			{
+				name: "throws when both field and file match",
+				itemOpts: {
+					fields: [{ label: "password", value: "value", section: undefined }],
+					files: [{ id: "fid", name: "password", section: undefined }],
+				},
+				error: /Both a field and a file match/,
+			},
+		])("$name", ({ itemOpts, error }) => {
+			expect(() => find(itemOpts, sectionIds)).toThrow(error);
+		});
+	});
+});
+
+describe("findSectionIdsByQuery", () => {
+	it("throws when sections is empty", () => {
+		expect(() => findSectionIdsByQuery([], "section-1")).toThrow(
+			/section section-1 could not be found/,
+		);
+	});
+
+	it("throws when sections is null/undefined", () => {
+		expect(() =>
+			findSectionIdsByQuery(undefined as unknown as FullItem["sections"], "x"),
+		).toThrow(/could not be found/);
+	});
+
+	it("returns section id when section matches by id", () => {
+		const sections = [{ id: "sec-1", label: "Section 1" }];
+		expect(
+			findSectionIdsByQuery(sections as FullItem["sections"], "sec-1"),
+		).toEqual(["sec-1"]);
+	});
+
+	it("returns section id when section matches by label", () => {
+		const sections = [{ id: "sec-1", label: "My Section" }];
+		expect(
+			findSectionIdsByQuery(sections as FullItem["sections"], "My Section"),
+		).toEqual(["sec-1"]);
+	});
+
+	it("throws when section query matches no section", () => {
+		const sections = [{ id: "sec-1", label: "Other" }];
+		expect(() =>
+			findSectionIdsByQuery(sections as FullItem["sections"], "nonexistent"),
+		).toThrow(/could not be found/);
+	});
+
+	it("returns multiple ids when multiple sections match", () => {
+		const sections = [
+			{ id: "sec-1", label: "A" },
+			{ id: "sec-2", label: "A" },
+		];
+		expect(
+			findSectionIdsByQuery(sections as FullItem["sections"], "A"),
+		).toEqual(["sec-1", "sec-2"]);
+	});
+});
+
+describe("parseOpRef", () => {
+	it("parses 3-segment ref (vault/item/field)", () => {
+		expect(parseOpRef("op://vault/item/field")).toEqual({
+			vault: "vault",
+			item: "item",
+			field: "field",
+			section: undefined,
+		});
+	});
+
+	it("parses 4-segment ref (vault/item/section/field)", () => {
+		expect(parseOpRef("op://vault/item/MySection/password")).toEqual({
+			vault: "vault",
+			item: "item",
+			section: "MySection",
+			field: "password",
+		});
+	});
+
+	it("decodes URI-encoded segments", () => {
+		expect(parseOpRef("op://my%20vault/my%20item/field")).toEqual({
+			vault: "my vault",
+			item: "my item",
+			field: "field",
+			section: undefined,
+		});
+	});
+
+	it("throws when ref does not start with op://", () => {
+		expect(() => parseOpRef("invalid-ref")).toThrow(
+			/Invalid op reference: invalid-ref/,
+		);
+	});
+
+	it("throws when segment count is invalid", () => {
+		expect(() => parseOpRef("op://vault/item")).toThrow(
+			/use op:\/\/<vault>\/<item>\/<field>/,
+		);
+		expect(() => parseOpRef("op://a/b/c/d/e")).toThrow(
+			/use op:\/\/<vault>\/<item>\/<field>/,
+		);
+	});
+
+	it("throws when vault or item or field is empty", () => {
+		expect(() => parseOpRef("op:///item/field")).toThrow(/vault is required/);
+		expect(() => parseOpRef("op://vault//field")).toThrow(/item is required/);
+		expect(() => parseOpRef("op://vault/item/")).toThrow(/field is required/);
+	});
+
+	it("throws when 4-segment ref has empty section", () => {
+		expect(() => parseOpRef("op://vault/item//field")).toThrow(
+			/section is required when using 4 path segments/,
+		);
+	});
+
+	it("throws when last segment is empty (trailing slash)", () => {
+		expect(() => parseOpRef("op://vault/item/field/")).toThrow(
+			/field is required/,
+		);
+	});
+});
+
+describe("getEnvVarNamesWithSecretRefs", () => {
+	it("returns only env var names whose value is a string starting with op://", () => {
+		process.env.OP_REF = "op://vault/item/field";
+		process.env.NOT_OP_REF = "https://example.com";
+		process.env.EMPTY_REF = "";
+		process.env.OP_REF_OTHER = "op://other/vault/item/secret";
+
+		const result = getEnvVarNamesWithSecretRefs();
+
+		expect(result).toContain("OP_REF");
+		expect(result).toContain("OP_REF_OTHER");
+		expect(result).not.toContain("NOT_OP_REF");
+		expect(result).not.toContain("EMPTY_REF");
 	});
 });
