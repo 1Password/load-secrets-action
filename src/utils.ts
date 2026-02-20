@@ -381,7 +381,6 @@ const loadSecretsViaConnect = async (
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			serverURL: host,
 			token,
-			timeout: 30000,
 		});
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
@@ -395,25 +394,27 @@ const loadSecretsViaConnect = async (
 		if (!ref) {
 			continue;
 		}
-
+		let parsed, vaultId, item, secretValue;
 		try {
-			// Parse the op ref and get the item from the Connect SDK
-			const parsed = parseOpRef(ref);
-
-			const vaultId = await fetchVaultId(
-				client,
-				parsed.vault,
-				ref,
-				vaultIdByQuery,
-			);
-			const item = await client.getItem(vaultId, parsed.item);
-
-			// Get the secret value from the item as Connect returns a full item object
-			const secretValue = await getSecretFromConnectItem(client, item, parsed);
+			parsed = parseOpRef(ref);
+		} catch (err) {
+			throw new Error(`Failed to parse ref "${ref}": ${getErrorMessage(err)}`);
+		}
+		try {
+			vaultId = await fetchVaultId(client, parsed.vault, ref, vaultIdByQuery);
+		} catch (err) {
+			throw new Error(`Failed to resolve vault for "${ref}": ${getErrorMessage(err)}`);
+		}
+		try {
+			item = await client.getItem(vaultId, parsed.item);
+		} catch (err) {
+			throw new Error(`Failed to get item for "${ref}": ${getErrorMessage(err)}`);
+		}
+		try {
+			secretValue = await getSecretFromConnectItem(client, item, parsed);
 			setResolvedSecret(envName, secretValue, shouldExportEnv);
 		} catch (err) {
-			const msg = err instanceof Error ? err.message : String(err);
-			throw new Error(`Failed to load ref "${ref}": ${msg}`);
+			throw new Error(`Failed to get secret value for "${ref}": ${getErrorMessage(err)}`);
 		}
 	}
 
@@ -421,6 +422,13 @@ const loadSecretsViaConnect = async (
 		core.exportVariable(envManagedVariables, envs.join());
 	}
 };
+
+function getErrorMessage(err: unknown): string {
+	if (err instanceof Error) return err.message;
+	if (err && typeof (err as { message?: unknown }).message === "string")
+		return (err as { message: string }).message;
+	return String(err);
+}
 
 // Service Account loads secrets via the 1Password SDK
 const loadSecretsViaServiceAccount = async (
