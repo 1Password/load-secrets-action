@@ -381,6 +381,7 @@ const loadSecretsViaConnect = async (
 			// eslint-disable-next-line @typescript-eslint/naming-convention
 			serverURL: host,
 			token,
+			timeout: 30000,
 		});
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
@@ -411,16 +412,9 @@ const loadSecretsViaConnect = async (
 			const secretValue = await getSecretFromConnectItem(client, item, parsed);
 			setResolvedSecret(envName, secretValue, shouldExportEnv);
 		} catch (err) {
-			const msg =
-			  err instanceof Error
-				? err.message
-				: err && typeof err === "object" && "message" in err
-				  ? String((err as { message?: unknown }).message)
-				  : err && typeof err === "object"
-					? JSON.stringify(err)
-					: String(err);
+			const msg = err instanceof Error ? err.message : String(err);
 			throw new Error(`Failed to load ref "${ref}": ${msg}`);
-		  }
+		}
 	}
 
 	if (shouldExportEnv) {
