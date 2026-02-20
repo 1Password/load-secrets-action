@@ -26,6 +26,7 @@ jest.mock("@actions/exec", () => ({
 jest.mock("@1password/op-js");
 jest.mock("@1password/sdk", () => ({
 	createClient: jest.fn(),
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	Secrets: {
 		validateSecretReference: jest.fn(),
 	},
@@ -153,6 +154,12 @@ describe("extractSecret", () => {
 });
 
 describe("loadSecrets when using Connect", () => {
+	beforeEach(() => {
+		process.env[envConnectHost] = "https://localhost:8000";
+		process.env[envConnectToken] = "token";
+		process.env[envServiceAccountToken] = "";
+	});
+
 	beforeEach(() => {
 		process.env[envConnectHost] = "https://connect.example";
 		process.env[envConnectToken] = "test-token";
@@ -308,6 +315,15 @@ describe("loadSecrets when using Service Account", () => {
 		await loadSecrets(true);
 		expect(exec.getExecOutput).not.toHaveBeenCalled();
 		expect(core.exportVariable).not.toHaveBeenCalled();
+	});
+
+	it("wraps createClient errors with a descriptive message", async () => {
+		(createClient as jest.Mock).mockRejectedValue(
+			new Error("invalid token format"),
+		);
+		await expect(loadSecrets(false)).rejects.toThrow(
+			"Service account authentication failed: invalid token format",
+		);
 	});
 
 	describe("multiple refs", () => {

@@ -266,7 +266,7 @@ export const validateAuth = (): void => {
 	core.info(`Authenticated with ${authType}.`);
 };
 
-export const getEnvVarNamesWithSecretRefs = (): string[] =>
+const getEnvVarNamesWithSecretRefs = (): string[] =>
 	Object.keys(process.env).filter(
 		(key) =>
 			typeof process.env[key] === "string" &&
@@ -317,8 +317,6 @@ export const extractSecret = (
 	envName: string,
 	shouldExportEnv: boolean,
 ): void => {
-	core.info(`Populating variable: ${envName}`);
-
 	const ref = process.env[envName];
 	if (!ref) {
 		return;
@@ -329,16 +327,7 @@ export const extractSecret = (
 		return;
 	}
 
-	if (shouldExportEnv) {
-		core.exportVariable(envName, secretValue);
-	} else {
-		core.setOutput(envName, secretValue);
-	}
-	// Skip setSecret for empty strings to avoid the warning:
-	// "Can't add secret mask for empty string in ##[add-mask] command."
-	if (secretValue) {
-		core.setSecret(secretValue);
-	}
+	setResolvedSecret(envName, secretValue, shouldExportEnv);
 };
 
 // Connect loads secrets via the Connect JS SDK
