@@ -11,9 +11,6 @@ inputs:
   export-env:
     description: Export the secrets as environment variables
     default: "false"
-  version:
-    description: Specify which 1Password CLI version to install. Defaults to "latest".
-    default: "latest"
 runs:
   using: "node20"
   main: "dist/index.js"

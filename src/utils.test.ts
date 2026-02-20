@@ -1,10 +1,8 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import { read } from "@1password/op-js";
 import { createClient, Secrets } from "@1password/sdk";
 import { OnePasswordConnect, FullItem } from "@1password/connect";
 import {
-	extractSecret,
 	loadSecrets,
 	unsetPrevious,
 	validateAuth,
@@ -27,7 +25,6 @@ jest.mock("@actions/exec", () => ({
 		stdout: "MOCK_SECRET",
 	})),
 }));
-jest.mock("@1password/op-js");
 jest.mock("@1password/sdk", () => ({
 	createClient: jest.fn(),
 	// eslint-disable-next-line @typescript-eslint/naming-convention
@@ -83,77 +80,6 @@ describe("validateAuth", () => {
 		expect(validateAuth).not.toThrow(authErr);
 		expect(core.warning).toHaveBeenCalled();
 		expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
-	});
-});
-
-describe("extractSecret", () => {
-	const envTestSecretEnv = "TEST_SECRET";
-	const testSecretRef = "op://vault/item/secret";
-	const testSecretValue = "Secret1@3$";
-
-	read.parse = jest.fn().mockReturnValue(testSecretValue);
-
-	process.env[envTestSecretEnv] = testSecretRef;
-
-	it("should set secret as step output", () => {
-		extractSecret(envTestSecretEnv, false);
-		expect(core.exportVariable).not.toHaveBeenCalledWith(
-			envTestSecretEnv,
-			testSecretValue,
-		);
-		expect(core.setOutput).toHaveBeenCalledWith(
-			envTestSecretEnv,
-			testSecretValue,
-		);
-		expect(core.setSecret).toHaveBeenCalledWith(testSecretValue);
-	});
-
-	it("should set secret as environment variable", () => {
-		extractSecret(envTestSecretEnv, true);
-		expect(core.exportVariable).toHaveBeenCalledWith(
-			envTestSecretEnv,
-			testSecretValue,
-		);
-		expect(core.setOutput).not.toHaveBeenCalledWith(
-			envTestSecretEnv,
-			testSecretValue,
-		);
-		expect(core.setSecret).toHaveBeenCalledWith(testSecretValue);
-	});
-
-	describe("when secret value is empty string", () => {
-		const emptySecretValue = "";
-
-		beforeEach(() => {
-			(read.parse as jest.Mock).mockReturnValue(emptySecretValue);
-		});
-
-		afterEach(() => {
-			(read.parse as jest.Mock).mockReturnValue(testSecretValue);
-		});
-
-		it("should set empty string as step output", () => {
-			extractSecret(envTestSecretEnv, false);
-			expect(core.setOutput).toHaveBeenCalledWith(
-				envTestSecretEnv,
-				emptySecretValue,
-			);
-			expect(core.exportVariable).not.toHaveBeenCalled();
-		});
-
-		it("should set empty string as environment variable", () => {
-			extractSecret(envTestSecretEnv, true);
-			expect(core.exportVariable).toHaveBeenCalledWith(
-				envTestSecretEnv,
-				emptySecretValue,
-			);
-			expect(core.setOutput).not.toHaveBeenCalled();
-		});
-
-		it("should not call setSecret for empty string", () => {
-			extractSecret(envTestSecretEnv, false);
-			expect(core.setSecret).not.toHaveBeenCalled();
-		});
 	});
 });
 
@@ -411,11 +337,6 @@ describe("loadSecrets when using Service Account", () => {
 		});
 
 		mockResolve.mockResolvedValue("resolved-secret-value");
-	});
-
-	it("does not call op env ls when using Service Account", async () => {
-		await loadSecrets(false);
-		expect(exec.getExecOutput).not.toHaveBeenCalled();
 	});
 
 	it("sets step output with resolved value when export-env is false", async () => {

@@ -84,7 +84,7 @@ When loading SSH keys, you can specify the format using the `ssh-format` query p
     SSH_PRIVATE_KEY: op://vault/item/private key?ssh-format=openssh
 ```
 
-For more details on secret reference syntax, see the [1Password CLI documentation](https://developer.1password.com/docs/cli/secret-reference-syntax/#ssh-format-parameter).
+For more details on secret reference syntax, see the [1Password documentation](https://developer.1password.com/docs/cli/secret-reference-syntax/#ssh-format-parameter).
 
 ## 💙 Community & Support
 

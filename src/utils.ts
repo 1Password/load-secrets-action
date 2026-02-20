@@ -1,5 +1,4 @@
 import * as core from "@actions/core";
-import { read } from "@1password/op-js";
 import { createClient, Secrets } from "@1password/sdk";
 import { OnePasswordConnect, FullItem, OPConnect } from "@1password/connect";
 import { version } from "../package.json";
@@ -318,23 +317,6 @@ export const validateAuth = (): void => {
 	const authType = isConnect ? "Connect" : "Service account";
 
 	core.info(`Authenticated with ${authType}.`);
-};
-
-export const extractSecret = (
-	envName: string,
-	shouldExportEnv: boolean,
-): void => {
-	const ref = process.env[envName];
-	if (!ref) {
-		return;
-	}
-
-	const secretValue = read.parse(ref);
-	if (secretValue === null || secretValue === undefined) {
-		return;
-	}
-
-	setResolvedSecret(envName, secretValue, shouldExportEnv);
 };
 
 export const unsetPrevious = (): void => {

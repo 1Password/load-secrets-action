@@ -14,7 +14,7 @@ const loadSecretsAction = async () => {
 			unsetPrevious();
 		}
 
-		// Validate that a proper authentication configuration is set for the CLI
+		// Validate that a proper authentication configuration is set (Connect or service account)
 		validateAuth();
 
 		// Set environment variables from OP_ENV_FILE

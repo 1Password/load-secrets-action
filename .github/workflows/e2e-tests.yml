@@ -29,13 +29,12 @@ on:
 
 jobs:
   test-service-account:
-    name: Service Account (${{ matrix.os }}, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
+    name: Service Account (${{ matrix.os }}, export-env=${{ matrix.export-env }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        version: [latest, 2.30.0]
         export-env: [true, false]
     steps:
       - name: Checkout
@@ -86,7 +85,6 @@ jobs:
         id: load_secrets
         uses: ./
         with:
-          version: ${{ matrix.version }}
           export-env: ${{ matrix.export-env }}
         env:
           SECRET: op://${{ secrets.VAULT }}/test-secret/password
@@ -147,7 +145,6 @@ jobs:
         id: load_secrets_by_vault_id
         uses: ./
         with:
-          version: ${{ matrix.version }}
           export-env: ${{ matrix.export-env }}
         env:
           SECRET: op://${{ secrets.VAULT_ID }}/test-secret/password
@@ -174,13 +171,12 @@ jobs:
         run: ./tests/assert-env-set.sh
 
   test-connect:
-    name: Connect (ubuntu-latest, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
+    name: Connect (ubuntu-latest, export-env=${{ matrix.export-env }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        version: [latest, 2.30.0]
         export-env: [true, false]
     steps:
       - name: Checkout
@@ -237,7 +233,6 @@ jobs:
         id: load_secrets
         uses: ./
         with:
-          version: ${{ matrix.version }}
           export-env: ${{ matrix.export-env }}
         env:
           SECRET: op://${{ secrets.VAULT }}/test-secret/password
@@ -295,7 +290,6 @@ jobs:
         id: load_secrets_by_vault_id
         uses: ./
         with:
-          version: ${{ matrix.version }}
           export-env: ${{ matrix.export-env }}
         env:
           SECRET: op://${{ secrets.VAULT_ID }}/test-secret/password
