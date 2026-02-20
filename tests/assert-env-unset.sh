@@ -17,3 +17,7 @@ assert_env_unset "FILE_SECRET_IN_SECTION"
 
 assert_env_unset "MULTILINE_SECRET"
 assert_env_unset "FILE_MULTILINE_SECRET"
+
+assert_env_unset "SECRET_WITH_FILE"
+assert_env_unset "SECRET_WITH_FILE_IN_SECTION"
+assert_env_unset "DOUBLE_SECTION_SECRET"

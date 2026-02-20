@@ -10,6 +10,9 @@ assert_env_equals() {
 }
 
 readonly SECRET="RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLCB0aGlzIGlzIGp1c3QgYSBkdW1teSBzZWNyZXQuIFBsZWFzZSBkb24ndCByZXBvcnQgaXQu"
+readonly FILE_SECRET_CONTENT="This is a test"
+readonly DOUBLE_SECTION_SECRET_CONTENT="test-password"
+
 MULTILINE_SECRET="$(cat << EOF
 -----BEGIN PRIVATE KEY-----
 RGVhciBzZWN1cml0eSByZXNlYXJjaGVyLApXaGls
@@ -35,3 +38,8 @@ assert_env_equals "FILE_SECRET_IN_SECTION" "${SECRET}"
 
 assert_env_equals "MULTILINE_SECRET" "${MULTILINE_SECRET}"
 assert_env_equals "FILE_MULTILINE_SECRET" "${MULTILINE_SECRET}"
+
+assert_env_equals "SECRET_WITH_FILE" "${FILE_SECRET_CONTENT}"
+assert_env_equals "SECRET_WITH_FILE_IN_SECTION" "${FILE_SECRET_CONTENT}"
+
+assert_env_equals "DOUBLE_SECTION_SECRET" "${DOUBLE_SECTION_SECRET_CONTENT}"

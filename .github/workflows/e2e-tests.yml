@@ -63,6 +63,9 @@ jobs:
           echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
           echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
+          echo "SECRET_WITH_FILE=op://${{ secrets.VAULT }}/file-secret/test.txt" >> tests/.env.tpl
+          echo "SECRET_WITH_FILE_IN_SECTION=op://${{ secrets.VAULT }}/file-secret/file section/test.txt" >> tests/.env.tpl
+          echo "DOUBLE_SECTION_SECRET=op://${{ secrets.VAULT }}/double-section-secret/test-section/password" >> tests/.env.tpl
 
       - name: Generate .vaultId_env.tpl
         shell: bash
@@ -70,6 +73,9 @@ jobs:
           echo "FILE_SECRET=op://${{ secrets.VAULT_ID }}/test-secret/password" > tests/.vaultId_env.tpl
           echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT_ID }}/test-secret/test-section/password" >> tests/.vaultId_env.tpl
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT_ID }}/multiline-secret/notesPlain" >> tests/.vaultId_env.tpl
+          echo "SECRET_WITH_FILE=op://${{ secrets.VAULT_ID }}/file-secret/test.txt" >> tests/.vaultId_env.tpl
+          echo "SECRET_WITH_FILE_IN_SECTION=op://${{ secrets.VAULT_ID }}/file-secret/file section/test.txt" >> tests/.vaultId_env.tpl
+          echo "DOUBLE_SECTION_SECRET=op://${{ secrets.VAULT_ID }}/double-section-secret/test-section/password" >> tests/.vaultId_env.tpl
 
       - name: Configure Service account
         uses: ./configure
@@ -86,6 +92,9 @@ jobs:
           SECRET: op://${{ secrets.VAULT }}/test-secret/password
           SECRET_IN_SECTION: op://${{ secrets.VAULT }}/test-secret/test-section/password
           MULTILINE_SECRET: op://${{ secrets.VAULT }}/multiline-secret/notesPlain
+          SECRET_WITH_FILE: op://${{ secrets.VAULT }}/file-secret/test.txt
+          SECRET_WITH_FILE_IN_SECTION: op://${{ secrets.VAULT }}/file-secret/file section/test.txt
+          DOUBLE_SECTION_SECRET: op://${{ secrets.VAULT }}/double-section-secret/test-section/password
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -98,6 +107,9 @@ jobs:
           FILE_SECRET: ${{ steps.load_secrets.outputs.FILE_SECRET }}
           FILE_SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.FILE_SECRET_IN_SECTION }}
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
+          SECRET_WITH_FILE: ${{ steps.load_secrets.outputs.SECRET_WITH_FILE }}
+          SECRET_WITH_FILE_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_WITH_FILE_IN_SECTION }}
+          DOUBLE_SECTION_SECRET: ${{ steps.load_secrets.outputs.DOUBLE_SECTION_SECRET }}
         run: ./tests/assert-env-set.sh
 
       - name: Assert test secret values [exported env]
@@ -141,6 +153,9 @@ jobs:
           SECRET: op://${{ secrets.VAULT_ID }}/test-secret/password
           SECRET_IN_SECTION: op://${{ secrets.VAULT_ID }}/test-secret/test-section/password
           MULTILINE_SECRET: op://${{ secrets.VAULT_ID }}/multiline-secret/notesPlain
+          SECRET_WITH_FILE: op://${{ secrets.VAULT_ID }}/file-secret/test.txt
+          SECRET_WITH_FILE_IN_SECTION: op://${{ secrets.VAULT_ID }}/file-secret/file section/test.txt
+          DOUBLE_SECTION_SECRET: op://${{ secrets.VAULT_ID }}/double-section-secret/test-section/password
           OP_ENV_FILE: ./tests/.vaultId_env.tpl
 
       - name: Assert test secret values [vault by ID]
@@ -153,6 +168,9 @@ jobs:
           FILE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.FILE_SECRET }}
           FILE_SECRET_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.FILE_SECRET_IN_SECTION }}
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.FILE_MULTILINE_SECRET }}
+          SECRET_WITH_FILE: ${{ steps.load_secrets_by_vault_id.outputs.SECRET_WITH_FILE }}
+          SECRET_WITH_FILE_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.SECRET_WITH_FILE_IN_SECTION }}
+          DOUBLE_SECTION_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.DOUBLE_SECTION_SECRET }}
         run: ./tests/assert-env-set.sh
 
   test-connect:
@@ -189,12 +207,18 @@ jobs:
           echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
           echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
+          echo "SECRET_WITH_FILE=op://${{ secrets.VAULT }}/file-secret/test.txt" >> tests/.env.tpl
+          echo "SECRET_WITH_FILE_IN_SECTION=op://${{ secrets.VAULT }}/file-secret/file section/test.txt" >> tests/.env.tpl
+          echo "DOUBLE_SECTION_SECRET=op://${{ secrets.VAULT }}/double-section-secret/test-section/password" >> tests/.env.tpl
 
       - name: Generate .vaultId_env.tpl
         run: |
           echo "FILE_SECRET=op://${{ secrets.VAULT_ID }}/test-secret/password" > tests/.vaultId_env.tpl
           echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT_ID }}/test-secret/test-section/password" >> tests/.vaultId_env.tpl
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT_ID }}/multiline-secret/notesPlain" >> tests/.vaultId_env.tpl
+          echo "SECRET_WITH_FILE=op://${{ secrets.VAULT_ID }}/file-secret/test.txt" >> tests/.vaultId_env.tpl
+          echo "SECRET_WITH_FILE_IN_SECTION=op://${{ secrets.VAULT_ID }}/file-secret/file section/test.txt" >> tests/.vaultId_env.tpl
+          echo "DOUBLE_SECTION_SECRET=op://${{ secrets.VAULT_ID }}/double-section-secret/test-section/password" >> tests/.vaultId_env.tpl
 
       - name: Launch 1Password Connect instance
         env:
@@ -219,6 +243,9 @@ jobs:
           SECRET: op://${{ secrets.VAULT }}/test-secret/password
           SECRET_IN_SECTION: op://${{ secrets.VAULT }}/test-secret/test-section/password
           MULTILINE_SECRET: op://${{ secrets.VAULT }}/multiline-secret/notesPlain
+          SECRET_WITH_FILE: op://${{ secrets.VAULT }}/file-secret/test.txt
+          SECRET_WITH_FILE_IN_SECTION: op://${{ secrets.VAULT }}/file-secret/file section/test.txt
+          DOUBLE_SECTION_SECRET: op://${{ secrets.VAULT }}/double-section-secret/test-section/password
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -230,6 +257,9 @@ jobs:
           FILE_SECRET: ${{ steps.load_secrets.outputs.FILE_SECRET }}
           FILE_SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.FILE_SECRET_IN_SECTION }}
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
+          SECRET_WITH_FILE: ${{ steps.load_secrets.outputs.SECRET_WITH_FILE }}
+          SECRET_WITH_FILE_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_WITH_FILE_IN_SECTION }}
+          DOUBLE_SECTION_SECRET: ${{ steps.load_secrets.outputs.DOUBLE_SECTION_SECRET }}
         run: ./tests/assert-env-set.sh
 
       - name: Assert test secret values [exported env]
@@ -271,6 +301,9 @@ jobs:
           SECRET: op://${{ secrets.VAULT_ID }}/test-secret/password
           SECRET_IN_SECTION: op://${{ secrets.VAULT_ID }}/test-secret/test-section/password
           MULTILINE_SECRET: op://${{ secrets.VAULT_ID }}/multiline-secret/notesPlain
+          SECRET_WITH_FILE: op://${{ secrets.VAULT_ID }}/file-secret/test.txt
+          SECRET_WITH_FILE_IN_SECTION: op://${{ secrets.VAULT_ID }}/file-secret/file section/test.txt
+          DOUBLE_SECTION_SECRET: op://${{ secrets.VAULT_ID }}/double-section-secret/test-section/password
           OP_ENV_FILE: ./tests/.vaultId_env.tpl
 
       - name: Assert test secret values [vault by ID]
@@ -283,4 +316,7 @@ jobs:
           FILE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.FILE_SECRET }}
           FILE_SECRET_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.FILE_SECRET_IN_SECTION }}
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.FILE_MULTILINE_SECRET }}
+          SECRET_WITH_FILE: ${{ steps.load_secrets_by_vault_id.outputs.SECRET_WITH_FILE }}
+          SECRET_WITH_FILE_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.SECRET_WITH_FILE_IN_SECTION }}
+          DOUBLE_SECTION_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.DOUBLE_SECTION_SECRET }}
         run: ./tests/assert-env-set.sh
