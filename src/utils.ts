@@ -93,6 +93,7 @@ const getSecretFromConnectItem = async (
 	}
 
 	// If a file was found, get the content of the file
+	// If a file was found, get the content of the file (with retry on 503)
 	if (fileId) {
 		const maxAttempts = 3;
 		const retryDelayMs = 2000;
@@ -120,10 +121,6 @@ const getSecretFromConnectItem = async (
 				throw err;
 			}
 		}
-	}
-	core.error(`getFileContent failed: ${getErrorMessage(err)}`);
-	throw err;
-}
 	}
 
 	if (parsed.section) {
