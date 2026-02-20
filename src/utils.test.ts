@@ -15,6 +15,7 @@ import {
 	envManagedVariables,
 	envServiceAccountToken,
 } from "./constants";
+import { OnePasswordConnect } from "@1password/connect";
 
 jest.mock("@actions/core");
 jest.mock("@actions/exec", () => ({
@@ -29,6 +30,7 @@ jest.mock("@1password/sdk", () => ({
 		validateSecretReference: jest.fn(),
 	},
 }));
+jest.mock("@1password/connect");
 
 beforeEach(() => {
 	jest.clearAllMocks();
@@ -151,25 +153,47 @@ describe("extractSecret", () => {
 });
 
 describe("loadSecrets when using Connect", () => {
-	it("sets the client info and gets the executed output", async () => {
+	beforeEach(() => {
+		process.env[envConnectHost] = "https://connect.example";
+		process.env[envConnectToken] = "test-token";
+		process.env[envServiceAccountToken] = "";
+
+		Object.keys(process.env).forEach((key) => {
+			if (
+				typeof process.env[key] === "string" &&
+				process.env[key]?.startsWith("op://")
+			) {
+				delete process.env[key];
+			}
+		});
+		process.env.MY_SECRET = "op://vault/item/field";
+
+		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getItem: jest.fn().mockResolvedValue({
+				fields: [
+					{ label: "field", value: "resolved-via-connect", section: undefined },
+				],
+				sections: [],
+			}),
+		});
+	});
+	it("resolves ref via Connect SDK and exports secret", async () => {
 		await loadSecrets(true);
 
-		expect(setClientInfo).toHaveBeenCalledWith({
-			name: "1Password GitHub Action",
-			id: "GHA",
-		});
-		expect(exec.getExecOutput).toHaveBeenCalledWith('sh -c "op env ls"');
 		expect(core.exportVariable).toHaveBeenCalledWith(
-			"OP_MANAGED_VARIABLES",
-			"MOCK_SECRET",
+			"MY_SECRET",
+			"resolved-via-connect",
+		);
+		expect(core.exportVariable).toHaveBeenCalledWith(
+			envManagedVariables,
+			"MY_SECRET",
 		);
 	});
 
 	it("return early if no env vars with secrets found", async () => {
-		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({ stdout: "" });
+		delete process.env.MY_SECRET;
 		await loadSecrets(true);
 
-		expect(exec.getExecOutput).toHaveBeenCalledWith('sh -c "op env ls"');
 		expect(core.exportVariable).not.toHaveBeenCalled();
 	});
 
@@ -177,7 +201,15 @@ describe("loadSecrets when using Connect", () => {
 		it("is called when shouldExportEnv is true", async () => {
 			await loadSecrets(true);
 
-			expect(core.exportVariable).toHaveBeenCalledTimes(1);
+			expect(core.exportVariable).toHaveBeenCalledTimes(2);
+			expect(core.exportVariable).toHaveBeenCalledWith(
+				"MY_SECRET",
+				"resolved-via-connect",
+			);
+			expect(core.exportVariable).toHaveBeenCalledWith(
+				envManagedVariables,
+				"MY_SECRET",
+			);
 		});
 
 		it("is not called when shouldExportEnv is false", async () => {
