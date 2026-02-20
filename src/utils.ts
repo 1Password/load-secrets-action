@@ -94,30 +94,36 @@ const getSecretFromConnectItem = async (
 
 	// If a file was found, get the content of the file
 	if (fileId) {
-		try {
-			core.info(`Getting file content: vault=${parsed.vault} item=${parsed.item} fileId=${fileId}`);
-			const content = await client.getFileContent(
-				parsed.vault,
-				parsed.item,
-				fileId,
-			);
-			return content;
-		} catch (err) {
-			if (err && typeof err === "object") {
-				core.error(`getFileContent error keys: ${Object.keys(err).join(", ")}`);
-				core.error(`getFileContent err.message: ${(err as any)?.message}`);
-				core.error(`getFileContent err.code: ${(err as any)?.code}`);
-				if ((err as any)?.response) {
-					core.error(`getFileContent err.response.status: ${(err as any).response?.status}`);
-					core.error(`getFileContent err.response.data: ${JSON.stringify((err as any).response?.data)}`);
+		const maxAttempts = 3;
+		const retryDelayMs = 2000;
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			try {
+				const content = await client.getFileContent(
+					parsed.vault,
+					parsed.item,
+					fileId,
+				);
+				return content;
+			} catch (err) {
+				const is503 =
+					err &&
+					typeof err === "object" &&
+					(err as Record<string, unknown>).statusCode === 503;
+				if (is503 && attempt < maxAttempts) {
+					core.info(
+						`getFileContent returned 503 (attempt ${attempt}/${maxAttempts}), retrying in ${retryDelayMs / 1000}s...`,
+					);
+					await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+					continue;
 				}
-				if ((err as any)?.cause) {
-					core.error(`getFileContent err.cause: ${(err as any).cause?.message ?? String((err as any).cause)}`);
-				}
+				core.error(`getFileContent failed: ${getErrorMessage(err)}`);
+				throw err;
 			}
-			core.error(`getFileContent failed: ${getErrorMessage(err)}`);
-			throw err;
 		}
+	}
+	core.error(`getFileContent failed: ${getErrorMessage(err)}`);
+	throw err;
+}
 	}
 
 	if (parsed.section) {
@@ -443,21 +449,8 @@ const loadSecretsViaConnect = async (
 
 function getErrorMessage(err: unknown): string {
 	if (err instanceof Error) return err.message;
-	if (!err || typeof err !== "object") return String(err);
-	const e = err as Record<string, unknown>;
-	// Node HTTP response object (thrown by SDK on HTTP errors)
-	if (typeof e.statusCode === "number") {
-		const statusMsg = e.statusMessage != null ? String(e.statusMessage) : "";
-		return `HTTP ${e.statusCode}${statusMsg ? `: ${statusMsg}` : ""}`.trim();
-	}
-	if (typeof e.message === "string") return e.message;
-	if (e.response && typeof e.response === "object") {
-		const res = e.response as Record<string, unknown>;
-		if (typeof res.status === "number")
-			return `HTTP ${res.status}${res.statusText ? `: ${res.statusText}` : ""}`.trim();
-	}
-	if (typeof e.code === "string") return e.code;
-	if (e.cause instanceof Error) return e.cause.message;
+	if (err && typeof (err as { message?: unknown }).message === "string")
+		return (err as { message: string }).message;
 	return String(err);
 }
 
