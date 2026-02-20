@@ -91,6 +91,7 @@ jobs:
       OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
       OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
       VAULT: ${{ secrets.VAULT }}
+      VAULT_ID: ${{ secrets.VAULT_ID }}
 
   # Post comment on fork PRs after /ok-to-test
   comment-pr:
