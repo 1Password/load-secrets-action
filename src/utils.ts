@@ -11,8 +11,8 @@ import {
 	envManagedVariables,
 } from "./constants";
 
-// Types for parsed op ref
-export interface ParsedOpRef {
+// #region Op ref parsing
+interface ParsedOpRef {
 	vault: string;
 	item: string;
 	section: string | undefined;
@@ -69,7 +69,9 @@ const parseOpRef = (ref: string): ParsedOpRef => {
 		section,
 	};
 }
+// #endregion
 
+// #region Connect item resolution
 const getSecretFromConnectItem = async (
 	client: OPConnect,
 	item: FullItem,
@@ -129,8 +131,6 @@ const findSectionIdsByQuery = (
 	return ids;
 };
 
-
-
 const findMatchingFieldAndFile = (
 	item: FullItem,
 	fieldOrFileQuery: string,
@@ -150,7 +150,7 @@ const findMatchingFieldAndFile = (
 		const matchingFields = fields.filter((f) => {
 			const fieldIdOrLabelMatchesQuery = f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
 			const sectionId = f.section?.id;
-			const fieldSectionIsInRefSections = sectionId != null && sectionIds.includes(sectionId);
+			const fieldSectionIsInRefSections = sectionId !== null && sectionId !== undefined && sectionIds.includes(sectionId);
 			return fieldIdOrLabelMatchesQuery && fieldSectionIsInRefSections;
 		});
 
@@ -163,7 +163,7 @@ const findMatchingFieldAndFile = (
 		const matchingFiles = files.filter((f) => {
 			const fileIdOrNameMatchesQuery = f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
 			const sectionId = f.section?.id;
-			const fileSectionIsInRefSections = sectionId != null && sectionIds.includes(sectionId);
+			const fileSectionIsInRefSections = sectionId !== null && sectionId !== undefined && sectionIds.includes(sectionId);
 			return fileIdOrNameMatchesQuery && fileSectionIsInRefSections;
 		});
 
@@ -173,9 +173,9 @@ const findMatchingFieldAndFile = (
 		}
 		matchedFile = matchingFiles[0];
 	} else {
-		let matchingFields = fields.filter((f) => {
+		const matchingFields = fields.filter((f) => {
 			const fieldIdOrLabelMatchesQuery = f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
-			const fieldHasNoSection = f.section?.id == null;
+			const fieldHasNoSection = (f.section?.id === null || f.section?.id === undefined);
 			return fieldIdOrLabelMatchesQuery && fieldHasNoSection;
 		});
 
@@ -188,7 +188,7 @@ const findMatchingFieldAndFile = (
 		// If no field was found with no section, find a field in any section
 		if (!matchedField) {
 			const matchingFieldsInAnySection = fields.filter((f) => {
-				const fieldIdOrLabelMatchesQuery =f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
+				const fieldIdOrLabelMatchesQuery = f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
 				return fieldIdOrLabelMatchesQuery;
 			});
 
@@ -198,9 +198,9 @@ const findMatchingFieldAndFile = (
 			matchedField = matchingFieldsInAnySection[0];
 		}
 
-		let matchingFiles = files.filter((f) => {
+		const matchingFiles = files.filter((f) => {
 			const fileIdOrNameMatchesQuery = f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
-			const fileHasNoSection = f.section?.id == null;
+			const fileHasNoSection = (f.section?.id === null || f.section?.id === undefined);
 			return fileIdOrNameMatchesQuery && fileHasNoSection;
 		});
 
@@ -246,26 +246,9 @@ const findMatchingFieldAndFile = (
 
 	return {};
 }
+// #endregion
 
-export const validateAuth = (): void => {
-	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
-	const isServiceAccount = process.env[envServiceAccountToken];
-
-	if (isConnect && isServiceAccount) {
-		core.warning(
-			"WARNING: Both service account and Connect credentials are provided. Connect credentials will take priority.",
-		);
-	}
-
-	if (!isConnect && !isServiceAccount) {
-		throw new Error(authErr);
-	}
-
-	const authType = isConnect ? "Connect" : "Service account";
-
-	core.info(`Authenticated with ${authType}.`);
-};
-
+// #region Shared helpers and auth
 const getEnvVarNamesWithSecretRefs = (): string[] =>
 	Object.keys(process.env).filter(
 		(key) =>
@@ -313,6 +296,25 @@ const setResolvedSecret = (
 	}
 };
 
+export const validateAuth = (): void => {
+	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
+	const isServiceAccount = process.env[envServiceAccountToken];
+
+	if (isConnect && isServiceAccount) {
+		core.warning(
+			"WARNING: Both service account and Connect credentials are provided. Connect credentials will take priority.",
+		);
+	}
+
+	if (!isConnect && !isServiceAccount) {
+		throw new Error(authErr);
+	}
+
+	const authType = isConnect ? "Connect" : "Service account";
+
+	core.info(`Authenticated with ${authType}.`);
+};
+
 export const extractSecret = (
 	envName: string,
 	shouldExportEnv: boolean,
@@ -330,6 +332,19 @@ export const extractSecret = (
 	setResolvedSecret(envName, secretValue, shouldExportEnv);
 };
 
+export const unsetPrevious = (): void => {
+	if (process.env[envManagedVariables]) {
+		core.info("Unsetting previous values ...");
+		const managedEnvs = process.env[envManagedVariables].split(",");
+		for (const envName of managedEnvs) {
+			core.info(`Unsetting ${envName}`);
+			core.exportVariable(envName, "");
+		}
+	}
+};
+// #endregion
+
+// #region Load secrets
 // Connect loads secrets via the Connect JS SDK
 const loadSecretsViaConnect = async (
 	shouldExportEnv: boolean,
@@ -351,6 +366,7 @@ const loadSecretsViaConnect = async (
 	let client;
 	try {
 		client = OnePasswordConnect({
+			// eslint-disable-next-line @typescript-eslint/naming-convention
 			serverURL: host,
 			token,
 		});
@@ -435,14 +451,4 @@ export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
 
 	await loadSecretsViaServiceAccount(shouldExportEnv);
 };
-
-export const unsetPrevious = (): void => {
-	if (process.env[envManagedVariables]) {
-		core.info("Unsetting previous values ...");
-		const managedEnvs = process.env[envManagedVariables].split(",");
-		for (const envName of managedEnvs) {
-			core.info(`Unsetting ${envName}`);
-			core.exportVariable(envName, "");
-		}
-	}
-};
+// #endregion

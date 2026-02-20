@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
 import { createClient, Secrets } from "@1password/sdk";
+import { OnePasswordConnect } from "@1password/connect";
 import {
 	extractSecret,
 	loadSecrets,
@@ -15,7 +16,6 @@ import {
 	envManagedVariables,
 	envServiceAccountToken,
 } from "./constants";
-import { OnePasswordConnect } from "@1password/connect";
 
 jest.mock("@actions/core");
 jest.mock("@actions/exec", () => ({
@@ -154,12 +154,6 @@ describe("extractSecret", () => {
 });
 
 describe("loadSecrets when using Connect", () => {
-	beforeEach(() => {
-		process.env[envConnectHost] = "https://localhost:8000";
-		process.env[envConnectToken] = "token";
-		process.env[envServiceAccountToken] = "";
-	});
-
 	beforeEach(() => {
 		process.env[envConnectHost] = "https://connect.example";
 		process.env[envConnectToken] = "test-token";

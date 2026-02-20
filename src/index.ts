@@ -1,9 +1,7 @@
 import dotenv from "dotenv";
 import * as core from "@actions/core";
-import { validateCli } from "@1password/op-js";
-import { installCliOnGithubActionRunner } from "./op-cli-installer";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
-import { envFilePath, envConnectHost, envConnectToken } from "./constants";
+import { envFilePath } from "./constants";
 
 const loadSecretsAction = async () => {
 	try {
@@ -40,18 +38,6 @@ const loadSecretsAction = async () => {
 		}
 		core.setFailed(message);
 	}
-};
-
-// This function's name is an exception from the naming convention
-// since we refer to the 1Password CLI here.
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const installCLI = async (): Promise<void> => {
-	// validateCli checks if there's an existing 1Password CLI installed on the runner.
-	// If there's no CLI installed, then validateCli will throw an error, which we will use
-	// as an indicator that we need to execute the installation script.
-	await validateCli().catch(async () => {
-		await installCliOnGithubActionRunner();
-	});
 };
 
 void loadSecretsAction();
