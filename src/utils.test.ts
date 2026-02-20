@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import { read, setClientInfo } from "@1password/op-js";
+import { read } from "@1password/op-js";
 import { createClient, Secrets } from "@1password/sdk";
 import { OnePasswordConnect } from "@1password/connect";
 import {
