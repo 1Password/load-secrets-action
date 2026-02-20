@@ -383,7 +383,11 @@ const loadSecretsViaConnect = async (
 
 		// Parse the op ref and get the item from the Connect SDK
 		const parsed = parseOpRef(ref);
-		const item = await client.getItem(parsed.vault, parsed.item);
+		const vault = await client.getVault(parsed.vault);
+		if (!vault.id) {
+			throw new Error(`Vault "${parsed.vault}" has no id`);
+		}
+		const item = await client.getItem(vault.id, parsed.item);
 
 		// Get the secret value from the item as Connect returns a full item object
 		const secretValue = await getSecretFromConnectItem(client, item, parsed);
