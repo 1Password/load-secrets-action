@@ -103,6 +103,18 @@ const getSecretFromConnectItem = async (
 			);
 			return content;
 		} catch (err) {
+			if (err && typeof err === "object") {
+				core.error(`getFileContent error keys: ${Object.keys(err).join(", ")}`);
+				core.error(`getFileContent err.message: ${(err as any)?.message}`);
+				core.error(`getFileContent err.code: ${(err as any)?.code}`);
+				if ((err as any)?.response) {
+					core.error(`getFileContent err.response.status: ${(err as any).response?.status}`);
+					core.error(`getFileContent err.response.data: ${JSON.stringify((err as any).response?.data)}`);
+				}
+				if ((err as any)?.cause) {
+					core.error(`getFileContent err.cause: ${(err as any).cause?.message ?? String((err as any).cause)}`);
+				}
+			}
 			core.error(`getFileContent failed: ${getErrorMessage(err)}`);
 			throw err;
 		}
