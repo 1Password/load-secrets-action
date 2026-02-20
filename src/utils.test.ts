@@ -23,6 +23,7 @@ jest.mock("@actions/exec", () => ({
 	})),
 }));
 jest.mock("@1password/op-js");
+// eslint-disable-next-line @typescript-eslint/naming-convention
 jest.mock("@1password/sdk", () => ({
 	createClient: jest.fn(),
 	Secrets: {
