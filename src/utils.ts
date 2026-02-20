@@ -58,7 +58,9 @@ const parseOpRef = (ref: string): ParsedOpRef => {
 	if (segments.length === 4) {
 		section = segments[2];
 		if (!section) {
-			throw new Error(`Invalid op reference: section is required when using 4 path segments`);
+			throw new Error(
+				`Invalid op reference: section is required when using 4 path segments`,
+			);
 		}
 	}
 
@@ -68,7 +70,7 @@ const parseOpRef = (ref: string): ParsedOpRef => {
 		field,
 		section,
 	};
-}
+};
 // #endregion
 
 // #region Connect item resolution
@@ -77,8 +79,14 @@ const getSecretFromConnectItem = async (
 	item: FullItem,
 	parsed: ParsedOpRef,
 ): Promise<string> => {
-	const sectionIds = parsed.section ? findSectionIdsByQuery(item.sections, parsed.section) : [];
-	const { fieldValue, fileId } = findMatchingFieldAndFile(item, parsed.field, sectionIds);
+	const sectionIds = parsed.section
+		? findSectionIdsByQuery(item.sections, parsed.section)
+		: [];
+	const { fieldValue, fileId } = findMatchingFieldAndFile(
+		item,
+		parsed.field,
+		sectionIds,
+	);
 
 	if (fieldValue !== undefined) {
 		return fieldValue;
@@ -103,7 +111,7 @@ const getSecretFromConnectItem = async (
 	throw new Error(
 		`could not find field or file ${parsed.field} on item ${parsed.item} in vault ${parsed.vault}`,
 	);
-}
+};
 
 const findSectionIdsByQuery = (
 	sections: FullItem["sections"],
@@ -117,9 +125,9 @@ const findSectionIdsByQuery = (
 	}
 
 	const ids = sections
-	.filter((s) => s.id === sectionQuery || s.label === sectionQuery)
-	.map((s) => s.id!)
-	.filter(Boolean);
+		.filter((s) => s.id === sectionQuery || s.label === sectionQuery)
+		.map((s) => s.id!)
+		.filter(Boolean);
 
 	// If no sections were found with the given query throw an error
 	if (ids.length === 0) {
@@ -148,9 +156,13 @@ const findMatchingFieldAndFile = (
 	if (sectionFilter) {
 		// Filter fields by section
 		const matchingFields = fields.filter((f) => {
-			const fieldIdOrLabelMatchesQuery = f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
+			const fieldIdOrLabelMatchesQuery =
+				f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
 			const sectionId = f.section?.id;
-			const fieldSectionIsInRefSections = sectionId !== null && sectionId !== undefined && sectionIds.includes(sectionId);
+			const fieldSectionIsInRefSections =
+				sectionId !== null &&
+				sectionId !== undefined &&
+				sectionIds.includes(sectionId);
 			return fieldIdOrLabelMatchesQuery && fieldSectionIsInRefSections;
 		});
 
@@ -161,9 +173,13 @@ const findMatchingFieldAndFile = (
 		matchedField = matchingFields[0];
 
 		const matchingFiles = files.filter((f) => {
-			const fileIdOrNameMatchesQuery = f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
+			const fileIdOrNameMatchesQuery =
+				f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
 			const sectionId = f.section?.id;
-			const fileSectionIsInRefSections = sectionId !== null && sectionId !== undefined && sectionIds.includes(sectionId);
+			const fileSectionIsInRefSections =
+				sectionId !== null &&
+				sectionId !== undefined &&
+				sectionIds.includes(sectionId);
 			return fileIdOrNameMatchesQuery && fileSectionIsInRefSections;
 		});
 
@@ -174,8 +190,10 @@ const findMatchingFieldAndFile = (
 		matchedFile = matchingFiles[0];
 	} else {
 		const matchingFields = fields.filter((f) => {
-			const fieldIdOrLabelMatchesQuery = f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
-			const fieldHasNoSection = (f.section?.id === null || f.section?.id === undefined);
+			const fieldIdOrLabelMatchesQuery =
+				f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
+			const fieldHasNoSection =
+				f.section?.id === null || f.section?.id === undefined;
 			return fieldIdOrLabelMatchesQuery && fieldHasNoSection;
 		});
 
@@ -188,7 +206,8 @@ const findMatchingFieldAndFile = (
 		// If no field was found with no section, find a field in any section
 		if (!matchedField) {
 			const matchingFieldsInAnySection = fields.filter((f) => {
-				const fieldIdOrLabelMatchesQuery = f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
+				const fieldIdOrLabelMatchesQuery =
+					f.id === fieldOrFileQuery || f.label === fieldOrFileQuery;
 				return fieldIdOrLabelMatchesQuery;
 			});
 
@@ -199,8 +218,10 @@ const findMatchingFieldAndFile = (
 		}
 
 		const matchingFiles = files.filter((f) => {
-			const fileIdOrNameMatchesQuery = f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
-			const fileHasNoSection = (f.section?.id === null || f.section?.id === undefined);
+			const fileIdOrNameMatchesQuery =
+				f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
+			const fileHasNoSection =
+				f.section?.id === null || f.section?.id === undefined;
 			return fileIdOrNameMatchesQuery && fileHasNoSection;
 		});
 
@@ -213,7 +234,8 @@ const findMatchingFieldAndFile = (
 		// If no file was found with no section, find a file in any section
 		if (!matchedFile) {
 			const matchingFilesInAnySection = files.filter((f) => {
-				const fileIdOrNameMatchesQuery = f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
+				const fileIdOrNameMatchesQuery =
+					f.id === fieldOrFileQuery || f.name === fieldOrFileQuery;
 				return fileIdOrNameMatchesQuery;
 			});
 
@@ -245,7 +267,7 @@ const findMatchingFieldAndFile = (
 	}
 
 	return {};
-}
+};
 // #endregion
 
 // #region Shared helpers and auth
@@ -385,7 +407,9 @@ const loadSecretsViaConnect = async (
 		const parsed = parseOpRef(ref);
 		const vault = await client.getVault(parsed.vault);
 		if (!vault.id) {
-			throw new Error(`Vault "${parsed.vault}" has no id`);
+			throw new Error(
+				`Could not find valid vault "${parsed.vault}" for ref "${ref}"`,
+			);
 		}
 		const item = await client.getItem(vault.id, parsed.item);
 

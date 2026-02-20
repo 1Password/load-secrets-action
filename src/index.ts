@@ -33,7 +33,12 @@ const loadSecretsAction = async () => {
 			if (message === "Unknown Error" && error.cause instanceof Error) {
 				message = error.cause.message;
 			}
-		} else if (error && typeof error === "object" && "message" in error && typeof (error as { message: unknown }).message === "string") {
+		} else if (
+			error &&
+			typeof error === "object" &&
+			"message" in error &&
+			typeof (error as { message: unknown }).message === "string"
+		) {
 			message = (error as { message: string }).message;
 		} else if (error !== null && error !== undefined) {
 			message = typeof error === "string" ? error : JSON.stringify(error);

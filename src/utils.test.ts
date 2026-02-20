@@ -170,6 +170,7 @@ describe("loadSecrets when using Connect", () => {
 		process.env.MY_SECRET = "op://vault/item/field";
 
 		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getVault: jest.fn().mockResolvedValue({ id: "vault-id-123" }),
 			getItem: jest.fn().mockResolvedValue({
 				fields: [
 					{ label: "field", value: "resolved-via-connect", section: undefined },
@@ -178,6 +179,7 @@ describe("loadSecrets when using Connect", () => {
 			}),
 		});
 	});
+
 	it("resolves ref via Connect SDK and exports secret", async () => {
 		await loadSecrets(true);
 
@@ -196,6 +198,158 @@ describe("loadSecrets when using Connect", () => {
 		await loadSecrets(true);
 
 		expect(core.exportVariable).not.toHaveBeenCalled();
+	});
+
+	it("sets step output when shouldExportEnv is false", async () => {
+		await loadSecrets(false);
+
+		expect(core.setOutput).toHaveBeenCalledWith("MY_SECRET", "resolved-via-connect");
+		expect(core.exportVariable).not.toHaveBeenCalled();
+	});
+
+	it("masks resolved secret with setSecret", async () => {
+		await loadSecrets(true);
+
+		expect(core.setSecret).toHaveBeenCalledWith("resolved-via-connect");
+	});
+
+	it("calls getVault with vault segment from ref", async () => {
+		process.env.MY_SECRET = "op://my-vault-name/my-item/field";
+		const mockGetVault = jest.fn().mockResolvedValue({ id: "vault-uuid" });
+		const mockGetItem = jest.fn().mockResolvedValue({
+			fields: [
+				{ label: "field", value: "secret-value", section: undefined },
+			],
+			sections: [],
+		});
+		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getVault: mockGetVault,
+			getItem: mockGetItem,
+		});
+
+		await loadSecrets(false);
+
+		expect(mockGetVault).toHaveBeenCalledWith("my-vault-name");
+	});
+
+	it("throws when getVault returns vault without id", async () => {
+		const mockGetVault = jest.fn().mockResolvedValue({});
+		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getVault: mockGetVault,
+			getItem: jest.fn(),
+		});
+
+		await expect(loadSecrets(true)).rejects.toThrow(
+			/Could not find valid vault "vault" for ref "op:\/\/vault\/item\/field"/,
+		);
+		expect(mockGetVault).toHaveBeenCalledWith("vault");
+	});
+
+	it("resolves vault by name and uses returned id for getItem", async () => {
+		process.env.MY_SECRET = "op://My Vault/My Item/field";
+		const mockGetVault = jest.fn().mockResolvedValue({ id: "uuid-for-my-vault" });
+		const mockGetItem = jest.fn().mockResolvedValue({
+			fields: [
+				{ label: "field", value: "secret-from-named-vault", section: undefined },
+			],
+			sections: [],
+		});
+		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getVault: mockGetVault,
+			getItem: mockGetItem,
+		});
+
+		await loadSecrets(true);
+
+		expect(mockGetVault).toHaveBeenCalledWith("My Vault");
+		expect(mockGetItem).toHaveBeenCalledWith("uuid-for-my-vault", "My Item");
+		expect(core.exportVariable).toHaveBeenCalledWith(
+			"MY_SECRET",
+			"secret-from-named-vault",
+		);
+	});
+
+	it("calls getItem with vault id from getVault, not ref vault segment", async () => {
+		const mockGetVault = jest.fn().mockResolvedValue({ id: "resolved-vault-id" });
+		const mockGetItem = jest.fn().mockResolvedValue({
+			fields: [
+				{ label: "field", value: "resolved-via-connect", section: undefined },
+			],
+			sections: [],
+		});
+		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getVault: mockGetVault,
+			getItem: mockGetItem,
+		});
+
+		await loadSecrets(true);
+
+		expect(mockGetVault).toHaveBeenCalledWith("vault");
+		expect(mockGetItem).toHaveBeenCalledWith("resolved-vault-id", "item");
+	});
+
+	it("rejects when getItem fails", async () => {
+		const mockGetVault = jest.fn().mockResolvedValue({ id: "vault-id-123" });
+		const mockGetItem = jest.fn().mockRejectedValue(new Error("Item not found"));
+		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getVault: mockGetVault,
+			getItem: mockGetItem,
+		});
+
+		await expect(loadSecrets(true)).rejects.toThrow("Item not found");
+	});
+
+	it("resolves refs in different vaults using each vault id", async () => {
+		delete process.env.MY_SECRET;
+		process.env.SECRET_A = "op://vault-a/item1/field1";
+		process.env.SECRET_B = "op://vault-b/item2/field2";
+		const mockGetVault = jest.fn().mockImplementation(async (vaultName: string) =>
+			Promise.resolve({
+				id: vaultName === "vault-a" ? "id-a" : "id-b",
+			}),
+		);
+		const mockGetItem = jest
+			.fn()
+			.mockResolvedValueOnce({
+				fields: [
+					{ label: "field1", value: "value-a", section: undefined },
+				],
+				sections: [],
+			})
+			.mockResolvedValueOnce({
+				fields: [
+					{ label: "field2", value: "value-b", section: undefined },
+				],
+				sections: [],
+			});
+		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getVault: mockGetVault,
+			getItem: mockGetItem,
+		});
+
+		await loadSecrets(true);
+
+		expect(mockGetVault).toHaveBeenCalledWith("vault-a");
+		expect(mockGetVault).toHaveBeenCalledWith("vault-b");
+		expect(mockGetItem).toHaveBeenNthCalledWith(1, "id-a", "item1");
+		expect(mockGetItem).toHaveBeenNthCalledWith(2, "id-b", "item2");
+		expect(core.exportVariable).toHaveBeenCalledWith("SECRET_A", "value-a");
+		expect(core.exportVariable).toHaveBeenCalledWith("SECRET_B", "value-b");
+	});
+
+	it("throws on invalid ref before calling Connect", async () => {
+		delete process.env.MY_SECRET;
+		process.env.BAD_REF = "op://x";
+		const mockGetVault = jest.fn();
+		const mockGetItem = jest.fn();
+		(OnePasswordConnect as jest.Mock).mockReturnValue({
+			getVault: mockGetVault,
+			getItem: mockGetItem,
+		});
+
+		await expect(loadSecrets(true)).rejects.toThrow(/invalid|reference/i);
+		expect(mockGetVault).not.toHaveBeenCalled();
+		expect(mockGetItem).not.toHaveBeenCalled();
 	});
 
 	describe("core.exportVariable", () => {

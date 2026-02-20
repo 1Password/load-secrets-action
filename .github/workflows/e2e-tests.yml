@@ -21,7 +21,10 @@ on:
       OP_SERVICE_ACCOUNT_TOKEN:
         required: true
       VAULT:
-        description: "1Password vault name or UUID"
+        description: "1Password vault name"
+        required: true
+      VAULT_ID:
+        description: "1Password vault UUID"
         required: true
 
 jobs:
@@ -89,6 +92,30 @@ jobs:
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
         run: ./tests/assert-env-set.sh
 
+      - name: Load secrets by vault ID
+        id: load_secrets_by_vault_id
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+          export-env: ${{ matrix.export-env }}
+        env:
+          SECRET: op://${{ secrets.VAULT_ID }}/test-secret/password
+          SECRET_IN_SECTION: op://${{ secrets.VAULT_ID }}/test-secret/test-section/password
+          MULTILINE_SECRET: op://${{ secrets.VAULT_ID }}/multiline-secret/notesPlain
+          OP_ENV_FILE: ./tests/.env.tpl
+
+      - name: Assert test secret values [vault by ID]
+        if: ${{ !matrix.export-env }}
+        shell: bash
+        env:
+          SECRET: ${{ steps.load_secrets_by_vault_id.outputs.SECRET }}
+          SECRET_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.SECRET_IN_SECTION }}
+          MULTILINE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.MULTILINE_SECRET }}
+          FILE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.FILE_SECRET }}
+          FILE_SECRET_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.FILE_SECRET_IN_SECTION }}
+          FILE_MULTILINE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.FILE_MULTILINE_SECRET }}
+        run: ./tests/assert-env-set.sh
+
       - name: Assert test secret values [exported env]
         if: ${{ matrix.export-env }}
         shell: bash
@@ -111,7 +138,6 @@ jobs:
         uses: ./
         env:
           BAD_REF: "op://x"
-          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         with:
           export-env: true
 
@@ -156,6 +182,12 @@ jobs:
           echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
 
+      - name: Generate .vaultId_env.tpl
+        run: |
+          echo "FILE_SECRET=op://${{ secrets.VAULT_ID }}/test-secret/password" > tests/.vaultId_env.tpl
+          echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT_ID }}/test-secret/test-section/password" >> tests/.vaultId_env.tpl
+          echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT_ID }}/multiline-secret/notesPlain" >> tests/.vaultId_env.tpl
+
       - name: Launch 1Password Connect instance
         env:
           OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
@@ -192,6 +224,30 @@ jobs:
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
         run: ./tests/assert-env-set.sh
 
+      - name: Load secrets by vault ID
+        id: load_secrets_by_vault_id
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+          export-env: ${{ matrix.export-env }}
+        env:
+          SECRET: op://${{ secrets.VAULT_ID }}/test-secret/password
+          SECRET_IN_SECTION: op://${{ secrets.VAULT_ID }}/test-secret/test-section/password
+          MULTILINE_SECRET: op://${{ secrets.VAULT_ID }}/multiline-secret/notesPlain
+          OP_ENV_FILE: ./tests/.vaultId_env.tpl
+
+      - name: Assert test secret values [vault by ID]
+        if: ${{ !matrix.export-env }}
+        shell: bash
+        env:
+          SECRET: ${{ steps.load_secrets_by_vault_id.outputs.SECRET }}
+          SECRET_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.SECRET_IN_SECTION }}
+          MULTILINE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.MULTILINE_SECRET }}
+          FILE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.FILE_SECRET }}
+          FILE_SECRET_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.FILE_SECRET_IN_SECTION }}
+          FILE_MULTILINE_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.FILE_MULTILINE_SECRET }}
+        run: ./tests/assert-env-set.sh
+
       - name: Assert test secret values [exported env]
         if: ${{ matrix.export-env }}
         run: ./tests/assert-env-set.sh
@@ -205,3 +261,18 @@ jobs:
       - name: Assert removed secrets [exported env]
         if: ${{ matrix.export-env }}
         run: ./tests/assert-env-unset.sh
+
+      - name: Load secrets (invalid ref - expect failure)
+        id: load_invalid
+        continue-on-error: true
+        uses: ./
+        env:
+          BAD_REF: "op://x"
+        with:
+          export-env: true
+
+      - name: Assert invalid ref failed
+        shell: bash
+        run: ./tests/assert-invalid-ref-failed.sh
+        env:
+          STEP_OUTCOME: ${{ steps.load_invalid.outcome }}
