@@ -94,12 +94,18 @@ const getSecretFromConnectItem = async (
 
 	// If a file was found, get the content of the file
 	if (fileId) {
-		const content = await client.getFileContent(
-			parsed.vault,
-			parsed.item,
-			fileId,
-		);
-		return content;
+		try {
+			core.info(`Getting file content: vault=${parsed.vault} item=${parsed.item} fileId=${fileId}`);
+			const content = await client.getFileContent(
+				parsed.vault,
+				parsed.item,
+				fileId,
+			);
+			return content;
+		} catch (err) {
+			core.error(`getFileContent failed: ${getErrorMessage(err)}`);
+			throw err;
+		}
 	}
 
 	if (parsed.section) {
