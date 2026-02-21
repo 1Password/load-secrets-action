@@ -11,7 +11,7 @@ inputs:
   export-env:
     description: Export the secrets as environment variables
     default: "false"
-   # Backward-compatible no-op input (intentionally ignored)
+    # Backward-compatible no-op input (intentionally ignored)
   version:
     description: "(Deprecated) No longer used. Kept for backwards compatibility."
     default: "latest"
