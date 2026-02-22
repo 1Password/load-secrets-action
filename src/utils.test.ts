@@ -549,7 +549,7 @@ describe("loadSecrets when using Service Account", () => {
 
 	describe("secret reference validation", () => {
 		it("fails with clear message when a secret reference is invalid", async () => {
-			process.env.MY_SECRET = "op://invalid/ref/form";
+			process.env.MY_SECRET = "op://x";
 			(Secrets.validateSecretReference as jest.Mock).mockImplementationOnce(
 				() => {
 					throw new Error("invalid reference format");
@@ -572,7 +572,6 @@ describe("loadSecrets when using Service Account", () => {
 					}
 				},
 			);
-			mockResolve.mockResolvedValue("value1");
 
 			await expect(loadSecrets(false)).rejects.toThrow(
 				"Invalid secret reference(s): OTHER",
@@ -836,21 +835,21 @@ describe("findMatchingFieldAndFile", () => {
 describe("findSectionIdsByQuery", () => {
 	it("throws when sections is empty", () => {
 		expect(() => findSectionIdsByQuery([], "section-1")).toThrow(
-			/section section-1 could not be found/,
+			/Item has no sections; cannot resolve section "section-1"/,
 		);
 	});
 
 	it("throws when sections is null/undefined", () => {
 		expect(() =>
 			findSectionIdsByQuery(undefined as unknown as FullItem["sections"], "x"),
-		).toThrow(/could not be found/);
+		).toThrow(/Item has no sections; cannot resolve section "x"/);
 	});
 
-	it("returns section id when section matches by id", () => {
-		const sections = [{ id: "sec-1", label: "Section 1" }];
-		expect(
-			findSectionIdsByQuery(sections as FullItem["sections"], "sec-1"),
-		).toEqual(["sec-1"]);
+	it("throws when section query matches no section", () => {
+		const sections = [{ id: "sec-1", label: "Other" }];
+		expect(() =>
+			findSectionIdsByQuery(sections as FullItem["sections"], "nonexistent"),
+		).toThrow(/No section matching "nonexistent" found in specified item/);
 	});
 
 	it("returns section id when section matches by label", () => {
@@ -864,7 +863,7 @@ describe("findSectionIdsByQuery", () => {
 		const sections = [{ id: "sec-1", label: "Other" }];
 		expect(() =>
 			findSectionIdsByQuery(sections as FullItem["sections"], "nonexistent"),
-		).toThrow(/could not be found/);
+		).toThrow(/No section matching "nonexistent" found in specified item/);
 	});
 
 	it("returns multiple ids when multiple sections match", () => {

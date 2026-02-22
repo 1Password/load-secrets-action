@@ -120,7 +120,6 @@ const getFileContentWithRetry = async (
 	itemId: string,
 	fileId: string,
 ): Promise<string> => {
-
 	const maxAttempts = 3;
 	const retryDelayMs = 2000;
 	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -301,7 +300,7 @@ export const getEnvVarNamesWithSecretRefs = (): string[] =>
 	);
 
 const validateSecretRefs = (envNames: string[]): void => {
-	const invalid: string[] = [];
+	const invalid: { name: string; message: string }[] = [];
 
 	for (const envName of envNames) {
 		const ref = process.env[envName];
@@ -311,15 +310,18 @@ const validateSecretRefs = (envNames: string[]): void => {
 
 		try {
 			Secrets.validateSecretReference(ref);
-		} catch {
-			invalid.push(envName);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : String(err);
+			invalid.push({ name: envName, message });
 		}
 	}
 
 	// Throw an error if any secret references are invalid
 	if (invalid.length > 0) {
-		const names = invalid.join(", ");
-		throw new Error(`Invalid secret reference(s): ${names}`);
+		const details = invalid
+			.map(({ name, message }) => `${name}: ${message}`)
+			.join("; ");
+		throw new Error(`Invalid secret reference(s): ${details}`);
 	}
 };
 
