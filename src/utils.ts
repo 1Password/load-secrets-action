@@ -92,30 +92,8 @@ const getSecretFromConnectItem = async (
 		return fieldValue;
 	}
 
-	// If a file was found, get the content of the file (with retry on 503)
 	if (fileId) {
-		const maxAttempts = 3;
-		const retryDelayMs = 2000;
-		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-			try {
-				const content = await client.getFileContent(
-					parsed.vault,
-					parsed.item,
-					fileId,
-				);
-				return content;
-			} catch (err) {
-				const is503 =
-					err &&
-					typeof err === "object" &&
-					(err as Record<string, unknown>).statusCode === 503;
-				if (is503 && attempt < maxAttempts) {
-					await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
-					continue;
-				}
-				throw err;
-			}
-		}
+		return getFileContentWithRetry(client, parsed.vault, parsed.item, fileId);
 	}
 
 	if (parsed.section) {
@@ -129,6 +107,34 @@ const getSecretFromConnectItem = async (
 	);
 };
 
+const getFileContentWithRetry = async (
+	client: OPConnect,
+	vaultId: string,
+	itemId: string,
+	fileId: string,
+): Promise<string> => {
+
+	const maxAttempts = 3;
+	const retryDelayMs = 2000;
+	for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+		try {
+			return await client.getFileContent(vaultId, itemId, fileId);
+		} catch (err) {
+			// Retry on 503 errors as this can happen on multiple secret fetches
+			const is503 =
+				err !== null &&
+				typeof err === "object" &&
+				(err as Record<string, unknown>).statusCode === 503;
+			if (is503 && attempt < maxAttempts) {
+				await new Promise((r) => setTimeout(r, retryDelayMs));
+				continue;
+			}
+			throw err;
+		}
+	}
+	return "";
+};
+
 export const findSectionIdsByQuery = (
 	sections: FullItem["sections"],
 	sectionQuery: string | undefined,
@@ -136,7 +142,7 @@ export const findSectionIdsByQuery = (
 	// If no sections were returned with the item throw an error
 	if (!sections || sections.length === 0) {
 		throw new Error(
-			`section ${sectionQuery} could not be found in specified item`,
+			`Item has no sections; cannot resolve section "${sectionQuery}"`,
 		);
 	}
 
@@ -147,7 +153,7 @@ export const findSectionIdsByQuery = (
 	// If no sections were found with the given query throw an error
 	if (ids.length === 0) {
 		throw new Error(
-			`section ${sectionQuery} could not be found in specified item`,
+			`No section matching "${sectionQuery}" found in specified item`,
 		);
 	}
 
@@ -251,6 +257,19 @@ const findSingleMatch = <T>(matches: T[]): T | undefined => {
 	}
 	return matches[0];
 };
+
+const createConnectClient = (host: string, token: string): OPConnect => {
+	try {
+		return OnePasswordConnect({
+			// eslint-disable-next-line @typescript-eslint/naming-convention
+			serverURL: host,
+			token,
+		});
+	} catch (err) {
+		const message = err instanceof Error ? err.message : String(err);
+		throw new Error(`Connect authentication failed: ${message}`);
+	}
+};
 // #endregion
 
 // #region Shared helpers and auth
@@ -352,10 +371,10 @@ const fetchVaultId = async (
 	client: OPConnect,
 	vaultQuery: string,
 	ref: string,
-	cache: Map<string, string>,
+	vaultIdCache: Map<string, string>,
 ): Promise<string> => {
-	// Check if the vault ID is already cached
-	const cached = cache.get(vaultQuery);
+	// Check if the vault ID is already cached to avoid unnecessary API calls
+	const cached = vaultIdCache.get(vaultQuery);
 	if (cached !== undefined) {
 		return cached;
 	}
@@ -367,7 +386,7 @@ const fetchVaultId = async (
 		);
 	}
 
-	cache.set(vaultQuery, vault.id);
+	vaultIdCache.set(vaultQuery, vault.id);
 	return vault.id;
 };
 // #endregion
@@ -390,20 +409,8 @@ const loadSecretsViaConnect = async (
 		throw new Error(authErr);
 	}
 
-	// Authenticate with the Connect SDK
-	let client;
-	try {
-		client = OnePasswordConnect({
-			// eslint-disable-next-line @typescript-eslint/naming-convention
-			serverURL: host,
-			token,
-		});
-	} catch (err) {
-		const message = err instanceof Error ? err.message : String(err);
-		throw new Error(`Connect authentication failed: ${message}`);
-	}
-
-	const vaultIdByQuery = new Map<string, string>();
+	const client = createConnectClient(host, token);
+	const vaultIdCache = new Map<string, string>();
 
 	for (const envName of envs) {
 		const ref = process.env[envName];
@@ -419,7 +426,7 @@ const loadSecretsViaConnect = async (
 				client,
 				parsed.vault,
 				ref,
-				vaultIdByQuery,
+				vaultIdCache,
 			);
 			const item = await client.getItem(vaultId, parsed.item);
 
