@@ -277,15 +277,15 @@ const createConnectClient = (host: string, token: string): OPConnect => {
 	}
 };
 
-const toOpenSSH = (
-	value: string,
-	_queryParams: string | undefined,
-): string => {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const toOpenSSH = (value: string, _queryParams: string | undefined): string => {
 	try {
 		const key = sshpk.parsePrivateKey(value, "auto");
 		return key.toString("openssh");
 	} catch {
-		core.warning(`Failed to parse private key to OpenSSH, returning original value`);
+		core.warning(
+			`Failed to parse private key to OpenSSH, returning original value`,
+		);
 		return value;
 	}
 };
