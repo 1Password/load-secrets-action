@@ -66,6 +66,8 @@ jobs:
           echo "SECRET_WITH_FILE=op://${{ secrets.VAULT }}/file-secret/test.txt" >> tests/.env.tpl
           echo "SECRET_WITH_FILE_IN_SECTION=op://${{ secrets.VAULT }}/file-secret/file section/test.txt" >> tests/.env.tpl
           echo "DOUBLE_SECTION_SECRET=op://${{ secrets.VAULT }}/double-section-secret/test-section/password" >> tests/.env.tpl
+          echo "SSH_PRIVATE_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
+          echo "SSH_PRIVATE_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
 
       - name: Generate .vaultId_env.tpl
         shell: bash
@@ -76,6 +78,8 @@ jobs:
           echo "SECRET_WITH_FILE=op://${{ secrets.VAULT_ID }}/file-secret/test.txt" >> tests/.vaultId_env.tpl
           echo "SECRET_WITH_FILE_IN_SECTION=op://${{ secrets.VAULT_ID }}/file-secret/file section/test.txt" >> tests/.vaultId_env.tpl
           echo "DOUBLE_SECTION_SECRET=op://${{ secrets.VAULT_ID }}/double-section-secret/test-section/password" >> tests/.vaultId_env.tpl
+          echo "SSH_PRIVATE_KEY=op://${{ secrets.VAULT_ID }}/test-ssh-key/private key" >> tests/.vaultId_env.tpl
+          echo "SSH_PRIVATE_KEY_OPENSSH=op://${{ secrets.VAULT_ID }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.vaultId_env.tpl
 
       - name: Configure Service account
         uses: ./configure
@@ -95,6 +99,8 @@ jobs:
           SECRET_WITH_FILE: op://${{ secrets.VAULT }}/file-secret/test.txt
           SECRET_WITH_FILE_IN_SECTION: op://${{ secrets.VAULT }}/file-secret/file section/test.txt
           DOUBLE_SECTION_SECRET: op://${{ secrets.VAULT }}/double-section-secret/test-section/password
+          SSH_PRIVATE_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
+          SSH_PRIVATE_KEY_OPENSSH: op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -110,12 +116,27 @@ jobs:
           SECRET_WITH_FILE: ${{ steps.load_secrets.outputs.SECRET_WITH_FILE }}
           SECRET_WITH_FILE_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_WITH_FILE_IN_SECTION }}
           DOUBLE_SECTION_SECRET: ${{ steps.load_secrets.outputs.DOUBLE_SECTION_SECRET }}
+          SSH_PRIVATE_KEY: ${{ steps.load_secrets.outputs.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_OPENSSH: ${{ steps.load_secrets.outputs.SSH_PRIVATE_KEY_OPENSSH }}
         run: ./tests/assert-env-set.sh
 
       - name: Assert test secret values [exported env]
         if: ${{ matrix.export-env }}
         shell: bash
         run: ./tests/assert-env-set.sh
+
+      - name: Assert SSH keys [step output]
+        if: ${{ !matrix.export-env }}
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ steps.load_secrets.outputs.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_OPENSSH: ${{ steps.load_secrets.outputs.SSH_PRIVATE_KEY_OPENSSH }}
+        run: ./tests/assert-ssh-keys.sh
+
+      - name: Assert SSH keys [exported env]
+        if: ${{ matrix.export-env }}
+        shell: bash
+        run: ./tests/assert-ssh-keys.sh
 
       - name: Remove secrets [exported env]
         if: ${{ matrix.export-env }}
@@ -156,6 +177,8 @@ jobs:
           SECRET_WITH_FILE: op://${{ secrets.VAULT_ID }}/file-secret/test.txt
           SECRET_WITH_FILE_IN_SECTION: op://${{ secrets.VAULT_ID }}/file-secret/file section/test.txt
           DOUBLE_SECTION_SECRET: op://${{ secrets.VAULT_ID }}/double-section-secret/test-section/password
+          SSH_PRIVATE_KEY: op://${{ secrets.VAULT_ID }}/test-ssh-key/private key
+          SSH_PRIVATE_KEY_OPENSSH: op://${{ secrets.VAULT_ID }}/test-ssh-key/private key?ssh-format=openssh
           OP_ENV_FILE: ./tests/.vaultId_env.tpl
 
       - name: Assert test secret values [vault by ID]
@@ -171,6 +194,8 @@ jobs:
           SECRET_WITH_FILE: ${{ steps.load_secrets_by_vault_id.outputs.SECRET_WITH_FILE }}
           SECRET_WITH_FILE_IN_SECTION: ${{ steps.load_secrets_by_vault_id.outputs.SECRET_WITH_FILE_IN_SECTION }}
           DOUBLE_SECTION_SECRET: ${{ steps.load_secrets_by_vault_id.outputs.DOUBLE_SECTION_SECRET }}
+          SSH_PRIVATE_KEY: ${{ steps.load_secrets_by_vault_id.outputs.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_OPENSSH: ${{ steps.load_secrets_by_vault_id.outputs.SSH_PRIVATE_KEY_OPENSSH }}
         run: ./tests/assert-env-set.sh
 
   test-connect:
@@ -210,6 +235,8 @@ jobs:
           echo "SECRET_WITH_FILE=op://${{ secrets.VAULT }}/file-secret/test.txt" >> tests/.env.tpl
           echo "SECRET_WITH_FILE_IN_SECTION=op://${{ secrets.VAULT }}/file-secret/file section/test.txt" >> tests/.env.tpl
           echo "DOUBLE_SECTION_SECRET=op://${{ secrets.VAULT }}/double-section-secret/test-section/password" >> tests/.env.tpl
+          echo "SSH_PRIVATE_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
+          echo "SSH_PRIVATE_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
 
       - name: Generate .vaultId_env.tpl
         run: |
@@ -219,6 +246,8 @@ jobs:
           echo "SECRET_WITH_FILE=op://${{ secrets.VAULT_ID }}/file-secret/test.txt" >> tests/.vaultId_env.tpl
           echo "SECRET_WITH_FILE_IN_SECTION=op://${{ secrets.VAULT_ID }}/file-secret/file section/test.txt" >> tests/.vaultId_env.tpl
           echo "DOUBLE_SECTION_SECRET=op://${{ secrets.VAULT_ID }}/double-section-secret/test-section/password" >> tests/.vaultId_env.tpl
+          echo "SSH_PRIVATE_KEY=op://${{ secrets.VAULT_ID }}/test-ssh-key/private key" >> tests/.vaultId_env.tpl
+          echo "SSH_PRIVATE_KEY_OPENSSH=op://${{ secrets.VAULT_ID }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.vaultId_env.tpl
 
       - name: Launch 1Password Connect instance
         env:
@@ -246,6 +275,8 @@ jobs:
           SECRET_WITH_FILE: op://${{ secrets.VAULT }}/file-secret/test.txt
           SECRET_WITH_FILE_IN_SECTION: op://${{ secrets.VAULT }}/file-secret/file section/test.txt
           DOUBLE_SECTION_SECRET: op://${{ secrets.VAULT }}/double-section-secret/test-section/password
+          SSH_PRIVATE_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
+          SSH_PRIVATE_KEY_OPENSSH: op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -260,11 +291,26 @@ jobs:
           SECRET_WITH_FILE: ${{ steps.load_secrets.outputs.SECRET_WITH_FILE }}
           SECRET_WITH_FILE_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_WITH_FILE_IN_SECTION }}
           DOUBLE_SECTION_SECRET: ${{ steps.load_secrets.outputs.DOUBLE_SECTION_SECRET }}
+          SSH_PRIVATE_KEY: ${{ steps.load_secrets.outputs.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_OPENSSH: ${{ steps.load_secrets.outputs.SSH_PRIVATE_KEY_OPENSSH }}
         run: ./tests/assert-env-set.sh
 
       - name: Assert test secret values [exported env]
         if: ${{ matrix.export-env }}
         run: ./tests/assert-env-set.sh
+
+      - name: Assert SSH keys [step output]
+        if: ${{ !matrix.export-env }}
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ steps.load_secrets.outputs.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY_OPENSSH: ${{ steps.load_secrets.outputs.SSH_PRIVATE_KEY_OPENSSH }}
+        run: ./tests/assert-ssh-keys.sh
+
+      - name: Assert SSH keys [exported env]
+        if: ${{ matrix.export-env }}
+        shell: bash
+        run: ./tests/assert-ssh-keys.sh
 
       - name: Remove secrets [exported env]
         if: ${{ matrix.export-env }}

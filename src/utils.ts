@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import sshpk from "sshpk";
 import { read } from "@1password/op-js";
 import { createClient, Secrets } from "@1password/sdk";
 import { OnePasswordConnect, FullItem, OPConnect } from "@1password/connect";
@@ -17,6 +18,8 @@ interface ParsedOpRef {
 	item: string;
 	section: string | undefined;
 	field: string;
+
+	queryParams: string | undefined;
 }
 
 export const parseOpRef = (ref: string): ParsedOpRef => {
@@ -47,11 +50,14 @@ export const parseOpRef = (ref: string): ParsedOpRef => {
 		throw new Error(`Invalid op reference: item is required`);
 	}
 
-	// Last segment is always the field
-	const field = segments[segments.length - 1] ?? "";
+	// Last segment is the field; it may include a query string (e.g. "private key?ssh-format=openssh")
+	const lastSegment = segments[segments.length - 1] ?? "";
+	const [fieldPart, queryPart] = lastSegment.split("?");
+	const field = fieldPart ?? "";
 	if (!field) {
 		throw new Error(`Invalid op reference: field is required`);
 	}
+	const queryParams = queryPart ?? undefined;
 
 	// Second to last segment is the section if it exists
 	let section: string | undefined;
@@ -69,6 +75,7 @@ export const parseOpRef = (ref: string): ParsedOpRef => {
 		item,
 		field,
 		section,
+		queryParams,
 	};
 };
 // #endregion
@@ -270,6 +277,19 @@ const createConnectClient = (host: string, token: string): OPConnect => {
 		throw new Error(`Connect authentication failed: ${message}`);
 	}
 };
+
+const toOpenSSH = (
+	value: string,
+	_queryParams: string | undefined,
+): string => {
+	try {
+		const key = sshpk.parsePrivateKey(value, "auto");
+		return key.toString("openssh");
+	} catch {
+		core.warning(`Failed to parse private key to OpenSSH, returning original value`);
+		return value;
+	}
+};
 // #endregion
 
 // #region Shared helpers and auth
@@ -432,7 +452,11 @@ const loadSecretsViaConnect = async (
 
 			// Get the secret value from the item as Connect returns a full item object
 			const secretValue = await getSecretFromConnectItem(client, item, parsed);
-			setResolvedSecret(envName, secretValue, shouldExportEnv);
+			let valueToSet = secretValue;
+			if (parsed.queryParams?.includes("ssh-format=openssh")) {
+				valueToSet = toOpenSSH(secretValue, parsed.queryParams);
+			}
+			setResolvedSecret(envName, valueToSet, shouldExportEnv);
 		} catch (err) {
 			const msg = err instanceof Error ? err.message : String(err);
 			throw new Error(`Failed to load ref "${ref}": ${msg}`);

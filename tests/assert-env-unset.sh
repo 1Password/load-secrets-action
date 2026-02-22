@@ -21,3 +21,6 @@ assert_env_unset "FILE_MULTILINE_SECRET"
 assert_env_unset "SECRET_WITH_FILE"
 assert_env_unset "SECRET_WITH_FILE_IN_SECTION"
 assert_env_unset "DOUBLE_SECTION_SECRET"
+
+assert_env_unset "SSH_PRIVATE_KEY"
+assert_env_unset "SSH_PRIVATE_KEY_OPENSSH"
