@@ -549,7 +549,7 @@ describe("loadSecrets when using Service Account", () => {
 
 	describe("secret reference validation", () => {
 		it("fails with clear message when a secret reference is invalid", async () => {
-			process.env.MY_SECRET = "op://invalid/ref/form";
+			process.env.MY_SECRET = "op://x";
 			(Secrets.validateSecretReference as jest.Mock).mockImplementationOnce(
 				() => {
 					throw new Error("invalid reference format");
@@ -572,7 +572,6 @@ describe("loadSecrets when using Service Account", () => {
 					}
 				},
 			);
-			mockResolve.mockResolvedValue("value1");
 
 			await expect(loadSecrets(false)).rejects.toThrow(
 				"Invalid secret reference(s): OTHER",
