@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read, setClientInfo, semverToInt } from "@1password/op-js";
-import { createClient } from "@1password/sdk";
+import { createClient, Secrets } from "@1password/sdk";
 import { version } from "../package.json";
 import {
 	authErr,
@@ -36,6 +36,32 @@ const getEnvVarNamesWithSecretRefs = (): string[] =>
 			typeof process.env[key] === "string" &&
 			process.env[key]?.startsWith("op://"),
 	);
+
+const validateSecretRefs = (envNames: string[]): void => {
+	const invalid: { name: string; message: string }[] = [];
+
+	for (const envName of envNames) {
+		const ref = process.env[envName];
+		if (!ref) {
+			continue;
+		}
+
+		try {
+			Secrets.validateSecretReference(ref);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : String(err);
+			invalid.push({ name: envName, message });
+		}
+	}
+
+	// Throw an error if any secret references are invalid
+	if (invalid.length > 0) {
+		const details = invalid
+			.map(({ name, message }) => `${name}: ${message}`)
+			.join("; ");
+		throw new Error(`Invalid secret reference(s): ${details}`);
+	}
+};
 
 const setResolvedSecret = (
 	envName: string,
@@ -107,6 +133,8 @@ const loadSecretsViaServiceAccount = async (
 	if (envs.length === 0) {
 		return;
 	}
+
+	validateSecretRefs(envs);
 
 	const token = process.env[envServiceAccountToken];
 	if (!token) {

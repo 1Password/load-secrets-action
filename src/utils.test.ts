@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
-import { createClient } from "@1password/sdk";
+import { createClient, Secrets } from "@1password/sdk";
 import {
 	extractSecret,
 	loadSecrets,
@@ -25,6 +25,10 @@ jest.mock("@actions/exec", () => ({
 jest.mock("@1password/op-js");
 jest.mock("@1password/sdk", () => ({
 	createClient: jest.fn(),
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	Secrets: {
+		validateSecretReference: jest.fn(),
+	},
 }));
 
 beforeEach(() => {
@@ -347,6 +351,39 @@ describe("loadSecrets when using Service Account", () => {
 			expect(managedList).toHaveLength(3);
 
 			expect(core.setSecret).toHaveBeenCalledTimes(3);
+		});
+	});
+
+	describe("secret reference validation", () => {
+		it("fails with clear message when a secret reference is invalid", async () => {
+			process.env.MY_SECRET = "op://x";
+			(Secrets.validateSecretReference as jest.Mock).mockImplementationOnce(
+				() => {
+					throw new Error("invalid reference format");
+				},
+			);
+
+			await expect(loadSecrets(true)).rejects.toThrow(
+				"Invalid secret reference(s): MY_SECRET",
+			);
+			expect(mockResolve).not.toHaveBeenCalled();
+		});
+
+		it("validates all refs before resolving any secrets", async () => {
+			process.env.MY_SECRET = "op://vault/item/field";
+			process.env.OTHER = "op://vault/other/item";
+			(Secrets.validateSecretReference as jest.Mock).mockImplementation(
+				(ref: string) => {
+					if (ref === "op://vault/other/item") {
+						throw new Error("invalid");
+					}
+				},
+			);
+
+			await expect(loadSecrets(false)).rejects.toThrow(
+				"Invalid secret reference(s): OTHER",
+			);
+			expect(mockResolve).not.toHaveBeenCalled();
 		});
 	});
 });
