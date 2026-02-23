@@ -56,7 +56,9 @@ const validateSecretRefs = (envNames: string[]): void => {
 
 	// Throw an error if any secret references are invalid
 	if (invalid.length > 0) {
-		const details = invalid.map(({ name, message }) => `${name}: ${message}`).join("; ");
+		const details = invalid
+			.map(({ name, message }) => `${name}: ${message}`)
+			.join("; ");
 		throw new Error(`Invalid secret reference(s): ${details}`);
 	}
 };
