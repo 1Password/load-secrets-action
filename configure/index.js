@@ -1,4 +1,4 @@
-const core = require("@actions/core");
+import * as core from "@actions/core";
 
 const configure = () => {
 	const OP_CONNECT_HOST =
