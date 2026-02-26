@@ -15,12 +15,6 @@ import {
 	envServiceAccountToken,
 } from "./constants";
 
-jest.mock("@actions/core");
-jest.mock("@actions/exec", () => ({
-	getExecOutput: jest.fn(() => ({
-		stdout: "MOCK_SECRET",
-	})),
-}));
 jest.mock("@1password/op-js");
 
 beforeEach(() => {

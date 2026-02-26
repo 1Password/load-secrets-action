@@ -11,8 +11,9 @@ const jestConfig = {
 	testEnvironment: "node",
 	testRegex: "(/__tests__/.*|(\\.|/)test)\\.ts",
 	moduleNameMapper: {
-		"^@actions/core$": "<rootDir>/__mocks__/actions-core.js",
-		"^@actions/tool-cache$": "<rootDir>/__mocks__/actions-tool-cache.js",
+		"^@actions/core$": "<rootDir>/__mocks__/actions-core.ts",
+		"^@actions/tool-cache$": "<rootDir>/__mocks__/actions-tool-cache.ts",
+		"^@actions/exec$": "<rootDir>/__mocks__/actions-exec.ts",
 	},
 	transform: {
 		".ts": [

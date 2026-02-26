@@ -42,7 +42,7 @@
 	"dependencies": {
 		"@1password/op-js": "^0.1.11",
 		"@actions/core": "^3.0.0",
-		"@actions/exec": "^1.1.1",
+		"@actions/exec": "^3.0.0",
 		"@actions/tool-cache": "^4.0.0",
 		"dotenv": "^17.2.2"
 	},
