@@ -10,6 +10,11 @@ const jestConfig = {
 	rootDir: "../src/",
 	testEnvironment: "node",
 	testRegex: "(/__tests__/.*|(\\.|/)test)\\.ts",
+	moduleNameMapper: {
+		"^@actions/core$": "<rootDir>/__mocks__/actions-core.ts",
+		"^@actions/tool-cache$": "<rootDir>/__mocks__/actions-tool-cache.ts",
+		"^@actions/exec$": "<rootDir>/__mocks__/actions-exec.ts",
+	},
 	transform: {
 		".ts": [
 			"ts-jest",
@@ -25,4 +30,4 @@ const jestConfig = {
 	verbose: true,
 };
 
-export default jestConfig;
+module.exports = jestConfig;
