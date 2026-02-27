@@ -41,6 +41,7 @@
 	"homepage": "https://github.com/1Password/load-secrets-action#readme",
 	"dependencies": {
 		"@1password/op-js": "^0.1.11",
+		"@1password/sdk": "^0.4.0",
 		"@actions/core": "^3.0.0",
 		"@actions/exec": "^3.0.0",
 		"@actions/tool-cache": "^4.0.0",

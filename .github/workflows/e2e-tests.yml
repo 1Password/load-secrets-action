@@ -26,13 +26,12 @@ on:
 
 jobs:
   test-service-account:
-    name: Service Account (${{ matrix.os }}, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
+    name: Service Account (${{ matrix.os }}, export-env=${{ matrix.export-env }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        version: [latest, 2.30.0]
         export-env: [true, false]
     steps:
       - name: Checkout
@@ -69,7 +68,6 @@ jobs:
         id: load_secrets
         uses: ./
         with:
-          version: ${{ matrix.version }}
           export-env: ${{ matrix.export-env }}
         env:
           SECRET: op://${{ secrets.VAULT }}/test-secret/password
@@ -104,6 +102,22 @@ jobs:
         if: ${{ matrix.export-env }}
         shell: bash
         run: ./tests/assert-env-unset.sh
+
+      - name: Load secrets (invalid ref - expect failure)
+        id: load_invalid
+        continue-on-error: true
+        uses: ./
+        env:
+          BAD_REF: "op://x"
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        with:
+          export-env: true
+
+      - name: Assert invalid ref failed
+        shell: bash
+        run: ./tests/assert-invalid-ref-failed.sh
+        env:
+          STEP_OUTCOME: ${{ steps.load_invalid.outcome }}
 
   test-connect:
     name: Connect (ubuntu-latest, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
