@@ -1,6 +1,21 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 9295:
+/***/ ((module) => {
+
+function webpackEmptyContext(req) {
+	var e = new Error("Cannot find module '" + req + "'");
+	e.code = 'MODULE_NOT_FOUND';
+	throw e;
+}
+webpackEmptyContext.keys = () => ([]);
+webpackEmptyContext.resolve = webpackEmptyContext;
+webpackEmptyContext.id = 9295;
+module.exports = webpackEmptyContext;
+
+/***/ }),
+
 /***/ 7539:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -13,6 +28,2482 @@ var P=Object.create;var c=Object.defineProperty;var k=Object.getOwnPropertyDescr
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 var v=Object.create;var o=Object.defineProperty;var x=Object.getOwnPropertyDescriptor;var C=Object.getOwnPropertyNames;var f=Object.getPrototypeOf,F=Object.prototype.hasOwnProperty;var A=(e,t)=>{for(var r in t)o(e,r,{get:t[r],enumerable:!0})},u=(e,t,r,a)=>{if(t&&typeof t=="object"||typeof t=="function")for(let i of C(t))!F.call(e,i)&&i!==r&&o(e,i,{get:()=>t[i],enumerable:!(a=x(t,i))||a.enumerable});return e};var c=(e,t,r)=>(r=e!=null?v(f(e)):{},u(t||!e||!e.__esModule?o(r,"default",{value:e,enumerable:!0}):r,e)),R=e=>u(o({},"__esModule",{value:!0}),e);var M={};A(M,{CLIError:()=>n.CLIError,ExecutionError:()=>n.ExecutionError,ValidationError:()=>n.ValidationError,ValidationErrorType:()=>n.ValidationErrorType,account:()=>V,connect:()=>P,document:()=>U,eventsApi:()=>h,group:()=>w,inject:()=>b,item:()=>G,read:()=>D,semverToInt:()=>n.semverToInt,setClientInfo:()=>S,setConnect:()=>y,setGlobalFlags:()=>T,setServiceAccount:()=>_,user:()=>L,validateCli:()=>I,vault:()=>j,version:()=>N,whoami:()=>O});module.exports=R(M);var d=c(__nccwpck_require__(5385)),m=c(__nccwpck_require__(8011)),s=__nccwpck_require__(7539),n=__nccwpck_require__(7539);const S=e=>s.cli.setClientInfo(e),T=e=>{s.cli.globalFlags=e},y=(e,t)=>{s.cli.connect={host:e,token:t}},_=e=>{s.cli.serviceAccountToken=e},I=async e=>await s.cli.validate(e),N=()=>s.cli.getVersion(),b={data:(e,t={})=>s.cli.execute(["inject"],{flags:t,json:!1,stdin:e}),toFile:(e,t,r={})=>s.cli.execute(["inject"],{flags:{outFile:t,...r},json:!1,stdin:e})},D={parse:(e,t={})=>s.cli.execute(["read"],{args:[e],flags:t,json:!1}),toFile:(e,t,r={})=>s.cli.execute(["read"],{args:[e],flags:{outFile:t,...r},json:!1})},V={forget:(e,t={})=>s.cli.execute(["account","forget"],{args:[e],flags:t,json:!1}),get:(e={})=>s.cli.execute(["account","get"],{flags:e}),list:(e={})=>s.cli.execute(["account","list"],{flags:e})},O=()=>{try{return s.cli.execute(["whoami"])}catch(e){if(e instanceof s.CLIError&&e.message.includes("signed in"))return null;throw e}},U={create:(e,t={},r=!1)=>s.cli.execute(["document","create"],{args:[r?e:""],flags:t,stdin:r?void 0:e}),delete:(e,t={})=>s.cli.execute(["document","delete"],{args:[e],flags:t}),edit:(e,t,r={},a=!1)=>s.cli.execute(["document","edit"],{args:[e,a?t:""],flags:r,stdin:a?void 0:t}),get:(e,t={})=>s.cli.execute(["document","get"],{args:[e],flags:t,json:!1}),toFile:(e,t,r={})=>s.cli.execute(["document","get"],{args:[e],flags:{output:t,...r},json:!1}),list:(e={})=>s.cli.execute(["document","list"],{flags:e})},h={create:(e,t={})=>s.cli.execute(["events-api","create"],{args:[e],flags:t,json:!1})},P={group:{grant:(e,t={})=>s.cli.execute(["connect","group","grant"],{flags:{group:e,...t},json:!1}),revoke:(e,t={})=>s.cli.execute(["connect","group","revoke"],{flags:{group:e,...t},json:!1})},server:{create:(e,t={})=>s.cli.execute(["connect","server","create"],{args:[e],flags:t,json:!1}),delete:(e,t={})=>s.cli.execute(["connect","server","delete"],{args:[e],flags:t}),edit:(e,t,r={})=>s.cli.execute(["connect","server","edit"],{args:[e],flags:{name:t,...r},json:!1}),get:(e,t={})=>s.cli.execute(["connect","server","get"],{args:[e],flags:t}),list:(e={})=>s.cli.execute(["connect","server","list"],{flags:e})},token:{create:(e,t,r={})=>s.cli.execute(["connect","token","create"],{args:[e],flags:{server:t,...r},json:!1}),delete:(e,t={})=>s.cli.execute(["connect","token","delete"],{args:[e],flags:t,json:!1}),edit:(e,t,r={})=>s.cli.execute(["connect","token","edit"],{args:[e],flags:{name:t,...r},json:!1}),list:(e={})=>s.cli.execute(["connect","token","list"],{flags:e})},vault:{grant:(e,t,r={})=>s.cli.execute(["connect","vault","grant"],{flags:{server:e,vault:t,...r},json:!1}),revoke:(e,t,r={})=>s.cli.execute(["connect","vault","revoke"],{flags:{server:e,vault:t,...r},json:!1})}},G={create:(e,t={})=>{const r={flags:t},a=(0,d.default)(s.cli.getVersion());return(0,m.default)(a,">=2.6.2")?r.args=e:r.stdin={fields:e.map(([i,p,E,g])=>{const l={label:i,type:p,value:E};return g&&Object.assign(l,{purpose:g}),l})},s.cli.execute(["item","create"],r)},delete:(e,t={})=>s.cli.execute(["item","delete"],{args:[e],flags:t,json:!1}),edit:(e,t,r={})=>s.cli.execute(["item","edit"],{args:[e,...t],flags:r}),get:(e,t={})=>s.cli.execute(["item","get"],{args:[e],flags:t}),otp:(e,t={})=>s.cli.execute(["item","get"],{args:[e],flags:{otp:!0,...t},json:!1}),shareLink:(e,t={})=>s.cli.execute(["item","get"],{args:[e],flags:{shareLink:!0,...t},json:!1}),list:(e={})=>s.cli.execute(["item","list"],{flags:e}),share:(e,t={})=>s.cli.execute(["item","share"],{args:[e],flags:t,json:!1}),template:{get:(e,t={})=>s.cli.execute(["item","template","get"],{args:[e],flags:t}),list:(e={})=>s.cli.execute(["item","template","list"],{flags:e})}},j={create:(e,t={})=>s.cli.execute(["vault","create"],{args:[e],flags:t}),delete:(e,t={})=>s.cli.execute(["vault","delete"],{args:[e],flags:t,json:!1}),edit:(e,t={})=>s.cli.execute(["vault","edit"],{args:[e],flags:t,json:!1}),get:(e,t={})=>s.cli.execute(["vault","get"],{args:[e],flags:t}),list:(e={})=>s.cli.execute(["vault","list"],{flags:e}),group:{grant:(e={})=>s.cli.execute(["vault","group","grant"],{flags:{noInput:!0,...e}}),revoke:(e={})=>s.cli.execute(["vault","group","revoke"],{flags:{noInput:!0,...e}}),list:(e,t={})=>s.cli.execute(["vault","group","list"],{args:[e],flags:t})},user:{grant:(e={})=>s.cli.execute(["vault","user","grant"],{flags:{noInput:!0,...e}}),revoke:(e={})=>s.cli.execute(["vault","user","revoke"],{flags:{noInput:!0,...e}}),list:(e,t={})=>s.cli.execute(["vault","user","list"],{args:[e],flags:t})}},L={confirm:(e,t={})=>s.cli.execute(["user","confirm"],{args:[e],flags:t,json:!1}),confirmAll:(e={})=>s.cli.execute(["user","confirm"],{flags:{all:!0,...e},json:!1}),delete:(e,t={})=>s.cli.execute(["user","delete"],{args:[e],flags:t,json:!1}),edit:(e,t={})=>s.cli.execute(["user","edit"],{args:[e],flags:t,json:!1}),get:(e,t={})=>s.cli.execute(["user","get"],{args:[e],flags:t}),me:(e={})=>s.cli.execute(["user","get"],{flags:{me:!0,...e}}),fingerprint:(e,t={})=>s.cli.execute(["user","get"],{args:[e],flags:{fingerprint:!0,...t},json:!1}),publicKey:(e,t={})=>s.cli.execute(["user","get"],{args:[e],flags:{publicKey:!0,...t},json:!1}),list:(e={})=>s.cli.execute(["user","list"],{flags:e}),provision:(e,t,r)=>s.cli.execute(["user","provision"],{flags:{email:e,name:t,...r}}),reactivate:(e,t={})=>s.cli.execute(["user","reactivate"],{args:[e],flags:t,json:!1}),suspend:(e,t={})=>s.cli.execute(["user","suspend"],{args:[e],flags:t,json:!1})},w={create:(e,t={})=>s.cli.execute(["group","create"],{args:[e],flags:t}),delete:(e,t={})=>s.cli.execute(["group","delete"],{args:[e],flags:t,json:!1}),edit:(e,t={})=>s.cli.execute(["group","edit"],{args:[e],flags:t,json:!1}),get:(e,t={})=>s.cli.execute(["group","get"],{args:[e],flags:t}),list:(e={})=>s.cli.execute(["group","list"],{flags:e}),user:{grant:(e={})=>s.cli.execute(["group","user","grant"],{flags:e,json:!1}),list:(e,t={})=>s.cli.execute(["group","user","list"],{args:[e],flags:t}),revoke:(e={})=>s.cli.execute(["group","user","revoke"],{flags:e,json:!1})}};0&&(0);
+
+
+/***/ }),
+
+/***/ 2872:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+
+let imports = {};
+imports['__wbindgen_placeholder__'] = module.exports;
+let wasm;
+const { TextDecoder, TextEncoder } = __nccwpck_require__(9023);
+
+let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+
+cachedTextDecoder.decode();
+
+let cachedUint8ArrayMemory0 = null;
+
+function getUint8ArrayMemory0() {
+    if (cachedUint8ArrayMemory0 === null || cachedUint8ArrayMemory0.byteLength === 0) {
+        cachedUint8ArrayMemory0 = new Uint8Array(wasm.memory.buffer);
+    }
+    return cachedUint8ArrayMemory0;
+}
+
+function getStringFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
+}
+
+function addToExternrefTable0(obj) {
+    const idx = wasm.__externref_table_alloc();
+    wasm.__wbindgen_export_2.set(idx, obj);
+    return idx;
+}
+
+function handleError(f, args) {
+    try {
+        return f.apply(this, args);
+    } catch (e) {
+        const idx = addToExternrefTable0(e);
+        wasm.__wbindgen_exn_store(idx);
+    }
+}
+
+function isLikeNone(x) {
+    return x === undefined || x === null;
+}
+
+let WASM_VECTOR_LEN = 0;
+
+let cachedTextEncoder = new TextEncoder('utf-8');
+
+const encodeString = (typeof cachedTextEncoder.encodeInto === 'function'
+    ? function (arg, view) {
+    return cachedTextEncoder.encodeInto(arg, view);
+}
+    : function (arg, view) {
+    const buf = cachedTextEncoder.encode(arg);
+    view.set(buf);
+    return {
+        read: arg.length,
+        written: buf.length
+    };
+});
+
+function passStringToWasm0(arg, malloc, realloc) {
+
+    if (realloc === undefined) {
+        const buf = cachedTextEncoder.encode(arg);
+        const ptr = malloc(buf.length, 1) >>> 0;
+        getUint8ArrayMemory0().subarray(ptr, ptr + buf.length).set(buf);
+        WASM_VECTOR_LEN = buf.length;
+        return ptr;
+    }
+
+    let len = arg.length;
+    let ptr = malloc(len, 1) >>> 0;
+
+    const mem = getUint8ArrayMemory0();
+
+    let offset = 0;
+
+    for (; offset < len; offset++) {
+        const code = arg.charCodeAt(offset);
+        if (code > 0x7F) break;
+        mem[ptr + offset] = code;
+    }
+
+    if (offset !== len) {
+        if (offset !== 0) {
+            arg = arg.slice(offset);
+        }
+        ptr = realloc(ptr, len, len = offset + arg.length * 3, 1) >>> 0;
+        const view = getUint8ArrayMemory0().subarray(ptr + offset, ptr + len);
+        const ret = encodeString(arg, view);
+
+        offset += ret.written;
+        ptr = realloc(ptr, len, offset, 1) >>> 0;
+    }
+
+    WASM_VECTOR_LEN = offset;
+    return ptr;
+}
+
+let cachedDataViewMemory0 = null;
+
+function getDataViewMemory0() {
+    if (cachedDataViewMemory0 === null || cachedDataViewMemory0.buffer.detached === true || (cachedDataViewMemory0.buffer.detached === undefined && cachedDataViewMemory0.buffer !== wasm.memory.buffer)) {
+        cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
+    }
+    return cachedDataViewMemory0;
+}
+
+const CLOSURE_DTORS = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(state => {
+    wasm.__wbindgen_export_5.get(state.dtor)(state.a, state.b)
+});
+
+function makeMutClosure(arg0, arg1, dtor, f) {
+    const state = { a: arg0, b: arg1, cnt: 1, dtor };
+    const real = (...args) => {
+        // First up with a closure we increment the internal reference
+        // count. This ensures that the Rust closure environment won't
+        // be deallocated while we're invoking it.
+        state.cnt++;
+        const a = state.a;
+        state.a = 0;
+        try {
+            return f(a, state.b, ...args);
+        } finally {
+            if (--state.cnt === 0) {
+                wasm.__wbindgen_export_5.get(state.dtor)(a, state.b);
+                CLOSURE_DTORS.unregister(state);
+            } else {
+                state.a = a;
+            }
+        }
+    };
+    real.original = state;
+    CLOSURE_DTORS.register(real, state, state);
+    return real;
+}
+
+function debugString(val) {
+    // primitive types
+    const type = typeof val;
+    if (type == 'number' || type == 'boolean' || val == null) {
+        return  `${val}`;
+    }
+    if (type == 'string') {
+        return `"${val}"`;
+    }
+    if (type == 'symbol') {
+        const description = val.description;
+        if (description == null) {
+            return 'Symbol';
+        } else {
+            return `Symbol(${description})`;
+        }
+    }
+    if (type == 'function') {
+        const name = val.name;
+        if (typeof name == 'string' && name.length > 0) {
+            return `Function(${name})`;
+        } else {
+            return 'Function';
+        }
+    }
+    // objects
+    if (Array.isArray(val)) {
+        const length = val.length;
+        let debug = '[';
+        if (length > 0) {
+            debug += debugString(val[0]);
+        }
+        for(let i = 1; i < length; i++) {
+            debug += ', ' + debugString(val[i]);
+        }
+        debug += ']';
+        return debug;
+    }
+    // Test for built-in
+    const builtInMatches = /\[object ([^\]]+)\]/.exec(toString.call(val));
+    let className;
+    if (builtInMatches && builtInMatches.length > 1) {
+        className = builtInMatches[1];
+    } else {
+        // Failed to match the standard '[object ClassName]'
+        return toString.call(val);
+    }
+    if (className == 'Object') {
+        // we're a user defined class or Object
+        // JSON.stringify avoids problems with cycles, and is generally much
+        // easier than looping through ownProperties of `val`.
+        try {
+            return 'Object(' + JSON.stringify(val) + ')';
+        } catch (_) {
+            return 'Object';
+        }
+    }
+    // errors
+    if (val instanceof Error) {
+        return `${val.name}: ${val.message}\n${val.stack}`;
+    }
+    // TODO we could test for more things here, like `Set`s and `Map`s.
+    return className;
+}
+/**
+ * Initializes an SDK client with a given configuration.
+ * @param {string} config
+ * @returns {Promise<string>}
+ */
+module.exports.init_client = function(config) {
+    const ptr0 = passStringToWasm0(config, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.init_client(ptr0, len0);
+    return ret;
+};
+
+/**
+ * Handles all asynchronous invocations to the SDK core received from the SDK.
+ * @param {string} parameters
+ * @returns {Promise<string>}
+ */
+module.exports.invoke = function(parameters) {
+    const ptr0 = passStringToWasm0(parameters, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.invoke(ptr0, len0);
+    return ret;
+};
+
+function takeFromExternrefTable0(idx) {
+    const value = wasm.__wbindgen_export_2.get(idx);
+    wasm.__externref_table_dealloc(idx);
+    return value;
+}
+/**
+ * Handles all synchronous invocations to the SDK core received from the SDK.
+ * @param {string} parameters
+ * @returns {string}
+ */
+module.exports.invoke_sync = function(parameters) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passStringToWasm0(parameters, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.invoke_sync(ptr0, len0);
+        var ptr2 = ret[0];
+        var len2 = ret[1];
+        if (ret[3]) {
+            ptr2 = 0; len2 = 0;
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        deferred3_0 = ptr2;
+        deferred3_1 = len2;
+        return getStringFromWasm0(ptr2, len2);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+};
+
+/**
+ * Drops a client, releasing the memory allocated for it.
+ * @param {string} client_id
+ */
+module.exports.release_client = function(client_id) {
+    const ptr0 = passStringToWasm0(client_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.release_client(ptr0, len0);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+};
+
+function __wbg_adapter_30(arg0, arg1) {
+    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h4fa304e9a7297dba(arg0, arg1);
+}
+
+function __wbg_adapter_33(arg0, arg1, arg2) {
+    wasm.closure2484_externref_shim(arg0, arg1, arg2);
+}
+
+function __wbg_adapter_156(arg0, arg1, arg2, arg3) {
+    wasm.closure2632_externref_shim(arg0, arg1, arg2, arg3);
+}
+
+const __wbindgen_enum_RequestCache = ["default", "no-store", "reload", "no-cache", "force-cache", "only-if-cached"];
+
+const __wbindgen_enum_RequestCredentials = ["omit", "same-origin", "include"];
+
+const __wbindgen_enum_RequestMode = ["same-origin", "no-cors", "cors", "navigate"];
+
+module.exports.__wbg_abort_410ec47a64ac6117 = function(arg0, arg1) {
+    arg0.abort(arg1);
+};
+
+module.exports.__wbg_abort_775ef1d17fc65868 = function(arg0) {
+    arg0.abort();
+};
+
+module.exports.__wbg_append_8c7dd8d641a5f01b = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
+    arg0.append(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
+}, arguments) };
+
+module.exports.__wbg_arrayBuffer_d1b44c4390db422f = function() { return handleError(function (arg0) {
+    const ret = arg0.arrayBuffer();
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_buffer_609cc3eee51ed158 = function(arg0) {
+    const ret = arg0.buffer;
+    return ret;
+};
+
+module.exports.__wbg_call_672a4d21634d4a24 = function() { return handleError(function (arg0, arg1) {
+    const ret = arg0.call(arg1);
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_call_7cccdd69e0791ae2 = function() { return handleError(function (arg0, arg1, arg2) {
+    const ret = arg0.call(arg1, arg2);
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_clearTimeout_42d9ccd50822fd3a = function(arg0) {
+    const ret = clearTimeout(arg0);
+    return ret;
+};
+
+module.exports.__wbg_crypto_86f2631e91b51511 = function(arg0) {
+    const ret = arg0.crypto;
+    return ret;
+};
+
+module.exports.__wbg_done_769e5ede4b31c67b = function(arg0) {
+    const ret = arg0.done;
+    return ret;
+};
+
+module.exports.__wbg_fetch_509096533071c657 = function(arg0, arg1) {
+    const ret = arg0.fetch(arg1);
+    return ret;
+};
+
+module.exports.__wbg_fetch_6bbc32f991730587 = function(arg0) {
+    const ret = fetch(arg0);
+    return ret;
+};
+
+module.exports.__wbg_getFullYear_17d3c9e4db748eb7 = function(arg0) {
+    const ret = arg0.getFullYear();
+    return ret;
+};
+
+module.exports.__wbg_getRandomValues_b3f15fcbfabb0f8b = function() { return handleError(function (arg0, arg1) {
+    arg0.getRandomValues(arg1);
+}, arguments) };
+
+module.exports.__wbg_getTimezoneOffset_6b5752021c499c47 = function(arg0) {
+    const ret = arg0.getTimezoneOffset();
+    return ret;
+};
+
+module.exports.__wbg_get_67b2ba62fc30de12 = function() { return handleError(function (arg0, arg1) {
+    const ret = Reflect.get(arg0, arg1);
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_has_a5ea9117f258a0ec = function() { return handleError(function (arg0, arg1) {
+    const ret = Reflect.has(arg0, arg1);
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_headers_9cb51cfd2ac780a4 = function(arg0) {
+    const ret = arg0.headers;
+    return ret;
+};
+
+module.exports.__wbg_instanceof_Response_f2cc20d9f7dfd644 = function(arg0) {
+    let result;
+    try {
+        result = arg0 instanceof Response;
+    } catch (_) {
+        result = false;
+    }
+    const ret = result;
+    return ret;
+};
+
+module.exports.__wbg_instanceof_Window_def73ea0955fc569 = function(arg0) {
+    let result;
+    try {
+        result = arg0 instanceof Window;
+    } catch (_) {
+        result = false;
+    }
+    const ret = result;
+    return ret;
+};
+
+module.exports.__wbg_instanceof_WorkerGlobalScope_dbdbdea7e3b56493 = function(arg0) {
+    let result;
+    try {
+        result = arg0 instanceof WorkerGlobalScope;
+    } catch (_) {
+        result = false;
+    }
+    const ret = result;
+    return ret;
+};
+
+module.exports.__wbg_iterator_9a24c88df860dc65 = function() {
+    const ret = Symbol.iterator;
+    return ret;
+};
+
+module.exports.__wbg_languages_2420955220685766 = function(arg0) {
+    const ret = arg0.languages;
+    return ret;
+};
+
+module.exports.__wbg_languages_d8dad509faf757df = function(arg0) {
+    const ret = arg0.languages;
+    return ret;
+};
+
+module.exports.__wbg_length_a446193dc22c12f8 = function(arg0) {
+    const ret = arg0.length;
+    return ret;
+};
+
+module.exports.__wbg_msCrypto_d562bbe83e0d4b91 = function(arg0) {
+    const ret = arg0.msCrypto;
+    return ret;
+};
+
+module.exports.__wbg_navigator_0a9bf1120e24fec2 = function(arg0) {
+    const ret = arg0.navigator;
+    return ret;
+};
+
+module.exports.__wbg_navigator_1577371c070c8947 = function(arg0) {
+    const ret = arg0.navigator;
+    return ret;
+};
+
+module.exports.__wbg_new0_f788a2397c7ca929 = function() {
+    const ret = new Date();
+    return ret;
+};
+
+module.exports.__wbg_new_018dcc2d6c8c2f6a = function() { return handleError(function () {
+    const ret = new Headers();
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_new_23a2665fac83c611 = function(arg0, arg1) {
+    try {
+        var state0 = {a: arg0, b: arg1};
+        var cb0 = (arg0, arg1) => {
+            const a = state0.a;
+            state0.a = 0;
+            try {
+                return __wbg_adapter_156(a, state0.b, arg0, arg1);
+            } finally {
+                state0.a = a;
+            }
+        };
+        const ret = new Promise(cb0);
+        return ret;
+    } finally {
+        state0.a = state0.b = 0;
+    }
+};
+
+module.exports.__wbg_new_31a97dac4f10fab7 = function(arg0) {
+    const ret = new Date(arg0);
+    return ret;
+};
+
+module.exports.__wbg_new_405e22f390576ce2 = function() {
+    const ret = new Object();
+    return ret;
+};
+
+module.exports.__wbg_new_a12002a7f91c75be = function(arg0) {
+    const ret = new Uint8Array(arg0);
+    return ret;
+};
+
+module.exports.__wbg_new_e25e5aab09ff45db = function() { return handleError(function () {
+    const ret = new AbortController();
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_newnoargs_105ed471475aaf50 = function(arg0, arg1) {
+    const ret = new Function(getStringFromWasm0(arg0, arg1));
+    return ret;
+};
+
+module.exports.__wbg_newwithbyteoffsetandlength_d97e637ebe145a9a = function(arg0, arg1, arg2) {
+    const ret = new Uint8Array(arg0, arg1 >>> 0, arg2 >>> 0);
+    return ret;
+};
+
+module.exports.__wbg_newwithlength_a381634e90c276d4 = function(arg0) {
+    const ret = new Uint8Array(arg0 >>> 0);
+    return ret;
+};
+
+module.exports.__wbg_newwithstrandinit_06c535e0a867c635 = function() { return handleError(function (arg0, arg1, arg2) {
+    const ret = new Request(getStringFromWasm0(arg0, arg1), arg2);
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_next_25feadfc0913fea9 = function(arg0) {
+    const ret = arg0.next;
+    return ret;
+};
+
+module.exports.__wbg_next_6574e1a8a62d1055 = function() { return handleError(function (arg0) {
+    const ret = arg0.next();
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_node_e1f24f89a7336c2e = function(arg0) {
+    const ret = arg0.node;
+    return ret;
+};
+
+module.exports.__wbg_now_807e54c39636c349 = function() {
+    const ret = Date.now();
+    return ret;
+};
+
+module.exports.__wbg_now_d18023d54d4e5500 = function(arg0) {
+    const ret = arg0.now();
+    return ret;
+};
+
+module.exports.__wbg_parse_def2e24ef1252aff = function() { return handleError(function (arg0, arg1) {
+    const ret = JSON.parse(getStringFromWasm0(arg0, arg1));
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_process_3975fd6c72f520aa = function(arg0) {
+    const ret = arg0.process;
+    return ret;
+};
+
+module.exports.__wbg_queueMicrotask_97d92b4fcc8a61c5 = function(arg0) {
+    queueMicrotask(arg0);
+};
+
+module.exports.__wbg_queueMicrotask_d3219def82552485 = function(arg0) {
+    const ret = arg0.queueMicrotask;
+    return ret;
+};
+
+module.exports.__wbg_randomFillSync_f8c153b79f285817 = function() { return handleError(function (arg0, arg1) {
+    arg0.randomFillSync(arg1);
+}, arguments) };
+
+module.exports.__wbg_require_b74f47fc2d022fd6 = function() { return handleError(function () {
+    const ret = undefined;
+    return __nccwpck_require__(9295);
+}, arguments) };
+
+module.exports.__wbg_resolve_4851785c9c5f573d = function(arg0) {
+    const ret = Promise.resolve(arg0);
+    return ret;
+};
+
+module.exports.__wbg_self_b29ea9f89ecb0567 = function() { return handleError(function () {
+    const ret = self.self;
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_setTimeout_4ec014681668a581 = function(arg0, arg1) {
+    const ret = setTimeout(arg0, arg1);
+    return ret;
+};
+
+module.exports.__wbg_set_65595bdd868b3009 = function(arg0, arg1, arg2) {
+    arg0.set(arg1, arg2 >>> 0);
+};
+
+module.exports.__wbg_setbody_5923b78a95eedf29 = function(arg0, arg1) {
+    arg0.body = arg1;
+};
+
+module.exports.__wbg_setcache_12f17c3a980650e4 = function(arg0, arg1) {
+    arg0.cache = __wbindgen_enum_RequestCache[arg1];
+};
+
+module.exports.__wbg_setcredentials_c3a22f1cd105a2c6 = function(arg0, arg1) {
+    arg0.credentials = __wbindgen_enum_RequestCredentials[arg1];
+};
+
+module.exports.__wbg_setheaders_834c0bdb6a8949ad = function(arg0, arg1) {
+    arg0.headers = arg1;
+};
+
+module.exports.__wbg_setmethod_3c5280fe5d890842 = function(arg0, arg1, arg2) {
+    arg0.method = getStringFromWasm0(arg1, arg2);
+};
+
+module.exports.__wbg_setmode_5dc300b865044b65 = function(arg0, arg1) {
+    arg0.mode = __wbindgen_enum_RequestMode[arg1];
+};
+
+module.exports.__wbg_setsignal_75b21ef3a81de905 = function(arg0, arg1) {
+    arg0.signal = arg1;
+};
+
+module.exports.__wbg_signal_aaf9ad74119f20a4 = function(arg0) {
+    const ret = arg0.signal;
+    return ret;
+};
+
+module.exports.__wbg_static_accessor_GLOBAL_88a902d13a557d07 = function() {
+    const ret = typeof global === 'undefined' ? null : global;
+    return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
+};
+
+module.exports.__wbg_static_accessor_GLOBAL_THIS_56578be7e9f832b0 = function() {
+    const ret = typeof globalThis === 'undefined' ? null : globalThis;
+    return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
+};
+
+module.exports.__wbg_static_accessor_SELF_37c5d418e4bf5819 = function() {
+    const ret = typeof self === 'undefined' ? null : self;
+    return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
+};
+
+module.exports.__wbg_static_accessor_WINDOW_5de37043a91a9c40 = function() {
+    const ret = typeof window === 'undefined' ? null : window;
+    return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
+};
+
+module.exports.__wbg_static_accessor_performance_da77b3a901a72934 = function() {
+    const ret = performance;
+    return ret;
+};
+
+module.exports.__wbg_status_f6360336ca686bf0 = function(arg0) {
+    const ret = arg0.status;
+    return ret;
+};
+
+module.exports.__wbg_stringify_f7ed6987935b4a24 = function() { return handleError(function (arg0) {
+    const ret = JSON.stringify(arg0);
+    return ret;
+}, arguments) };
+
+module.exports.__wbg_subarray_aa9065fa9dc5df96 = function(arg0, arg1, arg2) {
+    const ret = arg0.subarray(arg1 >>> 0, arg2 >>> 0);
+    return ret;
+};
+
+module.exports.__wbg_then_44b73946d2fb3e7d = function(arg0, arg1) {
+    const ret = arg0.then(arg1);
+    return ret;
+};
+
+module.exports.__wbg_then_48b406749878a531 = function(arg0, arg1, arg2) {
+    const ret = arg0.then(arg1, arg2);
+    return ret;
+};
+
+module.exports.__wbg_toLocaleDateString_e5424994746e8415 = function(arg0, arg1, arg2, arg3) {
+    const ret = arg0.toLocaleDateString(getStringFromWasm0(arg1, arg2), arg3);
+    return ret;
+};
+
+module.exports.__wbg_url_ae10c34ca209681d = function(arg0, arg1) {
+    const ret = arg1.url;
+    const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
+    getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+};
+
+module.exports.__wbg_value_cd1ffa7b1ab794f1 = function(arg0) {
+    const ret = arg0.value;
+    return ret;
+};
+
+module.exports.__wbg_values_99f7a68c7f313d66 = function(arg0) {
+    const ret = arg0.values();
+    return ret;
+};
+
+module.exports.__wbg_versions_4e31226f5e8dc909 = function(arg0) {
+    const ret = arg0.versions;
+    return ret;
+};
+
+module.exports.__wbg_window_aa5515e600e96252 = function() { return handleError(function () {
+    const ret = window.window;
+    return ret;
+}, arguments) };
+
+module.exports.__wbindgen_cb_drop = function(arg0) {
+    const obj = arg0.original;
+    if (obj.cnt-- == 1) {
+        obj.a = 0;
+        return true;
+    }
+    const ret = false;
+    return ret;
+};
+
+module.exports.__wbindgen_closure_wrapper9169 = function(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 2463, __wbg_adapter_30);
+    return ret;
+};
+
+module.exports.__wbindgen_closure_wrapper9209 = function(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 2485, __wbg_adapter_33);
+    return ret;
+};
+
+module.exports.__wbindgen_debug_string = function(arg0, arg1) {
+    const ret = debugString(arg1);
+    const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
+    getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+};
+
+module.exports.__wbindgen_init_externref_table = function() {
+    const table = wasm.__wbindgen_export_2;
+    const offset = table.grow(4);
+    table.set(0, undefined);
+    table.set(offset + 0, undefined);
+    table.set(offset + 1, null);
+    table.set(offset + 2, true);
+    table.set(offset + 3, false);
+    ;
+};
+
+module.exports.__wbindgen_is_function = function(arg0) {
+    const ret = typeof(arg0) === 'function';
+    return ret;
+};
+
+module.exports.__wbindgen_is_object = function(arg0) {
+    const val = arg0;
+    const ret = typeof(val) === 'object' && val !== null;
+    return ret;
+};
+
+module.exports.__wbindgen_is_string = function(arg0) {
+    const ret = typeof(arg0) === 'string';
+    return ret;
+};
+
+module.exports.__wbindgen_is_undefined = function(arg0) {
+    const ret = arg0 === undefined;
+    return ret;
+};
+
+module.exports.__wbindgen_memory = function() {
+    const ret = wasm.memory;
+    return ret;
+};
+
+module.exports.__wbindgen_number_new = function(arg0) {
+    const ret = arg0;
+    return ret;
+};
+
+module.exports.__wbindgen_string_get = function(arg0, arg1) {
+    const obj = arg1;
+    const ret = typeof(obj) === 'string' ? obj : undefined;
+    var ptr1 = isLikeNone(ret) ? 0 : passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    var len1 = WASM_VECTOR_LEN;
+    getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
+    getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
+};
+
+module.exports.__wbindgen_string_new = function(arg0, arg1) {
+    const ret = getStringFromWasm0(arg0, arg1);
+    return ret;
+};
+
+module.exports.__wbindgen_throw = function(arg0, arg1) {
+    throw new Error(getStringFromWasm0(arg0, arg1));
+};
+
+const path = __nccwpck_require__.ab + "core_bg.wasm";
+const bytes = (__nccwpck_require__(9896).readFileSync)(__nccwpck_require__.ab + "core_bg.wasm");
+
+const wasmModule = new WebAssembly.Module(bytes);
+const wasmInstance = new WebAssembly.Instance(wasmModule, imports);
+wasm = wasmInstance.exports;
+module.exports.__wasm = wasm;
+
+wasm.__wbindgen_start();
+
+
+
+/***/ }),
+
+/***/ 351:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Client = void 0;
+const secrets_js_1 = __nccwpck_require__(5475);
+const items_js_1 = __nccwpck_require__(9018);
+const vaults_js_1 = __nccwpck_require__(3961);
+const groups_js_1 = __nccwpck_require__(8484);
+class Client {
+    constructor(innerClient) {
+        this.secrets = new secrets_js_1.Secrets(innerClient);
+        this.items = new items_js_1.Items(innerClient);
+        this.vaults = new vaults_js_1.Vaults(innerClient);
+        this.groups = new groups_js_1.Groups(innerClient);
+    }
+}
+exports.Client = Client;
+
+
+/***/ }),
+
+/***/ 9855:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createClientWithCore = void 0;
+const core_js_1 = __nccwpck_require__(747);
+const configuration_js_1 = __nccwpck_require__(3876);
+const client_js_1 = __nccwpck_require__(351);
+const shared_lib_core_js_1 = __nccwpck_require__(3107);
+const finalizationRegistry = new FinalizationRegistry((heldClient) => {
+    heldClient.core.releaseClient(heldClient.id);
+});
+/**
+ * Creates a 1Password SDK client with a given core implementation.
+ * @returns The authenticated 1Password SDK client.
+ */
+const createClientWithCore = (config, core) => __awaiter(void 0, void 0, void 0, function* () {
+    const authConfig = (0, configuration_js_1.clientAuthConfig)(config);
+    if (authConfig.accountName) {
+        core.setInner(new shared_lib_core_js_1.SharedLibCore(authConfig.accountName));
+    }
+    const clientId = yield core.initClient(authConfig);
+    const inner = new core_js_1.InnerClient(parseInt(clientId, 10), core, authConfig);
+    const client = new client_js_1.Client(inner);
+    // Cleans up associated memory from core when client instance goes out of scope.
+    finalizationRegistry.register(client, inner);
+    return client;
+});
+exports.createClientWithCore = createClientWithCore;
+
+
+/***/ }),
+
+/***/ 3876:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOsName = exports.clientAuthConfig = exports.DesktopAuth = exports.VERSION = exports.LANGUAGE = void 0;
+const os_1 = __importDefault(__nccwpck_require__(857));
+const version_js_1 = __nccwpck_require__(7202);
+exports.LANGUAGE = "JS";
+exports.VERSION = version_js_1.SDK_BUILD_NUMBER;
+/**
+ * Setting that specifies a client should use the desktop app to authenticate. Set accountName to your 1Password account name as shown at the top left sidebar of the app, or your account UUID.
+ */
+class DesktopAuth {
+    constructor(accountName) {
+        this.accountName = accountName;
+    }
+}
+exports.DesktopAuth = DesktopAuth;
+/**
+ * Creates a default client configuration.
+ * @returns The client configuration to instantiate the client with.
+ */
+const clientAuthConfig = (userConfig) => {
+    // TODO: Add logic for computing the correct sanitized version value for each platform
+    const defaultOsVersion = "0.0.0";
+    let serviceAccountToken;
+    let accountName;
+    if (typeof userConfig.auth === "string") {
+        serviceAccountToken = userConfig.auth;
+    }
+    else if (userConfig.auth instanceof DesktopAuth) {
+        accountName = userConfig.auth.accountName;
+    }
+    return {
+        serviceAccountToken: serviceAccountToken !== null && serviceAccountToken !== void 0 ? serviceAccountToken : "",
+        accountName,
+        programmingLanguage: exports.LANGUAGE,
+        sdkVersion: exports.VERSION,
+        integrationName: userConfig.integrationName,
+        integrationVersion: userConfig.integrationVersion,
+        requestLibraryName: "Fetch API",
+        requestLibraryVersion: "Fetch API",
+        os: (0, exports.getOsName)(),
+        osVersion: defaultOsVersion,
+        architecture: os_1.default.arch(),
+    };
+};
+exports.clientAuthConfig = clientAuthConfig;
+const getOsName = () => {
+    // Only supported on Node.js
+    const os_name = os_1.default.type().toLowerCase();
+    if (os_name === "windows_nt") {
+        return "windows";
+    }
+    return os_name;
+};
+exports.getOsName = getOsName;
+
+
+/***/ }),
+
+/***/ 747:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.InnerClient = exports.SharedCore = exports.WasmCore = void 0;
+const sdk_core_1 = __nccwpck_require__(2872);
+const types_1 = __nccwpck_require__(8267);
+const errors_1 = __nccwpck_require__(8203);
+// In empirical tests, we determined that maximum message size that can cross the FFI boundary
+// is ~64MB. Past this limit, the wasm-bingen FFI will throw an error and the program will crash.
+// We set the limit to 50MB to be safe, to be reconsidered upon further testing.
+const messageLimit = 50 * 1024 * 1024;
+class WasmCore {
+    initClient(config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield (0, sdk_core_1.init_client)(config);
+            }
+            catch (e) {
+                (0, errors_1.throwError)(e);
+            }
+        });
+    }
+    invoke(config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield (0, sdk_core_1.invoke)(config);
+            }
+            catch (e) {
+                (0, errors_1.throwError)(e);
+            }
+        });
+    }
+    releaseClient(clientId) {
+        try {
+            (0, sdk_core_1.release_client)(clientId);
+        }
+        catch (e) {
+            console.warn("failed to release client:", e);
+        }
+    }
+}
+exports.WasmCore = WasmCore;
+/**
+ *  An implementation of the `Core` interface that shares resources across all clients.
+ */
+class SharedCore {
+    constructor() {
+        this.inner = new WasmCore();
+    }
+    setInner(core) {
+        this.inner = core;
+    }
+    initClient(config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const serializedConfig = JSON.stringify(config);
+            return this.inner.initClient(serializedConfig);
+        });
+    }
+    invoke(config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const serializedConfig = JSON.stringify(config, types_1.ReplacerFunc);
+            // Encoding to bytes as JS uses UTF-16 under the hood, but the messages
+            // that are sent across the FFI boundary are encoded in UTF-8.
+            if (new TextEncoder().encode(serializedConfig).length > messageLimit) {
+                (0, errors_1.throwError)(`message size exceeds the limit of ${messageLimit} bytes, please contact 1Password at support@1password.com or https://developer.1password.com/joinslack if you need help."`);
+            }
+            return this.inner.invoke(serializedConfig);
+        });
+    }
+    invoke_sync(config) {
+        const serializedConfig = JSON.stringify(config, types_1.ReplacerFunc);
+        // Encoding to bytes as JS uses UTF-16 under the hood, but the messages
+        // that are sent across the FFI boundary are encoded in UTF-8.
+        if (new TextEncoder().encode(serializedConfig).length > messageLimit) {
+            (0, errors_1.throwError)(`message size exceeds the limit of ${messageLimit} bytes, please contact 1Password at support@1password.com or https://developer.1password.com/joinslack if you need help.`);
+        }
+        return (0, sdk_core_1.invoke_sync)(serializedConfig);
+    }
+    releaseClient(clientId) {
+        const serializedId = JSON.stringify(clientId);
+        this.inner.releaseClient(serializedId);
+    }
+}
+exports.SharedCore = SharedCore;
+/**
+ *  Represents the client instance on which a call is made.
+ */
+class InnerClient {
+    constructor(id, core, config) {
+        this.id = id;
+        this.core = core;
+        this.config = config;
+    }
+    invoke(config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield this.core.invoke(config);
+            }
+            catch (err) {
+                if (err instanceof errors_1.DesktopSessionExpiredError) {
+                    const newId = yield this.core.initClient(this.config);
+                    this.id = parseInt(newId, 10);
+                    config.invocation.clientId = this.id;
+                    return yield this.core.invoke(config);
+                }
+                throw err;
+            }
+        });
+    }
+}
+exports.InnerClient = InnerClient;
+
+
+/***/ }),
+
+/***/ 8203:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.throwError = exports.RateLimitExceededError = exports.DesktopSessionExpiredError = void 0;
+class DesktopSessionExpiredError extends Error {
+    constructor(message) {
+        super();
+        this.message = message;
+    }
+}
+exports.DesktopSessionExpiredError = DesktopSessionExpiredError;
+class RateLimitExceededError extends Error {
+    constructor(message) {
+        super();
+        this.message = message;
+    }
+}
+exports.RateLimitExceededError = RateLimitExceededError;
+const throwError = (errString) => {
+    let err;
+    try {
+        err = JSON.parse(errString);
+    }
+    catch (e) {
+        throw new Error(errString);
+    }
+    switch (err.name) {
+        case "DesktopSessionExpired":
+            throw new DesktopSessionExpiredError(err.message);
+        case "RateLimitExceeded":
+            throw new RateLimitExceededError(err.message);
+        default:
+            throw new Error(err.message);
+    }
+};
+exports.throwError = throwError;
+
+
+/***/ }),
+
+/***/ 8484:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _Groups_inner;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Groups = void 0;
+const types_js_1 = __nccwpck_require__(8267);
+class Groups {
+    constructor(inner) {
+        _Groups_inner.set(this, void 0);
+        __classPrivateFieldSet(this, _Groups_inner, inner, "f");
+    }
+    /**
+     * Get a group by its ID and parameters.
+     */
+    get(groupId, groupParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Groups_inner, "f").id,
+                    parameters: {
+                        name: "GroupsGet",
+                        parameters: {
+                            group_id: groupId,
+                            group_params: groupParams,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Groups_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+}
+exports.Groups = Groups;
+_Groups_inner = new WeakMap();
+
+
+/***/ }),
+
+/***/ 9018:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _Items_inner;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Items = void 0;
+const types_js_1 = __nccwpck_require__(8267);
+const items_shares_js_1 = __nccwpck_require__(985);
+const items_files_js_1 = __nccwpck_require__(4782);
+class Items {
+    constructor(inner) {
+        _Items_inner.set(this, void 0);
+        __classPrivateFieldSet(this, _Items_inner, inner, "f");
+        this.shares = new items_shares_js_1.ItemsShares(inner);
+        this.files = new items_files_js_1.ItemsFiles(inner);
+    }
+    /**
+     * Create a new item.
+     */
+    create(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsCreate",
+                        parameters: {
+                            params,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Create items in batch, within a single vault.
+     */
+    createAll(vaultId, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsCreateAll",
+                        parameters: {
+                            vault_id: vaultId,
+                            params,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Get an item by vault and item ID.
+     */
+    get(vaultId, itemId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsGet",
+                        parameters: {
+                            vault_id: vaultId,
+                            item_id: itemId,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Get items by vault and their item IDs.
+     */
+    getAll(vaultId, itemIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsGetAll",
+                        parameters: {
+                            vault_id: vaultId,
+                            item_ids: itemIds,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Update an existing item.
+     */
+    put(item) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsPut",
+                        parameters: {
+                            item,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Delete an item.
+     */
+    delete(vaultId, itemId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsDelete",
+                        parameters: {
+                            vault_id: vaultId,
+                            item_id: itemId,
+                        },
+                    },
+                },
+            };
+            yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig);
+        });
+    }
+    /**
+     * Delete items in batch, within a single vault.
+     */
+    deleteAll(vaultId, itemIds) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsDeleteAll",
+                        parameters: {
+                            vault_id: vaultId,
+                            item_ids: itemIds,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Archive an item.
+     */
+    archive(vaultId, itemId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsArchive",
+                        parameters: {
+                            vault_id: vaultId,
+                            item_id: itemId,
+                        },
+                    },
+                },
+            };
+            yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig);
+        });
+    }
+    /**
+     * List items based on filters.
+     */
+    list(vaultId, ...filters) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Items_inner, "f").id,
+                    parameters: {
+                        name: "ItemsList",
+                        parameters: {
+                            vault_id: vaultId,
+                            filters,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Items_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+}
+exports.Items = Items;
+_Items_inner = new WeakMap();
+
+
+/***/ }),
+
+/***/ 4782:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _ItemsFiles_inner;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ItemsFiles = void 0;
+const types_js_1 = __nccwpck_require__(8267);
+class ItemsFiles {
+    constructor(inner) {
+        _ItemsFiles_inner.set(this, void 0);
+        __classPrivateFieldSet(this, _ItemsFiles_inner, inner, "f");
+    }
+    /**
+     * Attach files to Items.
+     */
+    attach(item, fileParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsFiles_inner, "f").id,
+                    parameters: {
+                        name: "ItemsFilesAttach",
+                        parameters: {
+                            item,
+                            file_params: fileParams,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsFiles_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Read file content from the Item.
+     */
+    read(vaultId, itemId, attr) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsFiles_inner, "f").id,
+                    parameters: {
+                        name: "ItemsFilesRead",
+                        parameters: {
+                            vault_id: vaultId,
+                            item_id: itemId,
+                            attr,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsFiles_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Delete a field file from Item using the section and field IDs.
+     */
+    delete(item, sectionId, fieldId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsFiles_inner, "f").id,
+                    parameters: {
+                        name: "ItemsFilesDelete",
+                        parameters: {
+                            item,
+                            section_id: sectionId,
+                            field_id: fieldId,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsFiles_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Replace the document file within a document item.
+     */
+    replaceDocument(item, docParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsFiles_inner, "f").id,
+                    parameters: {
+                        name: "ItemsFilesReplaceDocument",
+                        parameters: {
+                            item,
+                            doc_params: docParams,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsFiles_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+}
+exports.ItemsFiles = ItemsFiles;
+_ItemsFiles_inner = new WeakMap();
+
+
+/***/ }),
+
+/***/ 985:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _ItemsShares_inner;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ItemsShares = void 0;
+const types_js_1 = __nccwpck_require__(8267);
+class ItemsShares {
+    constructor(inner) {
+        _ItemsShares_inner.set(this, void 0);
+        __classPrivateFieldSet(this, _ItemsShares_inner, inner, "f");
+    }
+    /**
+     * Get the item sharing policy of your account.
+     */
+    getAccountPolicy(vaultId, itemId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsShares_inner, "f").id,
+                    parameters: {
+                        name: "ItemsSharesGetAccountPolicy",
+                        parameters: {
+                            vault_id: vaultId,
+                            item_id: itemId,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Validate the recipients of an item sharing link.
+     */
+    validateRecipients(policy, recipients) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsShares_inner, "f").id,
+                    parameters: {
+                        name: "ItemsSharesValidateRecipients",
+                        parameters: {
+                            policy,
+                            recipients,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Create a new item sharing link.
+     */
+    create(item, policy, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _ItemsShares_inner, "f").id,
+                    parameters: {
+                        name: "ItemsSharesCreate",
+                        parameters: {
+                            item,
+                            policy,
+                            params,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _ItemsShares_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+}
+exports.ItemsShares = ItemsShares;
+_ItemsShares_inner = new WeakMap();
+
+
+/***/ }),
+
+/***/ 7837:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createClient = exports.DesktopAuth = exports.Secrets = exports.DEFAULT_INTEGRATION_VERSION = exports.DEFAULT_INTEGRATION_NAME = void 0;
+const core_js_1 = __nccwpck_require__(747);
+const client_builder_js_1 = __nccwpck_require__(9855);
+exports.DEFAULT_INTEGRATION_NAME = "Unknown";
+exports.DEFAULT_INTEGRATION_VERSION = "Unknown";
+// auto-generated static exports
+var secrets_js_1 = __nccwpck_require__(5475);
+Object.defineProperty(exports, "Secrets", ({ enumerable: true, get: function () { return secrets_js_1.Secrets; } }));
+var configuration_js_1 = __nccwpck_require__(3876);
+Object.defineProperty(exports, "DesktopAuth", ({ enumerable: true, get: function () { return configuration_js_1.DesktopAuth; } }));
+__exportStar(__nccwpck_require__(351), exports);
+__exportStar(__nccwpck_require__(8203), exports);
+__exportStar(__nccwpck_require__(8267), exports);
+/**
+ * Creates a default 1Password SDK client.
+ * @returns The authenticated 1Password SDK client.
+ */
+const createClient = (config) => __awaiter(void 0, void 0, void 0, function* () { return (0, client_builder_js_1.createClientWithCore)(config, new core_js_1.SharedCore()); });
+exports.createClient = createClient;
+
+
+/***/ }),
+
+/***/ 5475:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _Secrets_inner;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Secrets = void 0;
+const core_js_1 = __nccwpck_require__(747);
+const types_js_1 = __nccwpck_require__(8267);
+class Secrets {
+    constructor(inner) {
+        _Secrets_inner.set(this, void 0);
+        __classPrivateFieldSet(this, _Secrets_inner, inner, "f");
+    }
+    /**
+     * Resolve returns the secret the provided secret reference points to.
+     */
+    resolve(secretReference) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Secrets_inner, "f").id,
+                    parameters: {
+                        name: "SecretsResolve",
+                        parameters: {
+                            secret_reference: secretReference,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Secrets_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Resolve takes in a list of secret references and returns the secrets they point to or errors if any.
+     */
+    resolveAll(secretReferences) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Secrets_inner, "f").id,
+                    parameters: {
+                        name: "SecretsResolveAll",
+                        parameters: {
+                            secret_references: secretReferences,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Secrets_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Validate the secret reference to ensure there are no syntax errors.
+     */
+    static validateSecretReference(secretReference) {
+        const sharedCore = new core_js_1.SharedCore();
+        const invocationConfig = {
+            invocation: {
+                parameters: {
+                    name: "ValidateSecretReference",
+                    parameters: {
+                        secret_reference: secretReference,
+                    },
+                },
+            },
+        };
+        sharedCore.invoke_sync(invocationConfig);
+    }
+    /**
+     * Generate a password using the provided recipe.
+     */
+    static generatePassword(recipe) {
+        const sharedCore = new core_js_1.SharedCore();
+        const invocationConfig = {
+            invocation: {
+                parameters: {
+                    name: "GeneratePassword",
+                    parameters: {
+                        recipe,
+                    },
+                },
+            },
+        };
+        return JSON.parse(sharedCore.invoke_sync(invocationConfig), types_js_1.ReviverFunc);
+    }
+}
+exports.Secrets = Secrets;
+_Secrets_inner = new WeakMap();
+
+
+/***/ }),
+
+/***/ 3107:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SharedLibCore = void 0;
+const fs = __importStar(__nccwpck_require__(9896));
+const os = __importStar(__nccwpck_require__(857));
+const path = __importStar(__nccwpck_require__(6928));
+const errors_1 = __nccwpck_require__(8203);
+/**
+ * Find the 1Password shared lib path by asking an the wasm core synchronously.
+ */
+const find1PasswordLibPath = () => {
+    const platform = os.platform();
+    const appRoot = path.dirname(process.execPath);
+    let searchPaths = [];
+    // Define lists of possible locations for each platform.
+    switch (platform) {
+        case "darwin": // macOS
+            searchPaths = [
+                "/Applications/1Password.app/Contents/Frameworks/libop_sdk_ipc_client.dylib",
+                path.join(os.homedir(), "/Applications/1Password.app/Contents/Frameworks/libop_sdk_ipc_client.dylib"),
+            ];
+            break;
+        case "linux": // Linux
+            searchPaths = [
+                "/usr/bin/1password/libop_sdk_ipc_client.so",
+                "/opt/1Password/libop_sdk_ipc_client.so",
+                "/snap/bin/1password/libop_sdk_ipc_client.so",
+            ];
+            break;
+        case "win32": // Windows
+            searchPaths = [
+                path.join(os.homedir(), "/AppData/Local/1Password/op_sdk_ipc_client.dll"),
+                "C:/Program Files/1Password/app/8/op_sdk_ipc_client.dll",
+                "C:/Program Files (x86)/1Password/app/8/op_sdk_ipc_client.dll",
+                path.join(os.homedir(), "/AppData/Local/1Password/app/8/op_sdk_ipc_client.dll"),
+            ];
+            break;
+        default:
+            throw new Error(`Unsupported platform: ${platform}`);
+    }
+    // Iterate through the possible paths and return the first one that exists.
+    for (const addonPath of searchPaths) {
+        if (fs.existsSync(addonPath)) {
+            return addonPath;
+        }
+    }
+    // If the loop completes without finding the file, throw an error.
+    throw new Error("1Password desktop application not found");
+};
+/**
+ * SharedLibCore: wrapper around the dynamically loaded shared library
+ */
+class SharedLibCore {
+    constructor(accountName) {
+        this.lib = null;
+        try {
+            const libPath = find1PasswordLibPath();
+            const moduleStub = { exports: {} };
+            process.dlopen(moduleStub, libPath);
+            // Safely check the structure of the loaded module before casting.
+            if (typeof moduleStub === "object" &&
+                moduleStub !== null &&
+                typeof moduleStub.exports === "object" &&
+                moduleStub.exports !== null &&
+                "sendMessage" in moduleStub.exports &&
+                typeof moduleStub.exports.sendMessage ===
+                    "function") {
+                this.lib = moduleStub.exports;
+            }
+            else {
+                throw new Error("Failed to initialize native library: sendMessage function not found on module.");
+            }
+        }
+        catch (e) {
+            console.error("A critical error occurred while loading the native addon:", e);
+            this.lib = null;
+        }
+        this.acccountName = accountName;
+    }
+    /**
+     * callSharedLibrary - send string to native function, receive string back.
+     */
+    callSharedLibrary(input, operation_type) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.lib) {
+                throw new Error("Native library is not available.");
+            }
+            if (!input || input.length === 0) {
+                throw new Error("internal: empty input");
+            }
+            const inputEncoded = Buffer.from(input, "utf8").toString("base64");
+            const req = {
+                account_name: this.acccountName,
+                kind: operation_type,
+                payload: inputEncoded,
+            };
+            const inputBuf = Buffer.from(JSON.stringify(req), "utf8");
+            const nativeResponse = yield this.lib.sendMessage(inputBuf);
+            if (!(nativeResponse instanceof Uint8Array)) {
+                throw new Error(`Native function returned an unexpected type. Expected Uint8Array, got ${typeof nativeResponse}`);
+            }
+            const respString = new TextDecoder().decode(nativeResponse);
+            const response = JSON.parse(respString);
+            if (response.success) {
+                const decodedPayload = Buffer.from(response.payload).toString("utf8");
+                // On success, the payload is the actual result string
+                return decodedPayload;
+            }
+            else {
+                // On failure, convert the error payload to a readable string and throw
+                const errorMessage = Array.isArray(response.payload)
+                    ? String.fromCharCode(...response.payload)
+                    : JSON.stringify(response.payload);
+                (0, errors_1.throwError)(errorMessage);
+            }
+        });
+    }
+    // Core interface implementation
+    initClient(config) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.callSharedLibrary(config, "init_client");
+        });
+    }
+    invoke(invokeConfigBytes) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.callSharedLibrary(invokeConfigBytes, "invoke");
+        });
+    }
+    releaseClient(clientId) {
+        this.callSharedLibrary(clientId, "release_client").catch((err) => {
+            console.warn("failed to release client:", err);
+        });
+    }
+}
+exports.SharedLibCore = SharedLibCore;
+
+
+/***/ }),
+
+/***/ 8267:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+/*
+ Generated by typeshare 1.13.2
+*/
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ReplacerFunc = exports.ReviverFunc = exports.UPDATE_ITEM_HISTORY = exports.UPDATE_ITEMS = exports.SEND_ITEMS = exports.REVEAL_ITEM_PASSWORD = exports.RECOVER_VAULT = exports.READ_ITEMS = exports.PRINT_ITEMS = exports.NO_ACCESS = exports.MANAGE_VAULT = exports.IMPORT_ITEMS = exports.EXPORT_ITEMS = exports.DELETE_ITEMS = exports.CREATE_ITEMS = exports.ARCHIVE_ITEMS = exports.WordListType = exports.SeparatorType = exports.VaultType = exports.AllowedRecipientType = exports.AllowedType = exports.ItemShareDuration = exports.ItemState = exports.AutofillBehavior = exports.ItemFieldType = exports.ItemCategory = exports.VaultAccessorType = exports.GroupState = exports.GroupType = void 0;
+var GroupType;
+(function (GroupType) {
+    /**
+     * The owners group, which gives the following permissions:
+     * - Do everything the Admin group can do
+     * - See every vault other than the personal vaults
+     * - Change people's names
+     * - See billing
+     * - Change billing
+     * - Make other people owners
+     * - Delete a person
+     */
+    GroupType["Owners"] = "owners";
+    /**
+     * The administrators group, which gives the following permissions:
+     * - Perform recovery
+     * - Create new vaults
+     * - Invite new members
+     * - See vault metadata, including the vault name and who has access.
+     * - Make other people admins
+     */
+    GroupType["Administrators"] = "administrators";
+    /**
+     * The recovery group. It contains recovery keysets, and is added to every vault to allow for recovery.
+     *
+     * No one is added to this.
+     */
+    GroupType["Recovery"] = "recovery";
+    /**
+     * The external account managers group or EAM is a mandatory group for managed accounts that has
+     * same permissions as the owners.
+     */
+    GroupType["ExternalAccountManagers"] = "externalAccountManagers";
+    /** Members of a team that a user is on. */
+    GroupType["TeamMembers"] = "teamMembers";
+    /** A custom, user defined group. */
+    GroupType["UserDefined"] = "userDefined";
+    /** Support for new or renamed group types */
+    GroupType["Unsupported"] = "unsupported";
+})(GroupType || (exports.GroupType = GroupType = {}));
+var GroupState;
+(function (GroupState) {
+    /** This group is active */
+    GroupState["Active"] = "active";
+    /** This group has been deleted */
+    GroupState["Deleted"] = "deleted";
+    /** This group is in an unknown state */
+    GroupState["Unsupported"] = "unsupported";
+})(GroupState || (exports.GroupState = GroupState = {}));
+var VaultAccessorType;
+(function (VaultAccessorType) {
+    VaultAccessorType["User"] = "user";
+    VaultAccessorType["Group"] = "group";
+})(VaultAccessorType || (exports.VaultAccessorType = VaultAccessorType = {}));
+var ItemCategory;
+(function (ItemCategory) {
+    ItemCategory["Login"] = "Login";
+    ItemCategory["SecureNote"] = "SecureNote";
+    ItemCategory["CreditCard"] = "CreditCard";
+    ItemCategory["CryptoWallet"] = "CryptoWallet";
+    ItemCategory["Identity"] = "Identity";
+    ItemCategory["Password"] = "Password";
+    ItemCategory["Document"] = "Document";
+    ItemCategory["ApiCredentials"] = "ApiCredentials";
+    ItemCategory["BankAccount"] = "BankAccount";
+    ItemCategory["Database"] = "Database";
+    ItemCategory["DriverLicense"] = "DriverLicense";
+    ItemCategory["Email"] = "Email";
+    ItemCategory["MedicalRecord"] = "MedicalRecord";
+    ItemCategory["Membership"] = "Membership";
+    ItemCategory["OutdoorLicense"] = "OutdoorLicense";
+    ItemCategory["Passport"] = "Passport";
+    ItemCategory["Rewards"] = "Rewards";
+    ItemCategory["Router"] = "Router";
+    ItemCategory["Server"] = "Server";
+    ItemCategory["SshKey"] = "SshKey";
+    ItemCategory["SocialSecurityNumber"] = "SocialSecurityNumber";
+    ItemCategory["SoftwareLicense"] = "SoftwareLicense";
+    ItemCategory["Person"] = "Person";
+    ItemCategory["Unsupported"] = "Unsupported";
+})(ItemCategory || (exports.ItemCategory = ItemCategory = {}));
+var ItemFieldType;
+(function (ItemFieldType) {
+    ItemFieldType["Text"] = "Text";
+    ItemFieldType["Concealed"] = "Concealed";
+    ItemFieldType["CreditCardType"] = "CreditCardType";
+    ItemFieldType["CreditCardNumber"] = "CreditCardNumber";
+    ItemFieldType["Phone"] = "Phone";
+    ItemFieldType["Url"] = "Url";
+    ItemFieldType["Totp"] = "Totp";
+    ItemFieldType["Email"] = "Email";
+    ItemFieldType["Reference"] = "Reference";
+    ItemFieldType["SshKey"] = "SshKey";
+    ItemFieldType["Menu"] = "Menu";
+    ItemFieldType["MonthYear"] = "MonthYear";
+    ItemFieldType["Address"] = "Address";
+    ItemFieldType["Date"] = "Date";
+    ItemFieldType["Unsupported"] = "Unsupported";
+})(ItemFieldType || (exports.ItemFieldType = ItemFieldType = {}));
+/**
+ * Controls the auto-fill behavior of a website.
+ *
+ *
+ * For more information, visit <https://support.1password.com/autofill-behavior/>
+ */
+var AutofillBehavior;
+(function (AutofillBehavior) {
+    /** Auto-fill any page that’s part of the website, including subdomains */
+    AutofillBehavior["AnywhereOnWebsite"] = "AnywhereOnWebsite";
+    /** Auto-fill only if the domain (hostname and port) is an exact match. */
+    AutofillBehavior["ExactDomain"] = "ExactDomain";
+    /** Never auto-fill on this website */
+    AutofillBehavior["Never"] = "Never";
+})(AutofillBehavior || (exports.AutofillBehavior = AutofillBehavior = {}));
+/** Represents the state of an item in the SDK. */
+var ItemState;
+(function (ItemState) {
+    /** The item is active */
+    ItemState["Active"] = "active";
+    /** The item is archived meaning it's hidden from regular view and stored in the archive. */
+    ItemState["Archived"] = "archived";
+})(ItemState || (exports.ItemState = ItemState = {}));
+/** The valid duration options for sharing an item */
+var ItemShareDuration;
+(function (ItemShareDuration) {
+    /** The share will expire in one hour */
+    ItemShareDuration["OneHour"] = "OneHour";
+    /** The share will expire in one day */
+    ItemShareDuration["OneDay"] = "OneDay";
+    /** The share will expire in seven days */
+    ItemShareDuration["SevenDays"] = "SevenDays";
+    /** The share will expire in fourteen days */
+    ItemShareDuration["FourteenDays"] = "FourteenDays";
+    /** The share will expire in thirty days */
+    ItemShareDuration["ThirtyDays"] = "ThirtyDays";
+})(ItemShareDuration || (exports.ItemShareDuration = ItemShareDuration = {}));
+/** The allowed types of item sharing, enforced by account policy */
+var AllowedType;
+(function (AllowedType) {
+    /** Allows creating share links with specific recipients */
+    AllowedType["Authenticated"] = "Authenticated";
+    /** Allows creating public share links */
+    AllowedType["Public"] = "Public";
+})(AllowedType || (exports.AllowedType = AllowedType = {}));
+/** The allowed recipient types of item sharing, enforced by account policy */
+var AllowedRecipientType;
+(function (AllowedRecipientType) {
+    /** Recipients can be specified by email address */
+    AllowedRecipientType["Email"] = "Email";
+    /** Recipients can be specified by domain */
+    AllowedRecipientType["Domain"] = "Domain";
+})(AllowedRecipientType || (exports.AllowedRecipientType = AllowedRecipientType = {}));
+/** Represents the vault type. */
+var VaultType;
+(function (VaultType) {
+    VaultType["Personal"] = "personal";
+    VaultType["Everyone"] = "everyone";
+    VaultType["Transfer"] = "transfer";
+    VaultType["UserCreated"] = "userCreated";
+    VaultType["Unsupported"] = "unsupported";
+})(VaultType || (exports.VaultType = VaultType = {}));
+var SeparatorType;
+(function (SeparatorType) {
+    /**
+     * Randomly selected digits.
+     * E.g, "`correct4horse0battery1staple`"
+     */
+    SeparatorType["Digits"] = "digits";
+    /**
+     * Randomly selected digits and symbols.
+     * This is useful to get word-based passwords to meet complexity requirements
+     * E.g, "`correct4horse-battery1staple`"
+     */
+    SeparatorType["DigitsAndSymbols"] = "digitsAndSymbols";
+    /**
+     * Spaces, like the original Diceware.
+     * Great for mobile keyboards, not so great when people can overhear you type the password.
+     * E.g, "`correct horse battery staple`"
+     */
+    SeparatorType["Spaces"] = "spaces";
+    /**
+     * Hyphens "`-`".
+     * E.g, "`correct-horse-battery-staple`"
+     */
+    SeparatorType["Hyphens"] = "hyphens";
+    /**
+     * "`_`".
+     * E.g, "`correct_horse_battery_staple`"
+     */
+    SeparatorType["Underscores"] = "underscores";
+    /**
+     * Period (full stop) "`.`".
+     * E.g, "`correct.horse.battery.staple`"
+     */
+    SeparatorType["Periods"] = "periods";
+    /**
+     * Comma "`,`".
+     * E.g, "`correct,horse,battery,staple`"
+     */
+    SeparatorType["Commas"] = "commas";
+})(SeparatorType || (exports.SeparatorType = SeparatorType = {}));
+var WordListType;
+(function (WordListType) {
+    /** Agile wordlist */
+    WordListType["FullWords"] = "fullWords";
+    /** English-like syllables */
+    WordListType["Syllables"] = "syllables";
+    /** Three (random) letter "words" */
+    WordListType["ThreeLetters"] = "threeLetters";
+})(WordListType || (exports.WordListType = WordListType = {}));
+exports.ARCHIVE_ITEMS = 256;
+exports.CREATE_ITEMS = 128;
+exports.DELETE_ITEMS = 512;
+exports.EXPORT_ITEMS = 4194304;
+exports.IMPORT_ITEMS = 2097152;
+exports.MANAGE_VAULT = 2;
+exports.NO_ACCESS = 0;
+exports.PRINT_ITEMS = 8388608;
+exports.READ_ITEMS = 32;
+exports.RECOVER_VAULT = 1;
+exports.REVEAL_ITEM_PASSWORD = 16;
+exports.SEND_ITEMS = 1048576;
+exports.UPDATE_ITEMS = 64;
+exports.UPDATE_ITEM_HISTORY = 1024;
+/**
+ * Custom JSON reviver and replacer functions for dynamic data transformation
+ * ReviverFunc is used during JSON parsing to detect and transform specific data structures
+ * ReplacerFunc is used during JSON serialization to modify certain values before stringifying.
+ * These functions allow for flexible encoding and decoding of data, ensuring that complex types are properly handled when converting between TS objects and JSON
+ */
+const ReviverFunc = (key, value) => {
+    if (typeof value === "string" &&
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(value) &&
+        (key === "createdAt" || key === "updatedAt")) {
+        return new Date(value);
+    }
+    if (Array.isArray(value) &&
+        value.every((v) => Number.isInteger(v) && v >= 0 && v <= 255) &&
+        value.length > 0) {
+        return new Uint8Array(value);
+    }
+    return value;
+};
+exports.ReviverFunc = ReviverFunc;
+const ReplacerFunc = (key, value) => {
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
+    if (value instanceof Uint8Array) {
+        return Array.from(value);
+    }
+    return value;
+};
+exports.ReplacerFunc = ReplacerFunc;
+
+
+/***/ }),
+
+/***/ 3961:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+// Code generated by op-codegen - DO NOT EDIT MANUALLY
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _Vaults_inner;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Vaults = void 0;
+const types_js_1 = __nccwpck_require__(8267);
+class Vaults {
+    constructor(inner) {
+        _Vaults_inner.set(this, void 0);
+        __classPrivateFieldSet(this, _Vaults_inner, inner, "f");
+    }
+    /**
+     * Create a new user vault.
+     */
+    create(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsCreate",
+                        parameters: {
+                            params,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * List information about vaults that's configurable based on some input parameters.
+     */
+    list(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsList",
+                        parameters: {
+                            params,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Get an overview of a vault by its ID.
+     */
+    getOverview(vaultId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsGetOverview",
+                        parameters: {
+                            vault_id: vaultId,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Get detailed vault information by vault ID and parameters.
+     */
+    get(vaultId, vaultParams) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsGet",
+                        parameters: {
+                            vault_id: vaultId,
+                            vault_params: vaultParams,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Update a vault
+     */
+    update(vaultId, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsUpdate",
+                        parameters: {
+                            vault_id: vaultId,
+                            params,
+                        },
+                    },
+                },
+            };
+            return JSON.parse(yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig), types_js_1.ReviverFunc);
+        });
+    }
+    /**
+     * Delete a vault by its ID.
+     */
+    delete(vaultId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsDelete",
+                        parameters: {
+                            vault_id: vaultId,
+                        },
+                    },
+                },
+            };
+            yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig);
+        });
+    }
+    /**
+     * Grant group permissions to a vault.
+     */
+    grantGroupPermissions(vaultId, groupPermissionsList) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsGrantGroupPermissions",
+                        parameters: {
+                            vault_id: vaultId,
+                            group_permissions_list: groupPermissionsList,
+                        },
+                    },
+                },
+            };
+            yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig);
+        });
+    }
+    /**
+     * Update group permissions for vaults.
+     */
+    updateGroupPermissions(groupPermissionsList) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsUpdateGroupPermissions",
+                        parameters: {
+                            group_permissions_list: groupPermissionsList,
+                        },
+                    },
+                },
+            };
+            yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig);
+        });
+    }
+    /**
+     * Revoke group permissions from a vault.
+     */
+    revokeGroupPermissions(vaultId, groupId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const invocationConfig = {
+                invocation: {
+                    clientId: __classPrivateFieldGet(this, _Vaults_inner, "f").id,
+                    parameters: {
+                        name: "VaultsRevokeGroupPermissions",
+                        parameters: {
+                            vault_id: vaultId,
+                            group_id: groupId,
+                        },
+                    },
+                },
+            };
+            yield __classPrivateFieldGet(this, _Vaults_inner, "f").invoke(invocationConfig);
+        });
+    }
+}
+exports.Vaults = Vaults;
+_Vaults_inner = new WeakMap();
+
+
+/***/ }),
+
+/***/ 7202:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SDK_BUILD_NUMBER = exports.SDK_VERSION = void 0;
+exports.SDK_VERSION = "0.4.0";
+exports.SDK_BUILD_NUMBER = "0040003";
+const SDK_CORE_VERSION = "0.4.0";
 
 
 /***/ }),
@@ -31720,11 +34211,11 @@ var HttpCodes;
     HttpCodes[HttpCodes["ServiceUnavailable"] = 503] = "ServiceUnavailable";
     HttpCodes[HttpCodes["GatewayTimeout"] = 504] = "GatewayTimeout";
 })(HttpCodes || (HttpCodes = {}));
-var Headers;
+var src_Headers;
 (function (Headers) {
     Headers["Accept"] = "accept";
     Headers["ContentType"] = "content-type";
-})(Headers || (Headers = {}));
+})(src_Headers || (src_Headers = {}));
 var MediaTypes;
 (function (MediaTypes) {
     MediaTypes["ApplicationJson"] = "application/json";
@@ -31879,7 +34370,7 @@ class lib_HttpClient {
      */
     getJson(requestUrl_1) {
         return __awaiter(this, arguments, void 0, function* (requestUrl, additionalHeaders = {}) {
-            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[src_Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, src_Headers.Accept, MediaTypes.ApplicationJson);
             const res = yield this.get(requestUrl, additionalHeaders);
             return this._processResponse(res, this.requestOptions);
         });
@@ -31887,8 +34378,8 @@ class lib_HttpClient {
     postJson(requestUrl_1, obj_1) {
         return __awaiter(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
             const data = JSON.stringify(obj, null, 2);
-            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-            additionalHeaders[Headers.ContentType] =
+            additionalHeaders[src_Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, src_Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[src_Headers.ContentType] =
                 this._getExistingOrDefaultContentTypeHeader(additionalHeaders, MediaTypes.ApplicationJson);
             const res = yield this.post(requestUrl, data, additionalHeaders);
             return this._processResponse(res, this.requestOptions);
@@ -31897,8 +34388,8 @@ class lib_HttpClient {
     putJson(requestUrl_1, obj_1) {
         return __awaiter(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
             const data = JSON.stringify(obj, null, 2);
-            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-            additionalHeaders[Headers.ContentType] =
+            additionalHeaders[src_Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, src_Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[src_Headers.ContentType] =
                 this._getExistingOrDefaultContentTypeHeader(additionalHeaders, MediaTypes.ApplicationJson);
             const res = yield this.put(requestUrl, data, additionalHeaders);
             return this._processResponse(res, this.requestOptions);
@@ -31907,8 +34398,8 @@ class lib_HttpClient {
     patchJson(requestUrl_1, obj_1) {
         return __awaiter(this, arguments, void 0, function* (requestUrl, obj, additionalHeaders = {}) {
             const data = JSON.stringify(obj, null, 2);
-            additionalHeaders[Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, Headers.Accept, MediaTypes.ApplicationJson);
-            additionalHeaders[Headers.ContentType] =
+            additionalHeaders[src_Headers.Accept] = this._getExistingOrDefaultHeader(additionalHeaders, src_Headers.Accept, MediaTypes.ApplicationJson);
+            additionalHeaders[src_Headers.ContentType] =
                 this._getExistingOrDefaultContentTypeHeader(additionalHeaders, MediaTypes.ApplicationJson);
             const res = yield this.patch(requestUrl, data, additionalHeaders);
             return this._processResponse(res, this.requestOptions);
@@ -32175,7 +34666,7 @@ class lib_HttpClient {
     _getExistingOrDefaultContentTypeHeader(additionalHeaders, _default) {
         let clientHeader;
         if (this.requestOptions && this.requestOptions.headers) {
-            const headerValue = lowercaseKeys(this.requestOptions.headers)[Headers.ContentType];
+            const headerValue = lowercaseKeys(this.requestOptions.headers)[src_Headers.ContentType];
             if (headerValue) {
                 if (typeof headerValue === 'number') {
                     clientHeader = String(headerValue);
@@ -32188,7 +34679,7 @@ class lib_HttpClient {
                 }
             }
         }
-        const additionalValue = additionalHeaders[Headers.ContentType];
+        const additionalValue = additionalHeaders[src_Headers.ContentType];
         // Return the first non-undefined value, converting numbers or arrays to strings if necessary
         if (additionalValue !== undefined) {
             if (typeof additionalValue === 'number') {
@@ -35384,8 +37875,10 @@ const installCliOnGithubActionRunner = async (version) => {
 
 
 
+// EXTERNAL MODULE: ./node_modules/@1password/sdk/dist/sdk.js
+var sdk = __nccwpck_require__(7837);
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"rE":"3.1.0"};
+const package_namespaceObject = {"rE":"3.2.0"};
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
@@ -35395,6 +37888,7 @@ const envFilePath = "OP_ENV_FILE";
 const authErr = `Authentication error with environment variables: you must set either 1) ${envServiceAccountToken}, or 2) both ${envConnectHost} and ${envConnectToken}.`;
 
 ;// CONCATENATED MODULE: ./src/utils.ts
+
 
 
 
@@ -35412,8 +37906,44 @@ const validateAuth = () => {
     const authType = isConnect ? "Connect" : "Service account";
     info(`Authenticated with ${authType}.`);
 };
-const extractSecret = (envName, shouldExportEnv) => {
+const getEnvVarNamesWithSecretRefs = () => Object.keys(process.env).filter((key) => typeof process.env[key] === "string" &&
+    process.env[key]?.startsWith("op://"));
+const validateSecretRefs = (envNames) => {
+    const invalid = [];
+    for (const envName of envNames) {
+        const ref = process.env[envName];
+        if (!ref) {
+            continue;
+        }
+        try {
+            sdk.Secrets.validateSecretReference(ref);
+        }
+        catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            invalid.push({ name: envName, message });
+        }
+    }
+    // Throw an error if any secret references are invalid
+    if (invalid.length > 0) {
+        const details = invalid
+            .map(({ name, message }) => `${name}: ${message}`)
+            .join("; ");
+        throw new Error(`Invalid secret reference(s): ${details}`);
+    }
+};
+const setResolvedSecret = (envName, secretValue, shouldExportEnv) => {
     info(`Populating variable: ${envName}`);
+    if (shouldExportEnv) {
+        exportVariable(envName, secretValue);
+    }
+    else {
+        setOutput(envName, secretValue);
+    }
+    if (secretValue) {
+        core_setSecret(secretValue);
+    }
+};
+const extractSecret = (envName, shouldExportEnv) => {
     const ref = process.env[envName];
     if (!ref) {
         return;
@@ -35422,20 +37952,10 @@ const extractSecret = (envName, shouldExportEnv) => {
     if (secretValue === null || secretValue === undefined) {
         return;
     }
-    if (shouldExportEnv) {
-        exportVariable(envName, secretValue);
-    }
-    else {
-        setOutput(envName, secretValue);
-    }
-    // Skip setSecret for empty strings to avoid the warning:
-    // "Can't add secret mask for empty string in ##[add-mask] command."
-    if (secretValue) {
-        core_setSecret(secretValue);
-    }
+    setResolvedSecret(envName, secretValue, shouldExportEnv);
 };
-const loadSecrets = async (shouldExportEnv) => {
-    // Pass User-Agent Information to the 1Password CLI
+// Connect loads secrets via the 1Password CLI
+const loadSecretsViaConnect = async (shouldExportEnv) => {
     (0,dist.setClientInfo)({
         name: "1Password GitHub Action",
         id: "GHA",
@@ -35455,6 +37975,52 @@ const loadSecrets = async (shouldExportEnv) => {
     if (shouldExportEnv) {
         exportVariable(envManagedVariables, envs.join());
     }
+};
+// Service Account loads secrets via the 1Password SDK
+const loadSecretsViaServiceAccount = async (shouldExportEnv) => {
+    const envs = getEnvVarNamesWithSecretRefs();
+    if (envs.length === 0) {
+        return;
+    }
+    validateSecretRefs(envs);
+    const token = process.env[envServiceAccountToken];
+    if (!token) {
+        throw new Error(authErr);
+    }
+    // Authenticate with the 1Password SDK
+    let client;
+    try {
+        client = await (0,sdk.createClient)({
+            auth: token,
+            integrationName: "1Password GitHub Action",
+            integrationVersion: package_namespaceObject.rE,
+        });
+    }
+    catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        throw new Error(`Service account authentication failed: ${message}`);
+    }
+    for (const envName of envs) {
+        const ref = process.env[envName];
+        if (!ref) {
+            continue;
+        }
+        // Resolve the secret value using the 1Password SDK
+        // and make it available either as step outputs or as environment variables
+        const secretValue = await client.secrets.resolve(ref);
+        setResolvedSecret(envName, secretValue, shouldExportEnv);
+    }
+    if (shouldExportEnv) {
+        exportVariable(envManagedVariables, envs.join());
+    }
+};
+const loadSecrets = async (shouldExportEnv) => {
+    const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
+    if (isConnect) {
+        await loadSecretsViaConnect(shouldExportEnv);
+        return;
+    }
+    await loadSecretsViaServiceAccount(shouldExportEnv);
 };
 const unsetPrevious = () => {
     if (process.env[envManagedVariables]) {
@@ -35491,8 +38057,11 @@ const loadSecretsAction = async () => {
             info(`Loading environment variables from file: ${file}`);
             main_default().config({ path: file });
         }
-        // Download and install the CLI
-        await installCLI();
+        const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
+        // If Connect is used, download and install the CLI
+        if (isConnect) {
+            await installCLI();
+        }
         // Load secrets
         await loadSecrets(shouldExportEnv);
     }
