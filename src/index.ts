@@ -3,7 +3,7 @@ import * as core from "@actions/core";
 import { validateCli } from "@1password/op-js";
 import { installCliOnGithubActionRunner } from "./op-cli-installer";
 import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
-import { envFilePath, envConnectHost, envConnectToken } from "./constants";
+import { envFilePath } from "./constants";
 
 const loadSecretsAction = async () => {
 	try {
@@ -26,12 +26,8 @@ const loadSecretsAction = async () => {
 			dotenv.config({ path: file });
 		}
 
-		const isConnect =
-			process.env[envConnectHost] && process.env[envConnectToken];
-		// If Connect is used, download and install the CLI
-		if (isConnect) {
-			await installCLI();
-		}
+		// Download and install the CLI
+		await installCLI();
 
 		// Load secrets
 		await loadSecrets(shouldExportEnv);
