@@ -187,13 +187,30 @@ jobs:
           OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
         run: |
           echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
-          docker compose -f tests/fixtures/docker-compose.yml up -d && sleep 25
+          docker compose -f tests/fixtures/docker-compose.yml up -d && sleep 15
 
       - name: Configure 1Password Connect
         uses: ./configure
         with:
           connect-host: http://localhost:8080
           connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
+
+      - name: Wait for Connect sync to be ready
+        env:
+          OP_CONNECT_HOST: http://localhost:8080
+        run: |
+          url="${OP_CONNECT_HOST}/health"
+          for i in $(seq 1 12); do
+            sync_status=$(curl -sf "$url" | jq -r '.dependencies[] | select(.service=="sync") | .status // empty')
+            if [ "$sync_status" = "ACTIVE" ]; then
+              echo "Connect sync is ready"
+              exit 0
+            fi
+            echo "Waiting for sync ($i/12)... status=${sync_status:-unknown}"
+            sleep 5
+          done
+          echo "Timeout waiting for Connect sync"
+          exit 1
 
       - name: Load secrets
         id: load_secrets
