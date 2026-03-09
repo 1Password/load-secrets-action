@@ -65,7 +65,7 @@ jobs:
           echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
           echo "FILE_SSH_KEY_DATE=op://${{ secrets.VAULT }}/test-ssh-key/test-section/date" >> tests/.env.tpl
           echo "FILE_TEST_CREDENTIALS=op://${{ secrets.VAULT }}/test-credentials/credential" >> tests/.env.tpl
-          echo "FILE_TEST_CREDENTIALS_NOTES=op://${{ secrets.VAULT }}/test-credentials/notes" >> tests/.env.tpl
+          echo "FILE_TEST_CREDENTIALS_NOTES=op://${{ secrets.VAULT }}/test-credentials/notesPlain" >> tests/.env.tpl
 
       - name: Configure Service account
         uses: ./configure
@@ -87,7 +87,7 @@ jobs:
           TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
           SSH_KEY_DATE: op://${{ secrets.VAULT }}/test-ssh-key/test-section/date
           TEST_CREDENTIALS: op://${{ secrets.VAULT }}/test-credentials/credential
-          TEST_CREDENTIALS_NOTES: op://${{ secrets.VAULT }}/test-credentials/notes
+          TEST_CREDENTIALS_NOTES: op://${{ secrets.VAULT }}/test-credentials/notesPlain
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -187,7 +187,7 @@ jobs:
           echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
           echo "FILE_SSH_KEY_DATE=op://${{ secrets.VAULT }}/test-ssh-key/test-section/date" >> tests/.env.tpl
           echo "FILE_TEST_CREDENTIALS=op://${{ secrets.VAULT }}/test-credentials/credential" >> tests/.env.tpl
-          echo "FILE_TEST_CREDENTIALS_NOTES=op://${{ secrets.VAULT }}/test-credentials/notes" >> tests/.env.tpl
+          echo "FILE_TEST_CREDENTIALS_NOTES=op://${{ secrets.VAULT }}/test-credentials/notesPlain" >> tests/.env.tpl
 
       - name: Launch 1Password Connect instance
         env:
@@ -234,7 +234,7 @@ jobs:
           TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
           SSH_KEY_DATE: op://${{ secrets.VAULT }}/test-ssh-key/test-section/date
           TEST_CREDENTIALS: op://${{ secrets.VAULT }}/test-credentials/credential
-          TEST_CREDENTIALS_NOTES: op://${{ secrets.VAULT }}/test-credentials/notes
+          TEST_CREDENTIALS_NOTES: op://${{ secrets.VAULT }}/test-credentials/notesPlain
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
