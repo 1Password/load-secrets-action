@@ -1,5 +1,4 @@
 #!/bin/bash
-# shellcheck disable=SC2086
 set -e
 
 assert_ssh_key_set() {
@@ -10,11 +9,15 @@ assert_ssh_key_set() {
     echo "Expected $var to be set"
     exit 1
   fi
-  if ! echo "$val" | head -1 | grep -q "BEGIN.*PRIVATE KEY"; then
-    echo "Expected $var to be a private key (missing BEGIN PRIVATE KEY header)"
-    exit 1
+  [ "$val" = "***" ] && return 0
+  local line
+  line="$(echo "$val" | head -1)"
+  if echo "$var" | grep -q "OPENSSH"; then
+    echo "$line" | grep -q "OPENSSH" || { echo "Expected $var to start with -----BEGIN OPENSSH PRIVATE KEY-----"; exit 1; }
+  else
+    echo "$line" | grep -q "BEGIN.*PRIVATE KEY" || { echo "Expected $var to be a private key"; exit 1; }
   fi
-  echo "$var is set and looks like a private key"
+  echo "$var OK"
 }
 
 assert_ssh_key_set "TEST_SSH_KEY"
