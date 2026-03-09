@@ -201,7 +201,7 @@ jobs:
         run: |
           url="${OP_CONNECT_HOST}/health"
           for i in $(seq 1 12); do
-            sync_status=$(curl -sf "$url" | jq -r '.dependencies[] | select(.service=="sync") | .status // empty')
+            sync_status=$(curl -sf -H "Authorization: Bearer $OP_CONNECT_TOKEN" "$url" | jq -r '.dependencies[] | select(.service=="sync") | .status // empty')
             if [ "$sync_status" = "ACTIVE" ]; then
               echo "Connect sync is ready"
               exit 0
