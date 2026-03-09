@@ -64,6 +64,8 @@ jobs:
           echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
           echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
           echo "FILE_SSH_KEY_DATE=op://${{ secrets.VAULT }}/test-ssh-key/test-section/date" >> tests/.env.tpl
+          echo "FILE_TEST_CREDENTIALS=op://${{ secrets.VAULT }}/test-credentials/credential" >> tests/.env.tpl
+          echo "FILE_TEST_CREDENTIALS_NOTES=op://${{ secrets.VAULT }}/test-credentials/notes" >> tests/.env.tpl
 
       - name: Configure Service account
         uses: ./configure
@@ -84,6 +86,8 @@ jobs:
           TEST_SSH_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
           TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
           SSH_KEY_DATE: op://${{ secrets.VAULT }}/test-ssh-key/test-section/date
+          TEST_CREDENTIALS: op://${{ secrets.VAULT }}/test-credentials/credential
+          TEST_CREDENTIALS_NOTES: op://${{ secrets.VAULT }}/test-credentials/notes
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -105,6 +109,10 @@ jobs:
           FILE_TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY_OPENSSH }}
           SSH_KEY_DATE: ${{ steps.load_secrets.outputs.SSH_KEY_DATE }}
           FILE_SSH_KEY_DATE: ${{ steps.load_secrets.outputs.FILE_SSH_KEY_DATE }}
+          TEST_CREDENTIALS: ${{ steps.load_secrets.outputs.TEST_CREDENTIALS }}
+          FILE_TEST_CREDENTIALS: ${{ steps.load_secrets.outputs.FILE_TEST_CREDENTIALS }}
+          TEST_CREDENTIALS_NOTES: ${{ steps.load_secrets.outputs.TEST_CREDENTIALS_NOTES }}
+          FILE_TEST_CREDENTIALS_NOTES: ${{ steps.load_secrets.outputs.FILE_TEST_CREDENTIALS_NOTES }}
         run: ./tests/assert-env-set.sh
 
       - name: Assert SSH key env vars [step output]
@@ -178,6 +186,8 @@ jobs:
           echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
           echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
           echo "FILE_SSH_KEY_DATE=op://${{ secrets.VAULT }}/test-ssh-key/test-section/date" >> tests/.env.tpl
+          echo "FILE_TEST_CREDENTIALS=op://${{ secrets.VAULT }}/test-credentials/credential" >> tests/.env.tpl
+          echo "FILE_TEST_CREDENTIALS_NOTES=op://${{ secrets.VAULT }}/test-credentials/notes" >> tests/.env.tpl
 
       - name: Launch 1Password Connect instance
         env:
@@ -223,6 +233,8 @@ jobs:
           TEST_SSH_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
           TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
           SSH_KEY_DATE: op://${{ secrets.VAULT }}/test-ssh-key/test-section/date
+          TEST_CREDENTIALS: op://${{ secrets.VAULT }}/test-credentials/credential
+          TEST_CREDENTIALS_NOTES: op://${{ secrets.VAULT }}/test-credentials/notes
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -241,6 +253,10 @@ jobs:
           FILE_TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY_OPENSSH }}
           SSH_KEY_DATE: ${{ steps.load_secrets.outputs.SSH_KEY_DATE }}
           FILE_SSH_KEY_DATE: ${{ steps.load_secrets.outputs.FILE_SSH_KEY_DATE }}
+          TEST_CREDENTIALS: ${{ steps.load_secrets.outputs.TEST_CREDENTIALS }}
+          FILE_TEST_CREDENTIALS: ${{ steps.load_secrets.outputs.FILE_TEST_CREDENTIALS }}
+          TEST_CREDENTIALS_NOTES: ${{ steps.load_secrets.outputs.TEST_CREDENTIALS_NOTES }}
+          FILE_TEST_CREDENTIALS_NOTES: ${{ steps.load_secrets.outputs.FILE_TEST_CREDENTIALS_NOTES }}
         run: ./tests/assert-env-set.sh
 
       - name: Assert SSH key env vars [step output]

@@ -28,3 +28,8 @@ assert_env_unset "FILE_TEST_SSH_KEY_OPENSSH"
 
 assert_env_unset "SSH_KEY_DATE"
 assert_env_unset "FILE_SSH_KEY_DATE"
+
+assert_env_unset "TEST_CREDENTIALS"
+assert_env_unset "FILE_TEST_CREDENTIALS"
+assert_env_unset "TEST_CREDENTIALS_NOTES"
+assert_env_unset "FILE_TEST_CREDENTIALS_NOTES"
