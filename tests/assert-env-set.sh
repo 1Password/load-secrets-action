@@ -39,11 +39,17 @@ assert_env_equals "FILE_SECRET_IN_SECTION" "${SECRET}"
 assert_env_equals "MULTILINE_SECRET" "${MULTILINE_SECRET}"
 assert_env_equals "FILE_MULTILINE_SECRET" "${MULTILINE_SECRET}"
 
-# WEBSITE/FILE_WEBSITE only loaded by Service Account as Connect does not support website field
-if [ -n "$(printenv WEBSITE 2>/dev/null)" ]; then
+# WEBSITE/FILE_WEBSITE: required when ASSERT_WEBSITE=true (Service Account), skipped when false (Connect)
+if [ "${ASSERT_WEBSITE:-false}" = "true" ]; then
+  if [ -z "$(printenv WEBSITE 2>/dev/null)" ]; then
+    echo "Expected WEBSITE to be set (Service Account)"
+    exit 1
+  fi
+  if [ -z "$(printenv FILE_WEBSITE 2>/dev/null)" ]; then
+    echo "Expected FILE_WEBSITE to be set (Service Account)"
+    exit 1
+  fi
   assert_env_equals "WEBSITE" "${WEBSITE}"
-fi
-if [ -n "$(printenv FILE_WEBSITE 2>/dev/null)" ]; then
   assert_env_equals "FILE_WEBSITE" "${WEBSITE}"
 fi
 
