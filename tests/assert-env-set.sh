@@ -26,6 +26,9 @@ IApTbyBwbGVhc2UgZG9uJ3QgcmVwb3J0IGl0IQo=
 EOF
 )"
 readonly MULTILINE_SECRET
+readonly WEBSITE="www.test.com"
+readonly SSH_KEY_DATE="1773057660"
+readonly TEST_FILE_CONTENT_EXPECTED="This is a test"
 
 assert_env_equals "SECRET" "${SECRET}"
 assert_env_equals "FILE_SECRET" "${SECRET}"
@@ -35,3 +38,12 @@ assert_env_equals "FILE_SECRET_IN_SECTION" "${SECRET}"
 
 assert_env_equals "MULTILINE_SECRET" "${MULTILINE_SECRET}"
 assert_env_equals "FILE_MULTILINE_SECRET" "${MULTILINE_SECRET}"
+
+assert_env_equals "WEBSITE" "${WEBSITE}"
+assert_env_equals "FILE_WEBSITE" "${WEBSITE}"
+
+assert_env_equals_or_masked "SSH_KEY_DATE" "${SSH_KEY_DATE}"
+assert_env_equals_or_masked "FILE_SSH_KEY_DATE" "${SSH_KEY_DATE}"
+
+assert_env_equals_or_masked "TEST_FILE_CONTENT" "${TEST_FILE_CONTENT_EXPECTED}"
+assert_env_equals_or_masked "FILE_TEST_FILE_CONTENT" "${TEST_FILE_CONTENT_EXPECTED}"
