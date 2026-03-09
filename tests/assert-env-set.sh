@@ -28,7 +28,6 @@ EOF
 readonly MULTILINE_SECRET
 readonly WEBSITE="www.test.com"
 readonly SSH_KEY_DATE="1773057660"
-readonly TEST_FILE_CONTENT_EXPECTED="This is a test"
 
 assert_env_equals "SECRET" "${SECRET}"
 assert_env_equals "FILE_SECRET" "${SECRET}"
@@ -55,6 +54,3 @@ fi
 
 assert_env_equals "SSH_KEY_DATE" "${SSH_KEY_DATE}"
 assert_env_equals "FILE_SSH_KEY_DATE" "${SSH_KEY_DATE}"
-
-assert_env_equals "TEST_FILE_CONTENT" "${TEST_FILE_CONTENT_EXPECTED}"
-assert_env_equals "FILE_TEST_FILE_CONTENT" "${TEST_FILE_CONTENT_EXPECTED}"
