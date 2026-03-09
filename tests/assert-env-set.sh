@@ -39,8 +39,13 @@ assert_env_equals "FILE_SECRET_IN_SECTION" "${SECRET}"
 assert_env_equals "MULTILINE_SECRET" "${MULTILINE_SECRET}"
 assert_env_equals "FILE_MULTILINE_SECRET" "${MULTILINE_SECRET}"
 
-assert_env_equals "WEBSITE" "${WEBSITE}"
-assert_env_equals "FILE_WEBSITE" "${WEBSITE}"
+# WEBSITE/FILE_WEBSITE only loaded by Service Account as Connect does not support website field
+if [ -n "$(printenv WEBSITE 2>/dev/null)" ]; then
+  assert_env_equals "WEBSITE" "${WEBSITE}"
+fi
+if [ -n "$(printenv FILE_WEBSITE 2>/dev/null)" ]; then
+  assert_env_equals "FILE_WEBSITE" "${WEBSITE}"
+fi
 
 assert_env_equals "SSH_KEY_DATE" "${SSH_KEY_DATE}"
 assert_env_equals "FILE_SSH_KEY_DATE" "${SSH_KEY_DATE}"

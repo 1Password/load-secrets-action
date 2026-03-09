@@ -174,7 +174,6 @@ jobs:
           echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
           echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
-          echo "FILE_WEBSITE=op://${{ secrets.VAULT }}/test-secret/website" >> tests/.env.tpl
           echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
           echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
           echo "FILE_SSH_KEY_DATE=op://${{ secrets.VAULT }}/test-ssh-key/test-section/date" >> tests/.env.tpl
@@ -203,7 +202,6 @@ jobs:
           SECRET: op://${{ secrets.VAULT }}/test-secret/password
           SECRET_IN_SECTION: op://${{ secrets.VAULT }}/test-secret/test-section/password
           MULTILINE_SECRET: op://${{ secrets.VAULT }}/multiline-secret/notesPlain
-          WEBSITE: op://${{ secrets.VAULT }}/test-secret/website
           TEST_SSH_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
           TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
           SSH_KEY_DATE: op://${{ secrets.VAULT }}/test-ssh-key/test-section/date
@@ -219,8 +217,6 @@ jobs:
           FILE_SECRET: ${{ steps.load_secrets.outputs.FILE_SECRET }}
           FILE_SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.FILE_SECRET_IN_SECTION }}
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
-          WEBSITE: ${{ steps.load_secrets.outputs.WEBSITE }}
-          FILE_WEBSITE: ${{ steps.load_secrets.outputs.FILE_WEBSITE }}
           TEST_SSH_KEY: ${{ steps.load_secrets.outputs.TEST_SSH_KEY }}
           FILE_TEST_SSH_KEY: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY }}
           TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.TEST_SSH_KEY_OPENSSH }}
