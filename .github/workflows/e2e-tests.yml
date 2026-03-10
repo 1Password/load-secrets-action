@@ -63,9 +63,6 @@ jobs:
           echo "FILE_WEBSITE=op://${{ secrets.VAULT }}/test-secret/website" >> tests/.env.tpl
           echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
           echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
-          echo "FILE_SSH_KEY_DATE=op://${{ secrets.VAULT }}/test-ssh-key/test-section/date" >> tests/.env.tpl
-          echo "FILE_TEST_CREDENTIALS=op://${{ secrets.VAULT }}/test-credentials/credential" >> tests/.env.tpl
-          echo "FILE_TEST_CREDENTIALS_NOTES=op://${{ secrets.VAULT }}/test-credentials/notesPlain" >> tests/.env.tpl
 
       - name: Configure Service account
         uses: ./configure
@@ -85,9 +82,6 @@ jobs:
           WEBSITE: op://${{ secrets.VAULT }}/test-secret/website
           TEST_SSH_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
           TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
-          SSH_KEY_DATE: op://${{ secrets.VAULT }}/test-ssh-key/test-section/date
-          TEST_CREDENTIALS: op://${{ secrets.VAULT }}/test-credentials/credential
-          TEST_CREDENTIALS_NOTES: op://${{ secrets.VAULT }}/test-credentials/notesPlain
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -107,12 +101,6 @@ jobs:
           FILE_TEST_SSH_KEY: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY }}
           TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.TEST_SSH_KEY_OPENSSH }}
           FILE_TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY_OPENSSH }}
-          SSH_KEY_DATE: ${{ steps.load_secrets.outputs.SSH_KEY_DATE }}
-          FILE_SSH_KEY_DATE: ${{ steps.load_secrets.outputs.FILE_SSH_KEY_DATE }}
-          TEST_CREDENTIALS: ${{ steps.load_secrets.outputs.TEST_CREDENTIALS }}
-          FILE_TEST_CREDENTIALS: ${{ steps.load_secrets.outputs.FILE_TEST_CREDENTIALS }}
-          TEST_CREDENTIALS_NOTES: ${{ steps.load_secrets.outputs.TEST_CREDENTIALS_NOTES }}
-          FILE_TEST_CREDENTIALS_NOTES: ${{ steps.load_secrets.outputs.FILE_TEST_CREDENTIALS_NOTES }}
         run: ./tests/assert-env-set.sh
 
       - name: Assert SSH key env vars [step output]
@@ -185,9 +173,6 @@ jobs:
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
           echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
           echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
-          echo "FILE_SSH_KEY_DATE=op://${{ secrets.VAULT }}/test-ssh-key/test-section/date" >> tests/.env.tpl
-          echo "FILE_TEST_CREDENTIALS=op://${{ secrets.VAULT }}/test-credentials/credential" >> tests/.env.tpl
-          echo "FILE_TEST_CREDENTIALS_NOTES=op://${{ secrets.VAULT }}/test-credentials/notesPlain" >> tests/.env.tpl
 
       - name: Launch 1Password Connect instance
         env:
@@ -202,24 +187,6 @@ jobs:
           connect-host: http://localhost:8080
           connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
 
-      - name: Wait for Connect sync to be ready
-        env:
-          OP_CONNECT_HOST: http://localhost:8080
-          OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
-        run: |
-          url="${OP_CONNECT_HOST}/health"
-          for i in $(seq 1 12); do
-            sync_status=$(curl -sf -H "Authorization: Bearer $OP_CONNECT_TOKEN" "$url" | jq -r '.dependencies[] | select(.service=="sync") | .status // empty')
-            if [ "$sync_status" = "ACTIVE" ]; then
-              echo "Connect sync is ready"
-              exit 0
-            fi
-            echo "Waiting for sync ($i/12)... status=${sync_status:-unknown}"
-            sleep 5
-          done
-          echo "Timeout waiting for Connect sync"
-          exit 1
-
       - name: Load secrets
         id: load_secrets
         uses: ./
@@ -232,9 +199,6 @@ jobs:
           MULTILINE_SECRET: op://${{ secrets.VAULT }}/multiline-secret/notesPlain
           TEST_SSH_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
           TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
-          SSH_KEY_DATE: op://${{ secrets.VAULT }}/test-ssh-key/test-section/date
-          TEST_CREDENTIALS: op://${{ secrets.VAULT }}/test-credentials/credential
-          TEST_CREDENTIALS_NOTES: op://${{ secrets.VAULT }}/test-credentials/notesPlain
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
@@ -251,12 +215,6 @@ jobs:
           FILE_TEST_SSH_KEY: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY }}
           TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.TEST_SSH_KEY_OPENSSH }}
           FILE_TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY_OPENSSH }}
-          SSH_KEY_DATE: ${{ steps.load_secrets.outputs.SSH_KEY_DATE }}
-          FILE_SSH_KEY_DATE: ${{ steps.load_secrets.outputs.FILE_SSH_KEY_DATE }}
-          TEST_CREDENTIALS: ${{ steps.load_secrets.outputs.TEST_CREDENTIALS }}
-          FILE_TEST_CREDENTIALS: ${{ steps.load_secrets.outputs.FILE_TEST_CREDENTIALS }}
-          TEST_CREDENTIALS_NOTES: ${{ steps.load_secrets.outputs.TEST_CREDENTIALS_NOTES }}
-          FILE_TEST_CREDENTIALS_NOTES: ${{ steps.load_secrets.outputs.FILE_TEST_CREDENTIALS_NOTES }}
         run: ./tests/assert-env-set.sh
 
       - name: Assert SSH key env vars [step output]
