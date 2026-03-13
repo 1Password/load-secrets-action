@@ -26,6 +26,7 @@ IApTbyBwbGVhc2UgZG9uJ3QgcmVwb3J0IGl0IQo=
 EOF
 )"
 readonly MULTILINE_SECRET
+readonly WEBSITE="www.test.com"
 
 assert_env_equals "SECRET" "${SECRET}"
 assert_env_equals "FILE_SECRET" "${SECRET}"
@@ -35,3 +36,9 @@ assert_env_equals "FILE_SECRET_IN_SECTION" "${SECRET}"
 
 assert_env_equals "MULTILINE_SECRET" "${MULTILINE_SECRET}"
 assert_env_equals "FILE_MULTILINE_SECRET" "${MULTILINE_SECRET}"
+
+# WEBSITE/FILE_WEBSITE: required when ASSERT_WEBSITE=true (Service Account), skipped when false (Connect)
+if [ "${ASSERT_WEBSITE:-false}" = "true" ]; then
+  assert_env_equals "WEBSITE" "${WEBSITE}"
+  assert_env_equals "FILE_WEBSITE" "${WEBSITE}"
+fi

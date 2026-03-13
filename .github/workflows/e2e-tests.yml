@@ -30,6 +30,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
+      max-parallel: 4
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         version: [latest, 2.30.0]
@@ -59,6 +60,9 @@ jobs:
           echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
           echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
+          echo "FILE_WEBSITE=op://${{ secrets.VAULT }}/test-secret/website" >> tests/.env.tpl
+          echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
+          echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
 
       - name: Configure Service account
         uses: ./configure
@@ -75,24 +79,51 @@ jobs:
           SECRET: op://${{ secrets.VAULT }}/test-secret/password
           SECRET_IN_SECTION: op://${{ secrets.VAULT }}/test-secret/test-section/password
           MULTILINE_SECRET: op://${{ secrets.VAULT }}/multiline-secret/notesPlain
+          WEBSITE: op://${{ secrets.VAULT }}/test-secret/website
+          TEST_SSH_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
+          TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
         if: ${{ !matrix.export-env }}
         shell: bash
         env:
+          ASSERT_WEBSITE: "true"
           SECRET: ${{ steps.load_secrets.outputs.SECRET }}
           SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
           MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
           FILE_SECRET: ${{ steps.load_secrets.outputs.FILE_SECRET }}
           FILE_SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.FILE_SECRET_IN_SECTION }}
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
+          WEBSITE: ${{ steps.load_secrets.outputs.WEBSITE }}
+          FILE_WEBSITE: ${{ steps.load_secrets.outputs.FILE_WEBSITE }}
+          TEST_SSH_KEY: ${{ steps.load_secrets.outputs.TEST_SSH_KEY }}
+          FILE_TEST_SSH_KEY: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY }}
+          TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.TEST_SSH_KEY_OPENSSH }}
+          FILE_TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY_OPENSSH }}
         run: ./tests/assert-env-set.sh
+
+      - name: Assert SSH key env vars [step output]
+        if: ${{ !matrix.export-env }}
+        shell: bash
+        env:
+          TEST_SSH_KEY: ${{ steps.load_secrets.outputs.TEST_SSH_KEY }}
+          FILE_TEST_SSH_KEY: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY }}
+          TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.TEST_SSH_KEY_OPENSSH }}
+          FILE_TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY_OPENSSH }}
+        run: ./tests/assert-ssh-keys-set.sh
 
       - name: Assert test secret values [exported env]
         if: ${{ matrix.export-env }}
         shell: bash
+        env:
+          ASSERT_WEBSITE: "true"
         run: ./tests/assert-env-set.sh
+
+      - name: Assert SSH key env vars [exported env]
+        if: ${{ matrix.export-env }}
+        shell: bash
+        run: ./tests/assert-ssh-keys-set.sh
 
       - name: Remove secrets [exported env]
         if: ${{ matrix.export-env }}
@@ -111,7 +142,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         version: [latest, 2.30.0]
         export-env: [true, false]
     steps:
@@ -139,13 +169,16 @@ jobs:
           echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
           echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
           echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
+          echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
+          echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
 
       - name: Launch 1Password Connect instance
         env:
           OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
         run: |
           echo "$OP_CONNECT_CREDENTIALS" > 1password-credentials.json
-          docker compose -f tests/fixtures/docker-compose.yml up -d && sleep 10
+          docker compose -f tests/fixtures/docker-compose.yml up -d
+          timeout 60 bash -c 'until curl -sf http://localhost:8080/health >/dev/null 2>&1; do sleep 2; done'
 
       - name: Configure 1Password Connect
         uses: ./configure
@@ -163,22 +196,44 @@ jobs:
           SECRET: op://${{ secrets.VAULT }}/test-secret/password
           SECRET_IN_SECTION: op://${{ secrets.VAULT }}/test-secret/test-section/password
           MULTILINE_SECRET: op://${{ secrets.VAULT }}/multiline-secret/notesPlain
+          TEST_SSH_KEY: op://${{ secrets.VAULT }}/test-ssh-key/private key
+          TEST_SSH_KEY_OPENSSH: "op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh"
           OP_ENV_FILE: ./tests/.env.tpl
 
       - name: Assert test secret values [step output]
         if: ${{ !matrix.export-env }}
         env:
+          ASSERT_WEBSITE: "false"
           SECRET: ${{ steps.load_secrets.outputs.SECRET }}
           SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.SECRET_IN_SECTION }}
           MULTILINE_SECRET: ${{ steps.load_secrets.outputs.MULTILINE_SECRET }}
           FILE_SECRET: ${{ steps.load_secrets.outputs.FILE_SECRET }}
           FILE_SECRET_IN_SECTION: ${{ steps.load_secrets.outputs.FILE_SECRET_IN_SECTION }}
           FILE_MULTILINE_SECRET: ${{ steps.load_secrets.outputs.FILE_MULTILINE_SECRET }}
+          TEST_SSH_KEY: ${{ steps.load_secrets.outputs.TEST_SSH_KEY }}
+          FILE_TEST_SSH_KEY: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY }}
+          TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.TEST_SSH_KEY_OPENSSH }}
+          FILE_TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY_OPENSSH }}
         run: ./tests/assert-env-set.sh
+
+      - name: Assert SSH key env vars [step output]
+        if: ${{ !matrix.export-env }}
+        env:
+          TEST_SSH_KEY: ${{ steps.load_secrets.outputs.TEST_SSH_KEY }}
+          FILE_TEST_SSH_KEY: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY }}
+          TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.TEST_SSH_KEY_OPENSSH }}
+          FILE_TEST_SSH_KEY_OPENSSH: ${{ steps.load_secrets.outputs.FILE_TEST_SSH_KEY_OPENSSH }}
+        run: ./tests/assert-ssh-keys-set.sh
 
       - name: Assert test secret values [exported env]
         if: ${{ matrix.export-env }}
+        env:
+          ASSERT_WEBSITE: "false"
         run: ./tests/assert-env-set.sh
+
+      - name: Assert SSH key env vars [exported env]
+        if: ${{ matrix.export-env }}
+        run: ./tests/assert-ssh-keys-set.sh
 
       - name: Remove secrets [exported env]
         if: ${{ matrix.export-env }}
