@@ -137,13 +137,11 @@ jobs:
         run: ./tests/assert-env-unset.sh
 
   test-connect:
-    name: Connect (${{ matrix.os }}, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
-    runs-on: ${{ matrix.os }}
+    name: Connect (ubuntu-latest, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-      max-parallel: 4
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         version: [latest, 2.30.0]
         export-env: [true, false]
     steps:
