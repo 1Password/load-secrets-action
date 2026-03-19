@@ -1,6 +1,6 @@
 {
 	"name": "load-secrets-action",
-	"version": "3.2.1",
+	"version": "3.2.2",
 	"description": "Load Secrets from 1Password",
 	"main": "dist/index.js",
 	"directories": {
@@ -45,6 +45,9 @@
 		"@actions/exec": "^3.0.0",
 		"@actions/tool-cache": "^4.0.0",
 		"dotenv": "^17.2.2"
+	},
+	"overrides": {
+		"minimatch": "^9.0.7"
 	},
 	"devDependencies": {
 		"@1password/eslint-config": "^4.3.1",
