@@ -9,7 +9,7 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
 
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@2.0.0
@@ -18,7 +18,7 @@ jobs:
             .husky
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
