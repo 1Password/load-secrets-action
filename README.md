@@ -35,7 +35,7 @@ jobs:
 
       - name: Load secret
         id: load_secrets
-        uses: 1password/load-secrets-action@v3
+        uses: 1password/load-secrets-action@v4
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://app-cicd/hello-world/secret
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Load secret
-        uses: 1password/load-secrets-action@v3
+        uses: 1password/load-secrets-action@v4
         with:
           # Export loaded secrets as environment variables
           export-env: true
@@ -77,7 +77,7 @@ When loading SSH keys, you can specify the format using the `ssh-format` query p
 
 ```yml
 - name: Load SSH key
-  uses: 1password/load-secrets-action@v3
+  uses: 1password/load-secrets-action@v4
   env:
     OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     # Load SSH private key in OpenSSH format
