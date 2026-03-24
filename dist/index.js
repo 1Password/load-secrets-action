@@ -35421,6 +35421,9 @@ class MacOsInstaller extends CliInstaller {
 
 ;// CONCATENATED MODULE: ./src/op-cli-installer/github-action/cli-installer/windows.ts
 
+
+
+
 class WindowsInstaller extends CliInstaller {
     platform = "win32"; // Node.js platform identifier for Windows
     constructor(version) {
@@ -35428,7 +35431,19 @@ class WindowsInstaller extends CliInstaller {
     }
     async installCli() {
         const urlBuilder = cliUrlBuilder[this.platform];
-        await super.install(urlBuilder(this.version, this.arch));
+        await this.install(urlBuilder(this.version, this.arch));
+    }
+    // Windows PowerShell's Expand-Archive requires files to have a .zip extension.
+    // tc.downloadTool saves to a UUID filename with no extension, so we rename it.
+    async install(url) {
+        console.info(`Downloading 1Password CLI from: ${url}`);
+        const downloadPath = await downloadTool(url);
+        const zipPath = `${downloadPath}.zip`;
+        external_fs_.renameSync(downloadPath, zipPath);
+        console.info("Installing 1Password CLI");
+        const extractedPath = await extractZip(zipPath);
+        addPath(extractedPath);
+        info("1Password CLI installed");
     }
 }
 
