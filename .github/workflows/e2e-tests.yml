@@ -57,13 +57,15 @@ jobs:
       - name: Generate .env.tpl
         shell: bash
         run: |
-          echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
-          echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
-          echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
-          echo "FILE_WEBSITE=op://${{ secrets.VAULT }}/test-secret/website" >> tests/.env.tpl
-          echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
-          echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
+          echo "FILE_SECRET=op://${VAULT}/test-secret/password" > tests/.env.tpl
+          echo "FILE_SECRET_IN_SECTION=op://${VAULT}/test-secret/test-section/password" >> tests/.env.tpl
+          echo "FILE_MULTILINE_SECRET=op://${VAULT}/multiline-secret/notesPlain" >> tests/.env.tpl
+          echo "FILE_WEBSITE=op://${VAULT}/test-secret/website" >> tests/.env.tpl
+          echo "FILE_TEST_SSH_KEY=op://${VAULT}/test-ssh-key/private key" >> tests/.env.tpl
+          echo "FILE_TEST_SSH_KEY_OPENSSH=op://${VAULT}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
 
+        env:
+          VAULT: ${{ secrets.VAULT }}
       - name: Configure Service account
         uses: ./configure
         with:
@@ -166,12 +168,14 @@ jobs:
       - name: Generate .env.tpl
         run: |
           mkdir -p tests
-          echo "FILE_SECRET=op://${{ secrets.VAULT }}/test-secret/password" > tests/.env.tpl
-          echo "FILE_SECRET_IN_SECTION=op://${{ secrets.VAULT }}/test-secret/test-section/password" >> tests/.env.tpl
-          echo "FILE_MULTILINE_SECRET=op://${{ secrets.VAULT }}/multiline-secret/notesPlain" >> tests/.env.tpl
-          echo "FILE_TEST_SSH_KEY=op://${{ secrets.VAULT }}/test-ssh-key/private key" >> tests/.env.tpl
-          echo "FILE_TEST_SSH_KEY_OPENSSH=op://${{ secrets.VAULT }}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
+          echo "FILE_SECRET=op://${VAULT}/test-secret/password" > tests/.env.tpl
+          echo "FILE_SECRET_IN_SECTION=op://${VAULT}/test-secret/test-section/password" >> tests/.env.tpl
+          echo "FILE_MULTILINE_SECRET=op://${VAULT}/multiline-secret/notesPlain" >> tests/.env.tpl
+          echo "FILE_TEST_SSH_KEY=op://${VAULT}/test-ssh-key/private key" >> tests/.env.tpl
+          echo "FILE_TEST_SSH_KEY_OPENSSH=op://${VAULT}/test-ssh-key/private key?ssh-format=openssh" >> tests/.env.tpl
 
+        env:
+          VAULT: ${{ secrets.VAULT }}
       - name: Launch 1Password Connect instance
         env:
           OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
