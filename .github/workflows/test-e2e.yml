@@ -65,7 +65,7 @@ jobs:
               echo "condition=skip" >> $GITHUB_OUTPUT
               echo "Setting condition=skip (sha does not match or empty)"
             fi
-          elif [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref_name }}" == "main" ]; then
+          elif [ "${{ github.event_name }}" == "push" ] && [ "${REF_NAME}" == "main" ]; then
             echo "condition=push-to-main" >> $GITHUB_OUTPUT
             echo "Setting condition=push-to-main (push to main)"
             echo "ref=${{ github.sha }}" >> $GITHUB_OUTPUT
@@ -75,6 +75,8 @@ jobs:
             echo "Setting condition=skip (unknown event type: ${{ github.event_name }})"
           fi
 
+        env:
+          REF_NAME: ${{ github.ref_name }}
   e2e:
     needs: check-external-pr
     if: |
@@ -105,7 +107,7 @@ jobs:
         run: echo "run-url=https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" >> $GITHUB_OUTPUT
 
       - name: Create comment on PR
-        uses: peter-evans/create-or-update-comment@v5
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5
         with:
           issue-number: ${{ github.event.client_payload.pull_request.number }}
           body: |
