@@ -35472,6 +35472,9 @@ const installCliOnGithubActionRunner = async (version) => {
 
 
 
+;// CONCATENATED MODULE: external "node:fs"
+const external_node_fs_namespaceObject = require("node:fs");
+var external_node_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_node_fs_namespaceObject);
 ;// CONCATENATED MODULE: ./package.json
 const package_namespaceObject = {"rE":"4.0.0"};
 ;// CONCATENATED MODULE: ./src/constants.ts
@@ -35488,6 +35491,9 @@ const authErr = `Authentication error with environment variables: you must set e
 
 
 
+
+
+const envFileKeysEnvVar = "OP_KEYS_JSON";
 const validateAuth = () => {
     const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
     const isServiceAccount = process.env[envServiceAccountToken];
@@ -35522,6 +35528,66 @@ const extractSecret = (envName, shouldExportEnv) => {
         core_setSecret(secretValue);
     }
 };
+const exportResolvedSecret = (envName, secretValue, shouldExportEnv) => {
+    info(`Populating variable: ${envName}`);
+    if (shouldExportEnv) {
+        exportVariable(envName, secretValue);
+    }
+    else {
+        setOutput(envName, secretValue);
+    }
+    // Skip setSecret for empty strings to avoid the warning:
+    // "Can't add secret mask for empty string in ##[add-mask] command."
+    if (secretValue) {
+        core_setSecret(secretValue);
+    }
+};
+const loadSecretsFromEnvFileBatched = async (envFile, shouldExportEnv) => {
+    const envFileBuf = external_node_fs_default().readFileSync(envFile);
+    const envFileVars = main_default().parse(envFileBuf);
+    const envNames = Object.keys(envFileVars);
+    if (envNames.length === 0) {
+        return;
+    }
+    // Pass User-Agent Information to the 1Password CLI
+    (0,dist.setClientInfo)({
+        name: "1Password GitHub Action",
+        id: "GHA",
+        build: (0,dist.semverToInt)(package_namespaceObject.rE),
+    });
+    // Resolve all secrets in a single `op run --env-file` call, then emit just the
+    // keys we care about as JSON. `silent: true` ensures values never hit logs.
+    const nodeScript = 'const keys=JSON.parse(process.env.OP_KEYS_JSON||"[]");const out={};for(const k of keys){out[k]=process.env[k]??"";}process.stdout.write(JSON.stringify(out));';
+    const res = await getExecOutput("op", [
+        "run",
+        `--env-file=${envFile}`,
+        "--no-masking",
+        "--",
+        "node",
+        "-e",
+        nodeScript,
+    ], {
+        silent: true,
+        env: {
+            ...process.env,
+            [envFileKeysEnvVar]: JSON.stringify(envNames),
+        },
+    });
+    let resolved = {};
+    try {
+        resolved = JSON.parse(res.stdout);
+    }
+    catch {
+        throw new Error("Failed to parse secrets resolved from 1Password CLI.");
+    }
+    for (const envName of envNames) {
+        const secretValue = resolved[envName] ?? "";
+        exportResolvedSecret(envName, secretValue, shouldExportEnv);
+    }
+    if (shouldExportEnv) {
+        exportVariable(envManagedVariables, envNames.join());
+    }
+};
 const loadSecrets = async (shouldExportEnv) => {
     // Pass User-Agent Information to the 1Password CLI
     (0,dist.setClientInfo)({
@@ -35532,7 +35598,7 @@ const loadSecrets = async (shouldExportEnv) => {
     // Load secrets from environment variables using 1Password CLI.
     // Iterate over them to find 1Password references, extract the secret values,
     // and make them available in the next steps either as step outputs or as environment variables.
-    const res = await getExecOutput(`sh -c "op env ls"`);
+    const res = await getExecOutput("op", ["env", "ls"]);
     if (res.stdout === "") {
         return;
     }
@@ -35582,7 +35648,12 @@ const loadSecretsAction = async () => {
         // Download and install the CLI
         await installCLI();
         // Load secrets
-        await loadSecrets(shouldExportEnv);
+        if (file) {
+            await loadSecretsFromEnvFileBatched(file, shouldExportEnv);
+        }
+        else {
+            await loadSecrets(shouldExportEnv);
+        }
     }
     catch (error) {
         // It's possible for the Error constructor to be modified to be anything
@@ -35593,7 +35664,7 @@ const loadSecretsAction = async () => {
             message = error.message;
         }
         else {
-            String(error);
+            message = String(error);
         }
         setFailed(message);
     }
