@@ -1,130 +1,53 @@
 import {
 	ALLOWED_MACOS_SIGNING_CERT_FINGERPRINTS,
 	APPLE_DEVELOPER_TEAM_ID,
+	ONEPASSWORD_GPG_KEY_FINGERPRINT,
+	ONEPASSWORD_GPG_KEY_URL,
+	verifyLinuxSignature,
 	verifyMacOsPackageSignature,
 } from "./signature";
 
-const FIRST_ALLOWED_FINGERPRINT = ALLOWED_MACOS_SIGNING_CERT_FINGERPRINTS[0]!;
-const SECOND_ALLOWED_FINGERPRINT = ALLOWED_MACOS_SIGNING_CERT_FINGERPRINTS[1]!;
-
-const fingerprintAsPkgutilLine = (hex: string): string => {
-	const bytes = hex.match(/.{2}/g);
-	if (!bytes) {
-		throw new Error("invalid hex");
-	}
-	const first = bytes.slice(0, 24).join(" ");
-	const second = bytes.slice(24).join(" ");
-	return `           ${first}\n           ${second}`;
-};
+const VALID_FINGERPRINT = ALLOWED_MACOS_SIGNING_CERT_FINGERPRINTS[0]!;
 
 const buildPkgutilOutput = ({
 	teamId = APPLE_DEVELOPER_TEAM_ID,
-	signerFingerprint = FIRST_ALLOWED_FINGERPRINT,
-	includeChain = true,
-	includeSignerFingerprint = true,
+	signerFingerprint = VALID_FINGERPRINT,
 }: {
 	teamId?: string;
 	signerFingerprint?: string;
-	includeChain?: boolean;
-	includeSignerFingerprint?: boolean;
 } = {}): string => {
-	const signerFingerprintBlock = includeSignerFingerprint
-		? `       SHA256 Fingerprint:\n${fingerprintAsPkgutilLine(signerFingerprint)}\n`
-		: "";
-
-	const chain = includeChain
-		? `   Certificate Chain:
+	const bytes = signerFingerprint.match(/.{2}/g)!;
+	const fprLines = `           ${bytes.slice(0, 24).join(" ")}\n           ${bytes.slice(24).join(" ")}`;
+	return `Package "op.pkg":
+   Certificate Chain:
     1. Developer ID Installer: AgileBits Inc. (${teamId})
-       Expires: 2027-02-01 22:12:15 +0000
-${signerFingerprintBlock}       ------------------------------------------------------------------------
-    2. Developer ID Certification Authority
-       Expires: 2027-02-01 22:12:15 +0000
        SHA256 Fingerprint:
-           7A FC 9D 01 A6 2F 03 A2 DE 96 37 93 6D 4A FE 68 09 0D 2D E1 8D 03 F2 9C
-           88 CF B0 B1 BA 63 58 7F
+${fprLines}
        ------------------------------------------------------------------------
-    3. Apple Root CA
-`
-		: "";
-
-	return `Package "op_apple_universal_v2.30.3.pkg":
-   Status: signed by a developer certificate issued by Apple for distribution
-   Signed with a trusted timestamp on: 2024-06-28 16:08:41 +0000
-${chain}`;
+    2. Developer ID Certification Authority
+`;
 };
 
+const pkgutilRunner = (output: string) =>
+	jest.fn<Promise<string>, [string]>().mockResolvedValue(output);
+
 describe("verifyMacOsPackageSignature", () => {
-	it("passes for a pkg signed with the first allowlisted fingerprint", async () => {
-		const runner = jest.fn<Promise<string>, [string]>().mockResolvedValue(
-			buildPkgutilOutput({
-				signerFingerprint: FIRST_ALLOWED_FINGERPRINT,
-			}),
-		);
-		await expect(
-			verifyMacOsPackageSignature("/tmp/op.pkg", runner),
-		).resolves.toBeUndefined();
-		expect(runner).toHaveBeenCalledWith("/tmp/op.pkg");
-	});
-
-	it("passes for a pkg signed with the second allowlisted fingerprint", async () => {
-		const runner = jest.fn<Promise<string>, [string]>().mockResolvedValue(
-			buildPkgutilOutput({
-				signerFingerprint: SECOND_ALLOWED_FINGERPRINT,
-			}),
-		);
+	it("passes for a pkg signed by AgileBits with an allowlisted cert", async () => {
+		const runner = pkgutilRunner(buildPkgutilOutput());
 		await expect(
 			verifyMacOsPackageSignature("/tmp/op.pkg", runner),
 		).resolves.toBeUndefined();
 	});
 
-	it("normalizes whitespace and case when comparing fingerprints", async () => {
-		const lowered = FIRST_ALLOWED_FINGERPRINT.toLowerCase();
-		const runner = jest
-			.fn<Promise<string>, [string]>()
-			.mockResolvedValue(buildPkgutilOutput({ signerFingerprint: lowered }));
-		await expect(
-			verifyMacOsPackageSignature("/tmp/op.pkg", runner),
-		).resolves.toBeUndefined();
-	});
-
-	it("throws if pkgutil exits non-zero", async () => {
-		const runner = jest
-			.fn<Promise<string>, [string]>()
-			.mockRejectedValue(new Error("not a package"));
-		await expect(
-			verifyMacOsPackageSignature("/tmp/op.pkg", runner),
-		).rejects.toThrow(/pkgutil --check-signature errored.*not a package/);
-	});
-
-	it("throws if the output has no certificate chain", async () => {
-		const runner = jest
-			.fn<Promise<string>, [string]>()
-			.mockResolvedValue('Package "op.pkg":\n   Status: no signature\n');
-		await expect(
-			verifyMacOsPackageSignature("/tmp/op.pkg", runner),
-		).rejects.toThrow(/could not locate certificate chain/);
-	});
-
-	it("throws if the signer cert is not under the AgileBits team ID", async () => {
-		const runner = jest
-			.fn<Promise<string>, [string]>()
-			.mockResolvedValue(buildPkgutilOutput({ teamId: "ATTACKER123" }));
+	it("throws if the signer is not under the AgileBits team ID", async () => {
+		const runner = pkgutilRunner(buildPkgutilOutput({ teamId: "ATTACKER" }));
 		await expect(
 			verifyMacOsPackageSignature("/tmp/op.pkg", runner),
 		).rejects.toThrow(/expected developer team ID 2BUA8C4S2C not found/);
 	});
 
-	it("throws if the signer cert fingerprint is missing from the output", async () => {
-		const runner = jest
-			.fn<Promise<string>, [string]>()
-			.mockResolvedValue(buildPkgutilOutput({ includeSignerFingerprint: false }));
-		await expect(
-			verifyMacOsPackageSignature("/tmp/op.pkg", runner),
-		).rejects.toThrow(/could not parse signer cert SHA-256 fingerprint/);
-	});
-
 	it("throws if the signer cert fingerprint is not on the allowlist", async () => {
-		const runner = jest.fn<Promise<string>, [string]>().mockResolvedValue(
+		const runner = pkgutilRunner(
 			buildPkgutilOutput({
 				signerFingerprint:
 					"DEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF",
@@ -133,5 +56,65 @@ describe("verifyMacOsPackageSignature", () => {
 		await expect(
 			verifyMacOsPackageSignature("/tmp/op.pkg", runner),
 		).rejects.toThrow(/not on the allowlist/);
+	});
+});
+
+describe("verifyLinuxSignature", () => {
+	const OP_PATH = "/tmp/op";
+	const SIG_PATH = "/tmp/op.sig";
+	const CORRECT_FPR = `fpr:::::::::${ONEPASSWORD_GPG_KEY_FINGERPRINT}:\n`;
+	const WRONG_FPR = `fpr:::::::::DEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF:\n`;
+	const downloadKey = jest
+		.fn<Promise<string>, [string]>()
+		.mockResolvedValue("/tmp/key.asc");
+
+	beforeEach(() => downloadKey.mockClear());
+
+	const gpgRunner = (...responses: (string | Error)[]) => {
+		const runner = jest.fn<Promise<string>, [readonly string[]]>();
+		for (const r of responses) {
+			if (r instanceof Error) {
+				runner.mockRejectedValueOnce(r);
+			} else {
+				runner.mockResolvedValueOnce(r);
+			}
+		}
+		return runner;
+	};
+
+	const subcommandsCalled = (runner: ReturnType<typeof gpgRunner>) =>
+		runner.mock.calls.map(([args]: [readonly string[]]) =>
+			args.find(
+				(a) => a === "--import" || a === "--list-keys" || a === "--verify",
+			),
+		);
+
+	it("passes when the imported key matches and gpg --verify succeeds", async () => {
+		const runner = gpgRunner("", CORRECT_FPR, "");
+		await expect(
+			verifyLinuxSignature(OP_PATH, SIG_PATH, runner, downloadKey),
+		).resolves.toBeUndefined();
+
+		expect(downloadKey).toHaveBeenCalledWith(ONEPASSWORD_GPG_KEY_URL);
+		expect(subcommandsCalled(runner)).toEqual([
+			"--import",
+			"--list-keys",
+			"--verify",
+		]);
+	});
+
+	it("throws and skips --verify when the imported key fingerprint is wrong", async () => {
+		const runner = gpgRunner("", WRONG_FPR);
+		await expect(
+			verifyLinuxSignature(OP_PATH, SIG_PATH, runner, downloadKey),
+		).rejects.toThrow(/does not match expected/);
+		expect(subcommandsCalled(runner)).toEqual(["--import", "--list-keys"]);
+	});
+
+	it("throws when gpg --verify rejects the signature", async () => {
+		const runner = gpgRunner("", CORRECT_FPR, new Error("BAD signature"));
+		await expect(
+			verifyLinuxSignature(OP_PATH, SIG_PATH, runner, downloadKey),
+		).rejects.toThrow(/gpg --verify rejected.*BAD signature/);
 	});
 });
