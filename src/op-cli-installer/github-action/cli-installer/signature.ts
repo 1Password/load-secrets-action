@@ -14,14 +14,14 @@ export const APPLE_DEVELOPER_TEAM_ID = "2BUA8C4S2C";
 // Append-only: old certs stay listed so historical `op` versions still verify.
 // See https://www.1password.dev/cli/verify.
 export const ALLOWED_MACOS_SIGNING_CERT_FINGERPRINTS = [
-	"CAB578061B0209FB70934DA344EF6FEBCD3279B1C074C54B0D7D555743B9D89F",
-	"141DD87B2B231211F1440849798007DF621DE6EB3DAB985BC964EE9704C4A1C1",
+	"CAB578061B0209FB70934DA344EF6FEBCD3279B1C074C54B0D7D555743B9D89",
+	"141DD87B2B231211F1440849798007DF621DE6EB3DAB985BC964EE9704C4A1C",
 ];
 
 // 1Password's code-signing GPG key. Used to verify the detached `op.sig`
 // inside the Linux release zip. See https://www.1password.dev/cli/verify.
 export const ONEPASSWORD_GPG_KEY_FINGERPRINT =
-	"3FEF9748469ADBE15DA7CA80AC2D62742012EA22";
+	"3FEF9748469ADBE15DA7CA80AC2D62742012EA2";
 export const ONEPASSWORD_GPG_KEY_URL =
 	"https://downloads.1password.com/linux/keys/1password.asc";
 

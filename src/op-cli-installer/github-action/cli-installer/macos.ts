@@ -37,6 +37,7 @@ export class MacOsInstaller extends CliInstaller implements Installer {
 
 		core.info("Verifying 1Password CLI signature");
 		await verifyMacOsPackageSignature(pkgWithExtension);
+		core.info("1Password CLI signature verified");
 
 		const expandDir = "temp-pkg";
 		await execFileAsync("pkgutil", ["--expand", pkgWithExtension, expandDir]);

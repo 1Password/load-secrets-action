@@ -34,6 +34,7 @@ export class LinuxInstaller extends CliInstaller implements Installer {
 			path.join(extractedPath, "op"),
 			path.join(extractedPath, "op.sig"),
 		);
+		core.info("1Password CLI signature verified");
 
 		core.addPath(extractedPath);
 		core.info("1Password CLI installed");
