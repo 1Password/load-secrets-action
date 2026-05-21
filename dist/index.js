@@ -35369,7 +35369,59 @@ class CliInstaller {
     }
 }
 
+;// CONCATENATED MODULE: ./src/op-cli-installer/github-action/cli-installer/linux-signature.ts
+
+
+
+
+
+const execFileAsync = (0,external_util_.promisify)(external_child_process_.execFile);
+// 1Password's code-signing GPG key fingerprint. See
+// https://www.1password.dev/cli/verify.
+const ONEPASSWORD_GPG_KEY_FINGERPRINT = "3FEF9748469ADBE15DA7CA80AC2D62742012EA22";
+// Bundled 1Password code-signing public key `linux-signing-key.asc` in
+// this directory. Bundled to avoid a runtime keyserver/URL dependency.
+// Source: https://downloads.1password.com/linux/keys/1password.asc
+const ONEPASSWORD_GPG_PUBLIC_KEY_PATH = __nccwpck_require__.ab + "linux-signing-key.asc";
+const defaultGpgRunner = async (args) => {
+    const { stdout } = await execFileAsync("gpg", args);
+    return stdout;
+};
+// Throws unless the binary at opPath carries a valid GPG signature (at
+// sigPath) from the pinned 1Password key. The key is bundled with the action
+const verifyLinuxSignature = async (opPath, sigPath, runGpg = defaultGpgRunner) => {
+    const gpgHome = external_fs_.mkdtempSync(external_path_.join(external_os_.tmpdir(), "op-verify-"));
+    try {
+        const baseArgs = ["--homedir", gpgHome, "--batch", "--no-tty"];
+        // Import the bundled key into the temp keyring.
+        await runGpg([...baseArgs, "--import", __nccwpck_require__.ab + "linux-signing-key.asc"]);
+        // Confirm we imported the pinned key.
+        const keyringListing = await runGpg([
+            ...baseArgs,
+            "--list-keys",
+            "--with-colons",
+        ]);
+        if (!keyringListing.includes(`${ONEPASSWORD_GPG_KEY_FINGERPRINT}:`)) {
+            throw new Error(`bundled GPG key does not match expected fingerprint ${ONEPASSWORD_GPG_KEY_FINGERPRINT}.`);
+        }
+        // Verify op.sig against op using the imported key.
+        await runGpg([...baseArgs, "--verify", sigPath, opPath]);
+    }
+    catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        throw new Error(`1Password CLI signature verification failed: ${message}. ` +
+            "If 1Password has rotated their GPG signing key, this action needs to be updated — please file an issue at https://github.com/1Password/load-secrets-action/issues.");
+    }
+    finally {
+        external_fs_.rmSync(gpgHome, { recursive: true, force: true });
+    }
+};
+
 ;// CONCATENATED MODULE: ./src/op-cli-installer/github-action/cli-installer/linux.ts
+
+
+
+
 
 class LinuxInstaller extends CliInstaller {
     platform = "linux"; // Node.js platform identifier for Linux
@@ -35378,9 +35430,76 @@ class LinuxInstaller extends CliInstaller {
     }
     async installCli() {
         const urlBuilder = cliUrlBuilder[this.platform];
-        await super.install(urlBuilder(this.version, this.arch));
+        await this.install(urlBuilder(this.version, this.arch));
+    }
+    async install(url) {
+        console.info(`Downloading 1Password CLI from: ${url}`);
+        const downloadPath = await downloadTool(url);
+        console.info("Installing 1Password CLI");
+        const extractedPath = await extractZip(downloadPath);
+        info("Verifying 1Password CLI signature");
+        await verifyLinuxSignature(external_path_.join(extractedPath, "op"), external_path_.join(extractedPath, "op.sig"));
+        info("1Password CLI signature verified");
+        addPath(extractedPath);
+        info("1Password CLI installed");
     }
 }
+
+;// CONCATENATED MODULE: ./src/op-cli-installer/github-action/cli-installer/macos-signature.ts
+
+
+const macos_signature_execFileAsync = (0,external_util_.promisify)(external_child_process_.execFile);
+// See https://www.1password.dev/cli/verify.
+const APPLE_DEVELOPER_TEAM_ID = "2BUA8C4S2C";
+// Append-only: old certs stay listed so historical `op` versions still verify.
+// See https://www.1password.dev/cli/verify.
+const ALLOWED_MACOS_SIGNING_CERT_FINGERPRINTS = [
+    "CAB578061B0209FB70934DA344EF6FEBCD3279B1C074C54B0D7D555743B9D89F",
+    "141DD87B2B231211F1440849798007DF621DE6EB3DAB985BC964EE9704C4A1C1",
+];
+const defaultPkgutilRunner = async (pkgPath) => {
+    const { stdout } = await macos_signature_execFileAsync("pkgutil", [
+        "--check-signature",
+        pkgPath,
+    ]);
+    return stdout;
+};
+// Returns just entry 1 (the signer cert) from the chain.
+const extractSignerCertSection = (pkgutilOutput) => {
+    const chainStart = pkgutilOutput.indexOf("Certificate Chain:");
+    if (chainStart === -1) {
+        return null;
+    }
+    const chainBody = pkgutilOutput.slice(chainStart);
+    const secondCert = /\n\s*2\.\s/.exec(chainBody);
+    return secondCert ? chainBody.slice(0, secondCert.index) : chainBody;
+};
+const parseSignerFingerprint = (signerSection) => {
+    const match = /SHA256 Fingerprint:\s*\n((?:[ \t]+[0-9A-Fa-f ]+\n?)+)/.exec(signerSection);
+    const captured = match?.[1];
+    return captured ? captured.replace(/\s+/g, "").toUpperCase() : null;
+};
+// Hard-fails if the .pkg at pkgPath is not signed by AgileBits Inc.
+// (2BUA8C4S2C) with a certificate on the allowlist above. Must run
+// before any extraction of the .pkg contents.
+const verifyMacOsPackageSignature = async (pkgPath, runPkgutil = defaultPkgutilRunner) => {
+    const stdout = await runPkgutil(pkgPath);
+    const signerSection = extractSignerCertSection(stdout);
+    if (!signerSection) {
+        throw new Error(`1Password CLI signature verification failed: could not locate certificate chain in pkgutil output.\npkgutil output:\n${stdout}`);
+    }
+    if (!signerSection.includes(`(${APPLE_DEVELOPER_TEAM_ID})`)) {
+        throw new Error(`1Password CLI signature verification failed: expected developer team ID ${APPLE_DEVELOPER_TEAM_ID} not found in signer certificate.\npkgutil output:\n${stdout}`);
+    }
+    const signerFingerprint = parseSignerFingerprint(signerSection);
+    if (!signerFingerprint) {
+        throw new Error(`1Password CLI signature verification failed: could not parse signer cert SHA-256 fingerprint.\npkgutil output:\n${stdout}`);
+    }
+    if (!ALLOWED_MACOS_SIGNING_CERT_FINGERPRINTS.includes(signerFingerprint)) {
+        throw new Error(`1Password CLI signature verification failed: signer cert SHA-256 fingerprint ${signerFingerprint} is not on the allowlist. ` +
+            "If 1Password has rotated their installer signing cert, this action needs to be updated — please file an issue at https://github.com/1Password/load-secrets-action/issues.");
+    }
+};
 
 ;// CONCATENATED MODULE: ./src/op-cli-installer/github-action/cli-installer/macos.ts
 
@@ -35391,7 +35510,8 @@ class LinuxInstaller extends CliInstaller {
 
 
 
-const execFileAsync = (0,external_util_.promisify)(external_child_process_.execFile);
+
+const macos_execFileAsync = (0,external_util_.promisify)(external_child_process_.execFile);
 class MacOsInstaller extends CliInstaller {
     platform = "darwin"; // Node.js platform identifier for macOS
     constructor(version) {
@@ -35407,8 +35527,11 @@ class MacOsInstaller extends CliInstaller {
         const pkgPath = await downloadTool(downloadUrl);
         const pkgWithExtension = `${pkgPath}.pkg`;
         external_fs_.renameSync(pkgPath, pkgWithExtension);
+        info("Verifying 1Password CLI signature");
+        await verifyMacOsPackageSignature(pkgWithExtension);
+        info("1Password CLI signature verified");
         const expandDir = "temp-pkg";
-        await execFileAsync("pkgutil", ["--expand", pkgWithExtension, expandDir]);
+        await macos_execFileAsync("pkgutil", ["--expand", pkgWithExtension, expandDir]);
         const payloadPath = external_path_.join(expandDir, "op.pkg", "Payload");
         console.info("Installing 1Password CLI");
         const cliPath = await extractTar(payloadPath);
@@ -35419,7 +35542,56 @@ class MacOsInstaller extends CliInstaller {
     }
 }
 
+;// CONCATENATED MODULE: ./src/op-cli-installer/github-action/cli-installer/windows-signature.ts
+
+
+const windows_signature_execFileAsync = (0,external_util_.promisify)(external_child_process_.execFile);
+// Identifying field of 1Password's Authenticode signing cert for op.exe.
+// See https://www.1password.dev/cli/verify.
+const WINDOWS_SIGNER_SUBJECT_CN = "Agilebits";
+const defaultPowerShellRunner = async (script) => {
+    const { stdout } = await windows_signature_execFileAsync("powershell.exe", [
+        "-NoProfile",
+        "-NonInteractive",
+        "-Command",
+        script,
+    ]);
+    return stdout;
+};
+// Verifies op.exe's Authenticode signature against 1Password's signing cert.
+// Throws unless the signature is cryptographically valid and the signer is AgileBits.
+const verifyAuthenticodeSignature = async (opExePath, runPowerShell = defaultPowerShellRunner) => {
+    const escapedPath = opExePath.replace(/'/g, "''");
+    const script = [
+        `$sig = Get-AuthenticodeSignature -FilePath '${escapedPath}'`,
+        `"Status=$($sig.Status)"`,
+        `"Subject=$($sig.SignerCertificate.Subject)"`,
+    ].join("; ");
+    const output = await runPowerShell(script);
+    const outputLines = output.split("\n").map((l) => l.trim());
+    const fieldValue = (prefix) => {
+        const matchingLine = outputLines.find((l) => l.startsWith(prefix));
+        if (!matchingLine) {
+            return undefined;
+        }
+        return matchingLine.slice(prefix.length);
+    };
+    // Reject unsigned or tampered binaries.
+    const status = fieldValue("Status=");
+    if (status !== "Valid") {
+        throw new Error(`Authenticode status is ${status ?? "unknown"}, expected Valid.\nGet-AuthenticodeSignature output:\n${output}`);
+    }
+    // Confirm the signer is AgileBits, not some other publisher.
+    const subject = fieldValue("Subject=") ?? "";
+    if (!subject.includes(`CN=${WINDOWS_SIGNER_SUBJECT_CN}`)) {
+        throw new Error(`1Password CLI signature verification failed: signer Subject (${subject}) does not contain CN=${WINDOWS_SIGNER_SUBJECT_CN}. ` +
+            "If 1Password has rotated or renamed their signing identity, this action needs to be updated — please file an issue at https://github.com/1Password/load-secrets-action/issues.");
+    }
+};
+
 ;// CONCATENATED MODULE: ./src/op-cli-installer/github-action/cli-installer/windows.ts
+
+
 
 
 
@@ -35442,6 +35614,9 @@ class WindowsInstaller extends CliInstaller {
         external_fs_.renameSync(downloadPath, zipPath);
         console.info("Installing 1Password CLI");
         const extractedPath = await extractZip(zipPath);
+        info("Verifying 1Password CLI signature");
+        await verifyAuthenticodeSignature(external_path_.join(extractedPath, "op.exe"));
+        info("1Password CLI signature verified");
         addPath(extractedPath);
         info("1Password CLI installed");
     }

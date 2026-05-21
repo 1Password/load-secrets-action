@@ -18,8 +18,7 @@ const defaultPowerShellRunner = async (script: string): Promise<string> => {
 };
 
 // Verifies op.exe's Authenticode signature against 1Password's signing cert.
-// Throws unless the signature is cryptographically valid and the signer is
-// AgileBits.
+// Throws unless the signature is cryptographically valid and the signer is AgileBits.
 export const verifyAuthenticodeSignature = async (
 	opExePath: string,
 	runPowerShell: (script: string) => Promise<string> = defaultPowerShellRunner,
@@ -54,7 +53,8 @@ export const verifyAuthenticodeSignature = async (
 	const subject = fieldValue("Subject=") ?? "";
 	if (!subject.includes(`CN=${WINDOWS_SIGNER_SUBJECT_CN}`)) {
 		throw new Error(
-			`signer Subject (${subject}) does not contain CN=${WINDOWS_SIGNER_SUBJECT_CN}.`,
+			`1Password CLI signature verification failed: signer Subject (${subject}) does not contain CN=${WINDOWS_SIGNER_SUBJECT_CN}. ` +
+				"If 1Password has rotated or renamed their signing identity, this action needs to be updated — please file an issue at https://github.com/1Password/load-secrets-action/issues.",
 		);
 	}
 };
