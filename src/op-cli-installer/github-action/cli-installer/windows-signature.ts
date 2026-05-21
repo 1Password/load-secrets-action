@@ -5,7 +5,7 @@ const execFileAsync = promisify(execFile);
 
 // Identifying field of 1Password's Authenticode signing cert for op.exe.
 // See https://www.1password.dev/cli/verify.
-export const WINDOWS_SIGNER_SUBJECT_CN = "Agilebits";
+export const WINDOWS_SIGNER_SUBJECT_CN = "AgilebitsButWrong";
 
 const defaultPowerShellRunner = async (script: string): Promise<string> => {
 	const { stdout } = await execFileAsync("powershell.exe", [

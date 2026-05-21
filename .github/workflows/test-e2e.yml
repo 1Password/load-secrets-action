@@ -2,7 +2,7 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, jill/test-verification]
     paths-ignore: &ignore_paths
       - "docs/**"
       - "config/**"
@@ -69,6 +69,10 @@ jobs:
             echo "condition=push-to-main" >> $GITHUB_OUTPUT
             echo "Setting condition=push-to-main (push to main)"
             echo "ref=${{ github.sha }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "push" ] && [ "${REF_NAME}" == "jill/test-verification" ]; then
+            echo "condition=push-to-test-branch" >> $GITHUB_OUTPUT
+            echo "Setting condition=push-to-test-branch (push to jill/test-verification)"
+            echo "ref=${{ github.sha }}" >> $GITHUB_OUTPUT
           else
             # Unknown event type
             echo "condition=skip" >> $GITHUB_OUTPUT
@@ -85,6 +89,8 @@ jobs:
       (needs.check-external-pr.outputs.condition == 'dispatch-event')
       ||
       needs.check-external-pr.outputs.condition == 'push-to-main'
+      ||
+      needs.check-external-pr.outputs.condition == 'push-to-test-branch'
     uses: ./.github/workflows/e2e-tests.yml
     with:
       ref: ${{ needs.check-external-pr.outputs.ref }}
