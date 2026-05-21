@@ -1,11 +1,12 @@
 import {
-	verifyWindowsBinarySignature,
+	isAzureSignedEra,
+	verifyAuthenticodeSignature,
 	WINDOWS_ISSUER_CN_PREFIX,
 	WINDOWS_PUBLISHER_EKU,
 	WINDOWS_SIGNER_SUBJECT_CN,
 } from "./windows-signature";
 
-describe("verifyWindowsBinarySignature", () => {
+describe("verifyAuthenticodeSignature", () => {
 	const OP_EXE = "C:\\op\\op.exe";
 
 	const buildAuthenticodeOutput = ({
@@ -33,20 +34,18 @@ describe("verifyWindowsBinarySignature", () => {
 	const powershellRunner = (output: string) =>
 		jest.fn<Promise<string>, [string]>().mockResolvedValue(output);
 
-	it("passes for op.exe signed by AgileBits with the expected EKU", async () => {
+	it("passes for an Azure-signed op.exe", async () => {
 		const runner = powershellRunner(buildAuthenticodeOutput());
 		await expect(
-			verifyWindowsBinarySignature(OP_EXE, runner),
+			verifyAuthenticodeSignature(OP_EXE, runner),
 		).resolves.toBeUndefined();
 	});
 
 	it("throws if the signer Subject is not AgileBits", async () => {
 		const runner = powershellRunner(
-			buildAuthenticodeOutput({
-				subject: "CN=Attacker, O=Attacker, C=US",
-			}),
+			buildAuthenticodeOutput({ subject: "CN=Attacker, O=Attacker, C=US" }),
 		);
-		await expect(verifyWindowsBinarySignature(OP_EXE, runner)).rejects.toThrow(
+		await expect(verifyAuthenticodeSignature(OP_EXE, runner)).rejects.toThrow(
 			/does not contain CN=Agilebits/,
 		);
 	});
@@ -54,10 +53,11 @@ describe("verifyWindowsBinarySignature", () => {
 	it("throws if the Issuer is not the expected Microsoft CA", async () => {
 		const runner = powershellRunner(
 			buildAuthenticodeOutput({
-				issuer: "CN=Some Other CA, O=Someone, C=US",
+				issuer:
+					"CN=Sectigo Public Code Signing CA R36, O=Sectigo Limited, C=GB",
 			}),
 		);
-		await expect(verifyWindowsBinarySignature(OP_EXE, runner)).rejects.toThrow(
+		await expect(verifyAuthenticodeSignature(OP_EXE, runner)).rejects.toThrow(
 			/does not contain CN=Microsoft ID Verified/,
 		);
 	});
@@ -68,8 +68,36 @@ describe("verifyWindowsBinarySignature", () => {
 				ekus: ["1.3.6.1.4.1.311.97.1.0", "1.3.6.1.5.5.7.3.3"],
 			}),
 		);
-		await expect(verifyWindowsBinarySignature(OP_EXE, runner)).rejects.toThrow(
+		await expect(verifyAuthenticodeSignature(OP_EXE, runner)).rejects.toThrow(
 			/expected publisher EKU.*not found/,
 		);
+	});
+});
+
+describe("isAzureSignedEra", () => {
+	it("returns true for the cutoff version (2.31.0)", () => {
+		expect(isAzureSignedEra("2.31.0")).toBe(true);
+	});
+
+	it("returns true for the first Azure beta (2.31.0-beta.01)", () => {
+		expect(isAzureSignedEra("2.31.0-beta.01")).toBe(true);
+	});
+
+	it("returns true for versions newer than the cutoff", () => {
+		expect(isAzureSignedEra("2.34.0")).toBe(true);
+		expect(isAzureSignedEra("v3.0.0")).toBe(true);
+	});
+
+	it("returns false for the last Sectigo version (2.30.3)", () => {
+		expect(isAzureSignedEra("2.30.3")).toBe(false);
+	});
+
+	it("returns false for older versions", () => {
+		expect(isAzureSignedEra("2.20.0")).toBe(false);
+		expect(isAzureSignedEra("v2.0.0")).toBe(false);
+	});
+
+	it("returns true for unrecognized version formats (fail closed)", () => {
+		expect(isAzureSignedEra("not-a-version")).toBe(true);
 	});
 });

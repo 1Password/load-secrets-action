@@ -9,8 +9,12 @@ import {
 	cliUrlBuilder,
 	type SupportedPlatform,
 } from "./cli-installer";
+import { verifyGpgSignature } from "./gpg-signature";
 import type { Installer } from "./installer";
-import { verifyWindowsBinarySignature } from "./windows-signature";
+import {
+	isAzureSignedEra,
+	verifyAuthenticodeSignature,
+} from "./windows-signature";
 
 export class WindowsInstaller extends CliInstaller implements Installer {
 	private readonly platform: SupportedPlatform = "win32"; // Node.js platform identifier for Windows
@@ -35,7 +39,15 @@ export class WindowsInstaller extends CliInstaller implements Installer {
 		const extractedPath = await tc.extractZip(zipPath);
 
 		core.info("Verifying 1Password CLI signature");
-		await verifyWindowsBinarySignature(path.join(extractedPath, "op.exe"));
+		const opExePath = path.join(extractedPath, "op.exe");
+		if (isAzureSignedEra(this.version)) {
+			await verifyAuthenticodeSignature(opExePath);
+		} else {
+			await verifyGpgSignature(
+				opExePath,
+				path.join(extractedPath, "op.exe.sig"),
+			);
+		}
 		core.info("1Password CLI signature verified");
 
 		core.addPath(extractedPath);

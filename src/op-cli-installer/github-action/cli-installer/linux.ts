@@ -9,7 +9,7 @@ import {
 	type SupportedPlatform,
 } from "./cli-installer";
 import type { Installer } from "./installer";
-import { verifyLinuxSignature } from "./linux-signature";
+import { verifyGpgSignature } from "./gpg-signature";
 
 export class LinuxInstaller extends CliInstaller implements Installer {
 	private readonly platform: SupportedPlatform = "linux"; // Node.js platform identifier for Linux
@@ -30,7 +30,7 @@ export class LinuxInstaller extends CliInstaller implements Installer {
 		const extractedPath = await tc.extractZip(downloadPath);
 
 		core.info("Verifying 1Password CLI signature");
-		await verifyLinuxSignature(
+		await verifyGpgSignature(
 			path.join(extractedPath, "op"),
 			path.join(extractedPath, "op.sig"),
 		);
