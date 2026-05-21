@@ -72,6 +72,28 @@ describe("verifyAuthenticodeSignature", () => {
 			/expected publisher EKU.*not found/,
 		);
 	});
+
+	it("loose mode passes for a Sectigo-issued cert (no Microsoft CS AOC CA issuer)", async () => {
+		const runner = powershellRunner(
+			buildAuthenticodeOutput({
+				issuer:
+					"CN=Sectigo Public Code Signing CA R36, O=Sectigo Limited, C=GB",
+				ekus: ["1.3.6.1.5.5.7.3.3"],
+			}),
+		);
+		await expect(
+			verifyAuthenticodeSignature(OP_EXE, runner, false),
+		).resolves.toBeUndefined();
+	});
+
+	it("loose mode still rejects an unsigned or wrong-publisher binary", async () => {
+		const runner = powershellRunner(
+			buildAuthenticodeOutput({ subject: "CN=Attacker, O=Attacker, C=US" }),
+		);
+		await expect(
+			verifyAuthenticodeSignature(OP_EXE, runner, false),
+		).rejects.toThrow(/does not contain CN=Agilebits/);
+	});
 });
 
 describe("isAzureSignedEra", () => {

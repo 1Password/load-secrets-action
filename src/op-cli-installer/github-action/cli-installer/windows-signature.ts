@@ -38,12 +38,19 @@ const defaultPowerShellRunner = async (script: string): Promise<string> => {
 	return stdout;
 };
 
-// Strict Authenticode check against 1Password's Azure Trusted Signing cert.
-// Throws unless Status is Valid, signer is AgileBits, issuer is a Microsoft
-// CS AOC CA, and the publisher EKU is present.
+// Authenticode check against 1Password's signing cert.
+//
+// Strict mode (default, for Azure Trusted Signing era): throws unless Status
+// is Valid, signer is AgileBits, issuer is a Microsoft CS AOC CA, and the
+// publisher EKU is present.
+//
+// Loose mode (for Sectigo era, pre-v2.31.0): only checks Status is Valid and
+// signer is AgileBits. The Sectigo-issued cert has no Microsoft issuer and no
+// publisher EKU, so the strict checks don't apply.
 export const verifyAuthenticodeSignature = async (
 	opExePath: string,
 	runPowerShell: (script: string) => Promise<string> = defaultPowerShellRunner,
+	strict = true,
 ): Promise<void> => {
 	// Read the four Authenticode fields we validate below.
 	const escapedPath = opExePath.replace(/'/g, "''");
@@ -56,6 +63,8 @@ export const verifyAuthenticodeSignature = async (
 	].join("; ");
 
 	const output = await runPowerShell(script);
+	// TEMPORARY DEBUG — remove before merging.
+	console.info(`Authenticode raw output:\n${output}`);
 	const outputLines = output.split("\n").map((l) => l.trim());
 
 	const fieldValue = (prefix: string): string | undefined => {
@@ -80,6 +89,12 @@ export const verifyAuthenticodeSignature = async (
 		throw new Error(
 			`signer Subject (${subject}) does not contain CN=${WINDOWS_SIGNER_SUBJECT_CN}.`,
 		);
+	}
+
+	// Loose mode (Sectigo era) stops here. Sectigo certs aren't issued by a
+	// Microsoft CS AOC CA, so the strict issuer check below doesn't apply.
+	if (!strict) {
+		return;
 	}
 
 	// Confirm the cert was issued by Microsoft's expected code signing CA.

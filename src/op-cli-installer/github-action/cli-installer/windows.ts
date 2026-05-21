@@ -9,7 +9,6 @@ import {
 	cliUrlBuilder,
 	type SupportedPlatform,
 } from "./cli-installer";
-import { verifyGpgSignature } from "./gpg-signature";
 import type { Installer } from "./installer";
 import {
 	isAzureSignedEra,
@@ -40,14 +39,14 @@ export class WindowsInstaller extends CliInstaller implements Installer {
 
 		core.info("Verifying 1Password CLI signature");
 		const opExePath = path.join(extractedPath, "op.exe");
-		if (isAzureSignedEra(this.version)) {
-			await verifyAuthenticodeSignature(opExePath);
-		} else {
-			await verifyGpgSignature(
-				opExePath,
-				path.join(extractedPath, "op.exe.sig"),
-			);
-		}
+		// Azure-era (v2.31.0+): strict Authenticode (matches current docs).
+		// Sectigo-era (pre-v2.31.0): loose Authenticode (Subject + Status only;
+		// the Sectigo cert lacks the Microsoft issuer and publisher EKU).
+		await verifyAuthenticodeSignature(
+			opExePath,
+			undefined,
+			isAzureSignedEra(this.version),
+		);
 		core.info("1Password CLI signature verified");
 
 		core.addPath(extractedPath);

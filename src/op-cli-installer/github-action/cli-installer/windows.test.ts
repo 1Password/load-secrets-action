@@ -16,9 +16,6 @@ jest.mock("./windows-signature", () => ({
 	verifyAuthenticodeSignature: jest.fn().mockResolvedValue(undefined),
 	isAzureSignedEra: jest.fn().mockReturnValue(true),
 }));
-jest.mock("./gpg-signature", () => ({
-	verifyGpgSignature: jest.fn().mockResolvedValue(undefined),
-}));
 
 afterEach(() => {
 	jest.restoreAllMocks();
