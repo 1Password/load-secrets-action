@@ -12,7 +12,7 @@ import {
 	type SupportedPlatform,
 } from "./cli-installer";
 import { type Installer } from "./installer";
-import { verifyMacOsPackageSignature } from "./signature";
+import { verifyMacOsPackageSignature } from "./macos-signature";
 
 const execFileAsync = promisify(execFile);
 

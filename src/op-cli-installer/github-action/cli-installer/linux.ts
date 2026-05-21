@@ -9,7 +9,7 @@ import {
 	type SupportedPlatform,
 } from "./cli-installer";
 import type { Installer } from "./installer";
-import { verifyLinuxSignature } from "./signature";
+import { verifyLinuxSignature } from "./linux-signature";
 
 export class LinuxInstaller extends CliInstaller implements Installer {
 	private readonly platform: SupportedPlatform = "linux"; // Node.js platform identifier for Linux

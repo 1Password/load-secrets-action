@@ -12,6 +12,9 @@ import {
 import { WindowsInstaller } from "./windows";
 
 jest.mock("fs");
+jest.mock("./windows-signature", () => ({
+	verifyWindowsBinarySignature: jest.fn().mockResolvedValue(undefined),
+}));
 
 afterEach(() => {
 	jest.restoreAllMocks();

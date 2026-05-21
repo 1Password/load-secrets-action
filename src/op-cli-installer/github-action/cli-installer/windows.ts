@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as path from "path";
 
 import * as core from "@actions/core";
 import * as tc from "@actions/tool-cache";
@@ -9,6 +10,7 @@ import {
 	type SupportedPlatform,
 } from "./cli-installer";
 import type { Installer } from "./installer";
+import { verifyWindowsBinarySignature } from "./windows-signature";
 
 export class WindowsInstaller extends CliInstaller implements Installer {
 	private readonly platform: SupportedPlatform = "win32"; // Node.js platform identifier for Windows
@@ -31,6 +33,11 @@ export class WindowsInstaller extends CliInstaller implements Installer {
 		fs.renameSync(downloadPath, zipPath);
 		console.info("Installing 1Password CLI");
 		const extractedPath = await tc.extractZip(zipPath);
+
+		core.info("Verifying 1Password CLI signature");
+		await verifyWindowsBinarySignature(path.join(extractedPath, "op.exe"));
+		core.info("1Password CLI signature verified");
+
 		core.addPath(extractedPath);
 		core.info("1Password CLI installed");
 	}
