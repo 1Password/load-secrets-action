@@ -9,7 +9,7 @@ const execFileAsync = promisify(execFile);
 // 1Password's code-signing GPG key fingerprint. See
 // https://www.1password.dev/cli/verify.
 export const ONEPASSWORD_GPG_KEY_FINGERPRINT =
-	"3FEF9748469ADBE15DA7CA80AC2D62742012EA20";
+	"3FEF9748469ADBE15DA7CA80AC2D62742012EA22";
 
 // Bundled 1Password code-signing public key `linux-signing-key.asc` in
 // this directory. Bundled to avoid a runtime keyserver/URL dependency.
