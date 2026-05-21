@@ -1,6 +1,6 @@
 import {
 	verifyWindowsBinarySignature,
-	WINDOWS_ISSUER_CN,
+	WINDOWS_ISSUER_CN_PREFIX,
 	WINDOWS_PUBLISHER_EKU,
 	WINDOWS_SIGNER_SUBJECT_CN,
 } from "./windows-signature";
@@ -11,7 +11,7 @@ describe("verifyWindowsBinarySignature", () => {
 	const buildAuthenticodeOutput = ({
 		status = "Valid",
 		subject = `CN=${WINDOWS_SIGNER_SUBJECT_CN}, O=Agilebits, L=Toronto, S=Ontario, C=CA`,
-		issuer = `CN=${WINDOWS_ISSUER_CN}, O=Microsoft Corporation, C=US`,
+		issuer = `CN=${WINDOWS_ISSUER_CN_PREFIX} 03, O=Microsoft Corporation, C=US`,
 		ekus = [
 			"1.3.6.1.4.1.311.97.1.0",
 			"1.3.6.1.5.5.7.3.3",
@@ -46,9 +46,9 @@ describe("verifyWindowsBinarySignature", () => {
 				subject: "CN=Attacker, O=Attacker, C=US",
 			}),
 		);
-		await expect(
-			verifyWindowsBinarySignature(OP_EXE, runner),
-		).rejects.toThrow(/does not contain CN=Agilebits/);
+		await expect(verifyWindowsBinarySignature(OP_EXE, runner)).rejects.toThrow(
+			/does not contain CN=Agilebits/,
+		);
 	});
 
 	it("throws if the Issuer is not the expected Microsoft CA", async () => {
@@ -57,9 +57,9 @@ describe("verifyWindowsBinarySignature", () => {
 				issuer: "CN=Some Other CA, O=Someone, C=US",
 			}),
 		);
-		await expect(
-			verifyWindowsBinarySignature(OP_EXE, runner),
-		).rejects.toThrow(/does not contain CN=Microsoft ID Verified/);
+		await expect(verifyWindowsBinarySignature(OP_EXE, runner)).rejects.toThrow(
+			/does not contain CN=Microsoft ID Verified/,
+		);
 	});
 
 	it("throws if the publisher EKU is missing", async () => {
@@ -68,8 +68,8 @@ describe("verifyWindowsBinarySignature", () => {
 				ekus: ["1.3.6.1.4.1.311.97.1.0", "1.3.6.1.5.5.7.3.3"],
 			}),
 		);
-		await expect(
-			verifyWindowsBinarySignature(OP_EXE, runner),
-		).rejects.toThrow(/expected publisher EKU.*not found/);
+		await expect(verifyWindowsBinarySignature(OP_EXE, runner)).rejects.toThrow(
+			/expected publisher EKU.*not found/,
+		);
 	});
 });

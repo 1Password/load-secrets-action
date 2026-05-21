@@ -6,7 +6,7 @@ const execFileAsync = promisify(execFile);
 // Identifying fields of 1Password's Authenticode signing cert for op.exe.
 // See https://www.1password.dev/cli/verify.
 export const WINDOWS_SIGNER_SUBJECT_CN = "Agilebits";
-export const WINDOWS_ISSUER_CN = "Microsoft ID Verified CS AOC CA 02";
+export const WINDOWS_ISSUER_CN_PREFIX = "Microsoft ID Verified CS AOC CA";
 export const WINDOWS_PUBLISHER_EKU =
 	"1.3.6.1.4.1.311.97.661420558.769123285.207353056.500447802";
 
@@ -65,9 +65,9 @@ export const verifyWindowsBinarySignature = async (
 
 	// Confirm the cert was issued by Microsoft's expected code signing CA.
 	const issuer = fieldValue("Issuer=") ?? "";
-	if (!issuer.includes(`CN=${WINDOWS_ISSUER_CN},`)) {
+	if (!issuer.includes(`CN=${WINDOWS_ISSUER_CN_PREFIX}`)) {
 		throw new Error(
-			`1Password CLI signature verification failed: issuer (${issuer}) does not contain CN=${WINDOWS_ISSUER_CN}.`,
+			`1Password CLI signature verification failed: issuer (${issuer}) does not contain CN=${WINDOWS_ISSUER_CN_PREFIX}.`,
 		);
 	}
 
