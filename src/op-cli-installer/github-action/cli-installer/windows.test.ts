@@ -14,7 +14,6 @@ import { WindowsInstaller } from "./windows";
 jest.mock("fs");
 jest.mock("./windows-signature", () => ({
 	verifyAuthenticodeSignature: jest.fn().mockResolvedValue(undefined),
-	isAzureSignedEra: jest.fn().mockReturnValue(true),
 }));
 
 afterEach(() => {

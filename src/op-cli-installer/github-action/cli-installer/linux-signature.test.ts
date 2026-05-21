@@ -1,10 +1,10 @@
 import {
 	ONEPASSWORD_GPG_KEY_FINGERPRINT,
 	ONEPASSWORD_GPG_KEYSERVER,
-	verifyGpgSignature,
-} from "./gpg-signature";
+	verifyLinuxSignature,
+} from "./linux-signature";
 
-describe("verifyGpgSignature", () => {
+describe("verifyLinuxSignature", () => {
 	const OP_PATH = "/tmp/op";
 	const SIG_PATH = `${OP_PATH}.sig`;
 
@@ -28,7 +28,7 @@ describe("verifyGpgSignature", () => {
 	it("fetches the pinned key by fingerprint and verifies the signature", async () => {
 		const runner = gpgRunner("", "");
 		await expect(
-			verifyGpgSignature(OP_PATH, SIG_PATH, runner),
+			verifyLinuxSignature(OP_PATH, SIG_PATH, runner),
 		).resolves.toBeUndefined();
 
 		expect(subcommandsCalled(runner)).toEqual(["--recv-keys", "--verify"]);
@@ -46,16 +46,16 @@ describe("verifyGpgSignature", () => {
 
 	it("throws if recv-keys fails (e.g., wrong fingerprint or keyserver unreachable)", async () => {
 		const runner = gpgRunner(new Error("No data"));
-		await expect(verifyGpgSignature(OP_PATH, SIG_PATH, runner)).rejects.toThrow(
-			/No data/,
-		);
+		await expect(
+			verifyLinuxSignature(OP_PATH, SIG_PATH, runner),
+		).rejects.toThrow(/No data/);
 		expect(subcommandsCalled(runner)).toEqual(["--recv-keys"]);
 	});
 
 	it("throws if gpg --verify rejects the signature", async () => {
 		const runner = gpgRunner("", new Error("BAD signature"));
-		await expect(verifyGpgSignature(OP_PATH, SIG_PATH, runner)).rejects.toThrow(
-			/BAD signature/,
-		);
+		await expect(
+			verifyLinuxSignature(OP_PATH, SIG_PATH, runner),
+		).rejects.toThrow(/BAD signature/);
 	});
 });

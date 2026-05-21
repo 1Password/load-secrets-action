@@ -10,10 +10,7 @@ import {
 	type SupportedPlatform,
 } from "./cli-installer";
 import type { Installer } from "./installer";
-import {
-	isAzureSignedEra,
-	verifyAuthenticodeSignature,
-} from "./windows-signature";
+import { verifyAuthenticodeSignature } from "./windows-signature";
 
 export class WindowsInstaller extends CliInstaller implements Installer {
 	private readonly platform: SupportedPlatform = "win32"; // Node.js platform identifier for Windows
@@ -38,15 +35,7 @@ export class WindowsInstaller extends CliInstaller implements Installer {
 		const extractedPath = await tc.extractZip(zipPath);
 
 		core.info("Verifying 1Password CLI signature");
-		const opExePath = path.join(extractedPath, "op.exe");
-		// Azure-era (v2.31.0+): strict Authenticode (matches current docs).
-		// Sectigo-era (pre-v2.31.0): loose Authenticode (Subject + Status only;
-		// the Sectigo cert lacks the Microsoft issuer and publisher EKU).
-		await verifyAuthenticodeSignature(
-			opExePath,
-			undefined,
-			isAzureSignedEra(this.version),
-		);
+		await verifyAuthenticodeSignature(path.join(extractedPath, "op.exe"));
 		core.info("1Password CLI signature verified");
 
 		core.addPath(extractedPath);

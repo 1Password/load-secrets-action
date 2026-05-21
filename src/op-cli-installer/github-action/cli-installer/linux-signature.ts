@@ -7,7 +7,7 @@ import { promisify } from "util";
 const execFileAsync = promisify(execFile);
 
 // 1Password's code-signing GPG key fingerprint. Used to verify the detached
-// `op.sig` / `op.exe.sig` inside the Linux and Windows release zips.
+// `op.sig` inside the Linux release zip.
 // See https://www.1password.dev/cli/verify.
 export const ONEPASSWORD_GPG_KEY_FINGERPRINT =
 	"3FEF9748469ADBE15DA7CA80AC2D62742012EA22";
@@ -23,7 +23,7 @@ const defaultGpgRunner = async (args: readonly string[]): Promise<string> => {
 //
 //   gpg --keyserver keyserver.ubuntu.com --recv-keys <fingerprint>
 //   gpg --verify <sigPath> <opPath>
-export const verifyGpgSignature = async (
+export const verifyLinuxSignature = async (
 	opPath: string,
 	sigPath: string,
 	runGpg: (args: readonly string[]) => Promise<string> = defaultGpgRunner,
