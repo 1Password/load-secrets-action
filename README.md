@@ -99,4 +99,3 @@ For more details on secret reference syntax, see the [1Password CLI documentatio
 1Password requests you practice responsible disclosure if you discover a vulnerability.
 
 Please file requests by sending an email to bugbounty@agilebits.com.
-
