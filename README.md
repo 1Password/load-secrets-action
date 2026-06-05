@@ -17,7 +17,7 @@ Specify in your workflow YAML file which secrets from 1Password should be loaded
 
 Read more on the [1Password Developer Portal](https://developer.1password.com/docs/ci-cd/github-actions).
 
-*This project is licensed under [MIT](./LICENSE). Use of the 1Password APIs and services accessed through these tools is governed by the [1Password API Terms of Service](https://1password.com/legal/api-sdk-terms-of-service).*
+_This project is licensed under [MIT](./LICENSE). Use of the 1Password APIs and services accessed through these tools is governed by the [1Password API Terms of Service](https://1password.com/legal/api-sdk-terms-of-service)._
 
 ## 🪄 See it in action!
 
