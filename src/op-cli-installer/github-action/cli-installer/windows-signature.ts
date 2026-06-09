@@ -49,11 +49,13 @@ export const verifyAuthenticodeSignature = async (
 		);
 	}
 
-	// Confirm the signer is AgileBits, not some other publisher.
+	// Confirm the signer is AgileBits, not some other publisher. Trailing comma
+	// anchors the CN value so e.g. "CN=AgilebitsAttacker, ..." cannot match.
 	const subject = fieldValue("Subject=") ?? "";
-	if (!subject.includes(`CN=${WINDOWS_SIGNER_SUBJECT_CN}`)) {
+	const expectedCn = `CN=${WINDOWS_SIGNER_SUBJECT_CN},`;
+	if (!subject.includes(expectedCn)) {
 		throw new Error(
-			`1Password CLI signature verification failed: signer Subject (${subject}) does not contain CN=${WINDOWS_SIGNER_SUBJECT_CN}. ` +
+			`1Password CLI signature verification failed: signer Subject (${subject}) does not contain ${expectedCn} ` +
 				"If 1Password has rotated or renamed their signing identity, this action needs to be updated — please file an issue at https://github.com/1Password/load-secrets-action/issues.",
 		);
 	}
