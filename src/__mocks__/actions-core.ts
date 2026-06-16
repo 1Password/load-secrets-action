@@ -11,5 +11,6 @@ module.exports = {
 	debug: jest.fn(),
 	addPath: jest.fn(),
 	isDebug: jest.fn(() => false),
-	getIDToken: jest.fn(() => Promise.resolve("mock-oidc-token")),
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	getIDToken: jest.fn().mockResolvedValue("mock-oidc-token"),
 };
