@@ -11,4 +11,5 @@ module.exports = {
 	debug: jest.fn(),
 	addPath: jest.fn(),
 	isDebug: jest.fn(() => false),
+	getIDToken: jest.fn(() => Promise.resolve("mock-oidc-token")),
 };

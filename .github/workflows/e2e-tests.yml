@@ -20,6 +20,12 @@ on:
         required: true
       OP_SERVICE_ACCOUNT_TOKEN:
         required: true
+      OP_WORKLOAD_ID:
+        required: true
+      OP_ENVIRONMENT_ID:
+        required: true
+      OP_INTEGRATION_KEY:
+        required: true
       VAULT:
         description: "1Password vault name or UUID"
         required: true
@@ -248,3 +254,77 @@ jobs:
       - name: Assert removed secrets [exported env]
         if: ${{ matrix.export-env }}
         run: ./tests/assert-env-unset.sh
+
+  test-workload-identity:
+    name: Workload Identity (ubuntu-latest, export-env=${{ matrix.export-env }})
+    runs-on: ubuntu-latest
+    # Workload Identity exchanges the GitHub OIDC token for 1Password access,
+    # so the job needs permission to request an OIDC token.
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: true
+      matrix:
+        export-env: [true, false]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build actions
+        run: npm run build:all
+
+      # No ./configure step and no op:// references: Workload Identity authenticates
+      # via OIDC and loads all variables from the configured 1Password environment.
+      - name: Load secrets
+        id: load_secrets
+        uses: ./
+        with:
+          export-env: ${{ matrix.export-env }}
+        env:
+          OP_WORKLOAD_ID: ${{ secrets.OP_WORKLOAD_ID }}
+          OP_ENVIRONMENT_ID: ${{ secrets.OP_ENVIRONMENT_ID }}
+          OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
+
+      - name: Assert test secret values [step output]
+        if: ${{ !matrix.export-env }}
+        shell: bash
+        env:
+          ANOTHER_TEST: ${{ steps.load_secrets.outputs.ANOTHER_TEST }}
+          SUPER_SECRET: ${{ steps.load_secrets.outputs.SUPER_SECRET }}
+          TEST_SECRET: ${{ steps.load_secrets.outputs.TEST_SECRET }}
+        run: ./tests/assert-workload-identity.sh
+
+      - name: Assert test secret values [exported env]
+        if: ${{ matrix.export-env }}
+        shell: bash
+        run: ./tests/assert-workload-identity.sh
+
+      - name: Remove secrets [exported env]
+        if: ${{ matrix.export-env }}
+        uses: ./
+        with:
+          unset-previous: true
+
+      - name: Assert removed secrets [exported env]
+        if: ${{ matrix.export-env }}
+        shell: bash
+        run: |
+          for var in ANOTHER_TEST SUPER_SECRET TEST_SECRET; do
+            if [ -n "$(printenv "$var")" ]; then
+              echo "Expected secret $var to be unset"
+              exit 1
+            fi
+          done

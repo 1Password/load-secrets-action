@@ -3,6 +3,7 @@ import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
 import {
 	extractSecret,
+	getWorkloadIdentityConfig,
 	loadSecrets,
 	unsetPrevious,
 	validateAuth,
@@ -11,8 +12,11 @@ import {
 	authErr,
 	envConnectHost,
 	envConnectToken,
+	envEnvironmentId,
+	envIntegrationKey,
 	envManagedVariables,
 	envServiceAccountToken,
+	envWorkloadId,
 } from "./constants";
 
 jest.mock("@1password/op-js");
@@ -63,6 +67,68 @@ describe("validateAuth", () => {
 		expect(validateAuth).not.toThrow(authErr);
 		expect(core.warning).toHaveBeenCalled();
 		expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
+	});
+});
+
+describe("getWorkloadIdentityConfig", () => {
+	const testWorkloadId = "workload-id";
+	const testEnvironmentId = "environment-id";
+	const testIntegrationKey = "integration-key";
+
+	beforeEach(() => {
+		process.env[envWorkloadId] = "";
+		process.env[envEnvironmentId] = "";
+		process.env[envIntegrationKey] = "";
+		process.env[envConnectHost] = "";
+		process.env[envConnectToken] = "";
+		process.env[envServiceAccountToken] = "";
+	});
+
+	it("should return null when no variables are set", () => {
+		expect(getWorkloadIdentityConfig()).toBeNull();
+	});
+
+	it("should return the config when all variables are set", () => {
+		process.env[envWorkloadId] = testWorkloadId;
+		process.env[envEnvironmentId] = testEnvironmentId;
+		process.env[envIntegrationKey] = testIntegrationKey;
+
+		expect(getWorkloadIdentityConfig()).toEqual({
+			workloadId: testWorkloadId,
+			environmentId: testEnvironmentId,
+			integrationKey: testIntegrationKey,
+		});
+	});
+
+	it("should throw an error when only some variables are set", () => {
+		process.env[envWorkloadId] = testWorkloadId;
+
+		expect(getWorkloadIdentityConfig).toThrow(
+			/Incomplete Workload Identity configuration/,
+		);
+	});
+
+	it("should throw an error when combined with Connect credentials", () => {
+		process.env[envWorkloadId] = testWorkloadId;
+		process.env[envEnvironmentId] = testEnvironmentId;
+		process.env[envIntegrationKey] = testIntegrationKey;
+		process.env[envConnectHost] = "https://localhost:8000";
+		process.env[envConnectToken] = "token";
+
+		expect(getWorkloadIdentityConfig).toThrow(
+			/Conflicting authentication configuration/,
+		);
+	});
+
+	it("should throw an error when combined with a service account token", () => {
+		process.env[envWorkloadId] = testWorkloadId;
+		process.env[envEnvironmentId] = testEnvironmentId;
+		process.env[envIntegrationKey] = testIntegrationKey;
+		process.env[envServiceAccountToken] = "ops_token";
+
+		expect(getWorkloadIdentityConfig).toThrow(
+			/Conflicting authentication configuration/,
+		);
 	});
 });
 
