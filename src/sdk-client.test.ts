@@ -40,17 +40,9 @@ describe("loadSecretsFromSDK", () => {
 	});
 
 	it("sets secrets as step outputs by default", async () => {
-		await loadSecretsFromSDK(
-			workloadId,
-			environmentId,
-			integrationKey,
-			false,
-		);
+		await loadSecretsFromSDK(workloadId, environmentId, integrationKey, false);
 
-		expect(core.setOutput).toHaveBeenCalledWith(
-			"DOCKERHUB_USERNAME",
-			"myuser",
-		);
+		expect(core.setOutput).toHaveBeenCalledWith("DOCKERHUB_USERNAME", "myuser");
 		expect(core.setOutput).toHaveBeenCalledWith(
 			"DOCKERHUB_TOKEN",
 			"mypassword",
@@ -68,12 +60,7 @@ describe("loadSecretsFromSDK", () => {
 	});
 
 	it("exports secrets as environment variables when shouldExportEnv is true", async () => {
-		await loadSecretsFromSDK(
-			workloadId,
-			environmentId,
-			integrationKey,
-			true,
-		);
+		await loadSecretsFromSDK(workloadId, environmentId, integrationKey, true);
 
 		expect(core.exportVariable).toHaveBeenCalledWith(
 			"DOCKERHUB_USERNAME",
@@ -110,12 +97,7 @@ describe("loadSecretsFromSDK", () => {
 		});
 
 		it("sets empty string as environment variable", async () => {
-			await loadSecretsFromSDK(
-				workloadId,
-				environmentId,
-				integrationKey,
-				true,
-			);
+			await loadSecretsFromSDK(workloadId, environmentId, integrationKey, true);
 
 			expect(core.exportVariable).toHaveBeenCalledWith("EMPTY_SECRET", "");
 			expect(core.setSecret).not.toHaveBeenCalled();
@@ -125,12 +107,7 @@ describe("loadSecretsFromSDK", () => {
 	it("does not export OP_MANAGED_VARIABLES when no variables are returned", async () => {
 		mockGetVariables.mockResolvedValue({ variables: [] });
 
-		await loadSecretsFromSDK(
-			workloadId,
-			environmentId,
-			integrationKey,
-			true,
-		);
+		await loadSecretsFromSDK(workloadId, environmentId, integrationKey, true);
 
 		expect(core.exportVariable).not.toHaveBeenCalled();
 	});

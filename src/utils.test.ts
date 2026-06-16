@@ -4,6 +4,7 @@ import { read, setClientInfo } from "@1password/op-js";
 import {
 	extractSecret,
 	getWorkloadIdentityConfig,
+	hasCliAuth,
 	loadSecrets,
 	unsetPrevious,
 	validateAuth,
@@ -129,6 +130,34 @@ describe("getWorkloadIdentityConfig", () => {
 		expect(getWorkloadIdentityConfig).toThrow(
 			/Conflicting authentication configuration/,
 		);
+	});
+});
+
+describe("hasCliAuth", () => {
+	beforeEach(() => {
+		process.env[envConnectHost] = "";
+		process.env[envConnectToken] = "";
+		process.env[envServiceAccountToken] = "";
+	});
+
+	it("returns false when no CLI auth is configured", () => {
+		expect(hasCliAuth()).toBe(false);
+	});
+
+	it("returns false when only the Connect host is set", () => {
+		process.env[envConnectHost] = "https://localhost:8000";
+		expect(hasCliAuth()).toBe(false);
+	});
+
+	it("returns true with both Connect host and token", () => {
+		process.env[envConnectHost] = "https://localhost:8000";
+		process.env[envConnectToken] = "token";
+		expect(hasCliAuth()).toBe(true);
+	});
+
+	it("returns true with a service account token", () => {
+		process.env[envServiceAccountToken] = "ops_token";
+		expect(hasCliAuth()).toBe(true);
 	});
 });
 

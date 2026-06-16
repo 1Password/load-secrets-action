@@ -38353,6 +38353,10 @@ const getWorkloadIdentityConfig = () => {
     }
     return { workloadId, environmentId, integrationKey };
 };
+// Whether CLI authentication (1Password Connect or a service account) is
+// configured via environment variables.
+const hasCliAuth = () => Boolean((process.env[envConnectHost] && process.env[envConnectToken]) ||
+    process.env[envServiceAccountToken]);
 const validateAuth = () => {
     const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
     const isServiceAccount = process.env[envServiceAccountToken];
@@ -38479,6 +38483,13 @@ const loadSecretsAction = async () => {
             unsetPrevious();
         }
         const workloadConfig = getWorkloadIdentityConfig();
+        // `unset-previous` can run with no credentials present: Workload Identity creds
+        // are inline per-step and intentionally not persisted (persisting them would make
+        // every later step re-load all variables). Nothing to auth or load, we're done.
+        if (shouldUnsetPrevious && !workloadConfig && !hasCliAuth()) {
+            info("No authentication configured; unset complete.");
+            return;
+        }
         if (workloadConfig) {
             await loadSecretsFromSDK(workloadConfig.workloadId, workloadConfig.environmentId, workloadConfig.integrationKey, shouldExportEnv);
         }

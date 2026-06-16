@@ -55,6 +55,14 @@ export const getWorkloadIdentityConfig = (): WorkloadIdentityConfig | null => {
 	return { workloadId, environmentId, integrationKey };
 };
 
+// Whether CLI authentication (1Password Connect or a service account) is
+// configured via environment variables.
+export const hasCliAuth = (): boolean =>
+	Boolean(
+		(process.env[envConnectHost] && process.env[envConnectToken]) ||
+			process.env[envServiceAccountToken],
+	);
+
 export const validateAuth = (): void => {
 	const isConnect = process.env[envConnectHost] && process.env[envConnectToken];
 	const isServiceAccount = process.env[envServiceAccountToken];

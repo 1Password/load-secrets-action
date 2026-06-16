@@ -33,6 +33,8 @@ on:
 jobs:
   test-service-account:
     name: Service Account (${{ matrix.os }}, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
+    # TODO: remove before merge temporarily disabled to avoid rate limiting while iterating on Workload Identity
+    if: false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -146,6 +148,8 @@ jobs:
 
   test-connect:
     name: Connect (ubuntu-latest, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
+    # TODO: remove before merge temporarily disabled to avoid rate limiting while iterating on Workload Identity
+    if: false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true

@@ -4,6 +4,7 @@ import { validateCli } from "@1password/op-js";
 import { installCliOnGithubActionRunner } from "./op-cli-installer";
 import {
 	getWorkloadIdentityConfig,
+	hasCliAuth,
 	loadSecrets,
 	unsetPrevious,
 	validateAuth,
@@ -23,6 +24,14 @@ const loadSecretsAction = async () => {
 		}
 
 		const workloadConfig = getWorkloadIdentityConfig();
+
+		// `unset-previous` can run with no credentials present: Workload Identity creds
+		// are inline per-step and intentionally not persisted (persisting them would make
+		// every later step re-load all variables). Nothing to auth or load, we're done.
+		if (shouldUnsetPrevious && !workloadConfig && !hasCliAuth()) {
+			core.info("No authentication configured; unset complete.");
+			return;
+		}
 
 		if (workloadConfig) {
 			await loadSecretsFromSDK(

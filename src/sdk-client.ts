@@ -12,7 +12,6 @@ export const loadSecretsFromSDK = async (
 	integrationKey: string,
 	shouldExportEnv: boolean,
 ): Promise<void> => {
-
 	// Temporary fix: strip base64 padding from integrationKey — this will eventually be handled by the SDK core itself
 	integrationKey = integrationKey.replace(/=+$/, "");
 
@@ -26,7 +25,7 @@ export const loadSecretsFromSDK = async (
 		},
 	});
 
-    core.info("Authenticated with Workload Identity.");
+	core.info("Authenticated with Workload Identity.");
 
 	const { variables } = await client.environments.getVariables(environmentId);
 
