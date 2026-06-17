@@ -16,6 +16,7 @@ export const loadSecretsFromSDK = async (
 ): Promise<void> => {
 	// Temporary fix: strip base64 padding from integrationKey — this will eventually be handled by the SDK core itself
 	const customerManagedSecret = integrationKey.replace(/=+$/, "");
+	core.setSecret(customerManagedSecret);
 
 	const client = await createClient({
 		integrationName: "1Password GitHub Action",
