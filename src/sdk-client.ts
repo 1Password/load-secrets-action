@@ -3,7 +3,6 @@ import { createClient } from "@1password/sdk";
 import { version } from "../package.json";
 import { envManagedVariables } from "./constants";
 
-// Names use the OIDC/SDK acronyms, which break strictCamelCase.
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const getOIDCToken = async (audience: string): Promise<string> =>
 	core.getIDToken(audience);

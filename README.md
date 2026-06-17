@@ -93,7 +93,7 @@ For more details on secret reference syntax, see the [1Password CLI documentatio
 > [!NOTE]
 > Workload Identity is in **private beta**. It's available to invited participants only. [Contact 1Password](https://developer.1password.com/joinslack) if you're interested in joining the beta.
 
-Instead of a Service Account token or Connect credentials, you can authenticate using Workload Identity, which exchanges your GitHub Actions OIDC token for short-lived 1Password access — no long-lived secret to store. To use it, set all three of the following environment variables (and do not set `OP_SERVICE_ACCOUNT_TOKEN` or the Connect variables):
+Instead of a Service Account token or Connect credentials, you can authenticate using Workload Identity, which exchanges your GitHub Actions OIDC token for short-lived 1Password access. To use it, set all three of the following environment variables (and do not set the Service Account token or the Connect variables):
 
 ```yml
 on: push
@@ -113,7 +113,7 @@ jobs:
           OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
 ```
 
-Unlike the Service Account and Connect flows, you don't select secrets with individual `op://` references. Instead, **all variables defined in the configured 1Password environment are loaded** — each one is exported as an environment variable (or set as a step output). Scope your environment to only the variables you want available to the job.
+Unlike the Service Account and Connect flows, you don't select secrets with individual `op://` references. Instead, **all variables defined in the configured 1Password environment are loaded** and each one is exported as an environment variable (or set as a step output). Scope your environment to only the variables you want available to the job.
 
 If only some of the three variables are set, or if they're combined with another authentication method, the action fails with a configuration error.
 

@@ -38431,19 +38431,18 @@ var sdk = __nccwpck_require__(7837);
 
 
 
-// Names use the OIDC/SDK acronyms, which break strictCamelCase.
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const getOIDCToken = async (audience) => getIDToken(audience);
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const loadSecretsFromSDK = async (workloadId, environmentId, integrationKey, shouldExportEnv) => {
     // Temporary fix: strip base64 padding from integrationKey — this will eventually be handled by the SDK core itself
-    integrationKey = integrationKey.replace(/=+$/, "");
+    const customerManagedSecret = integrationKey.replace(/=+$/, "");
     const client = await (0,sdk.createClient)({
         integrationName: "1Password GitHub Action",
         integrationVersion: package_namespaceObject.rE,
         oidcFetcher: getOIDCToken,
         workloadDetails: {
-            customerManagedSecret: integrationKey,
+            customerManagedSecret,
             workloadUuid: workloadId,
         },
     });
