@@ -113,7 +113,9 @@ jobs:
           OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
 ```
 
-When Workload Identity is configured, secrets are loaded directly from your environment's variables. You don't need to specify individual `op://` secret references. If only some of the three variables are set, or if they're combined with another authentication method, the action fails with a configuration error.
+Unlike the Service Account and Connect flows, you don't select secrets with individual `op://` references. Instead, **all variables defined in the configured 1Password environment are loaded** — each one is exported as an environment variable (or set as a step output). Scope your environment to only the variables you want available to the job.
+
+If only some of the three variables are set, or if they're combined with another authentication method, the action fails with a configuration error.
 
 ## 💙 Community & Support
 

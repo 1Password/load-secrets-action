@@ -38431,7 +38431,10 @@ var sdk = __nccwpck_require__(7837);
 
 
 
+// Names use the OIDC/SDK acronyms, which break strictCamelCase.
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const getOIDCToken = async (audience) => getIDToken(audience);
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const loadSecretsFromSDK = async (workloadId, environmentId, integrationKey, shouldExportEnv) => {
     // Temporary fix: strip base64 padding from integrationKey — this will eventually be handled by the SDK core itself
     integrationKey = integrationKey.replace(/=+$/, "");
@@ -38487,7 +38490,7 @@ const loadSecretsAction = async () => {
         // are inline per-step and intentionally not persisted (persisting them would make
         // every later step re-load all variables). Nothing to auth or load, we're done.
         if (shouldUnsetPrevious && !workloadConfig && !hasCliAuth()) {
-            info("No authentication configured; unset complete.");
+            info("No authentication configured; unset previously managed variables. No secrets were loaded.");
             return;
         }
         if (workloadConfig) {

@@ -262,8 +262,6 @@ jobs:
   test-workload-identity:
     name: Workload Identity (ubuntu-latest, export-env=${{ matrix.export-env }})
     runs-on: ubuntu-latest
-    # Workload Identity exchanges the GitHub OIDC token for 1Password access,
-    # so the job needs permission to request an OIDC token.
     permissions:
       id-token: write
       contents: read
@@ -290,8 +288,6 @@ jobs:
       - name: Build actions
         run: npm run build:all
 
-      # No ./configure step and no op:// references: Workload Identity authenticates
-      # via OIDC and loads all variables from the configured 1Password environment.
       - name: Load secrets
         id: load_secrets
         uses: ./

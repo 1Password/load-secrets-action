@@ -285,4 +285,24 @@ describe("unsetPrevious", () => {
 		expect(core.info).toHaveBeenCalledWith("Unsetting TEST_SECRET");
 		expect(core.exportVariable).toHaveBeenCalledWith("TEST_SECRET", "");
 	});
+
+	it("should unset every variable listed in OP_MANAGED_VARIABLES", () => {
+		process.env[envManagedVariables] = "TEST_SECRET,ANOTHER_TEST,SUPER_SECRET";
+
+		unsetPrevious();
+
+		expect(core.exportVariable).toHaveBeenCalledWith("TEST_SECRET", "");
+		expect(core.exportVariable).toHaveBeenCalledWith("ANOTHER_TEST", "");
+		expect(core.exportVariable).toHaveBeenCalledWith("SUPER_SECRET", "");
+		expect(core.exportVariable).toHaveBeenCalledTimes(3);
+	});
+
+	it("should do nothing when no variables are managed", () => {
+		process.env[envManagedVariables] = "";
+
+		unsetPrevious();
+
+		expect(core.exportVariable).not.toHaveBeenCalled();
+		expect(core.info).not.toHaveBeenCalledWith("Unsetting previous values ...");
+	});
 });
