@@ -78,7 +78,12 @@ describe("loadSecretsFromSDK", () => {
 	});
 
 	it("masks the integration key and strips its base64 padding", async () => {
-		await loadSecretsFromSDK(workloadId, environmentId, "integration-key==", false);
+		await loadSecretsFromSDK(
+			workloadId,
+			environmentId,
+			"integration-key==",
+			false,
+		);
 
 		expect(core.setSecret).toHaveBeenCalledWith("integration-key");
 	});
