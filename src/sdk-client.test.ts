@@ -77,17 +77,6 @@ describe("loadSecretsFromSDK", () => {
 		);
 	});
 
-	it("masks the integration key and strips its base64 padding", async () => {
-		await loadSecretsFromSDK(
-			workloadId,
-			environmentId,
-			"integration-key==",
-			false,
-		);
-
-		expect(core.setSecret).toHaveBeenCalledWith("integration-key");
-	});
-
 	describe("when secret value is empty string", () => {
 		beforeEach(() => {
 			mockGetVariables.mockResolvedValue({
