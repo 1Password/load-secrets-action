@@ -33,7 +33,6 @@ on:
 jobs:
   test-service-account:
     name: Service Account (${{ matrix.os }}, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
-    if: false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -147,7 +146,6 @@ jobs:
 
   test-connect:
     name: Connect (ubuntu-latest, ${{ matrix.version }}, export-env=${{ matrix.export-env }})
-    if: false
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
