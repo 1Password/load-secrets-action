@@ -38392,9 +38392,7 @@ const extractSecret = (envName, shouldExportEnv) => {
     }
 };
 const loadSecrets = async (shouldExportEnv) => {
-    // Pass User-Agent Information to the 1Password CLI.
-    // Strip any prerelease suffix ("-beta.1") since semverToInt only
-    // accepts a plain MAJOR.MINOR.PATCH; a prerelease produces an invalid build.
+    // Strip any prerelease suffix; semverToInt only accepts MAJOR.MINOR.PATCH.
     const [releaseVersion] = package_namespaceObject.rE.split("-");
     (0,dist.setClientInfo)({
         name: "1Password GitHub Action",
