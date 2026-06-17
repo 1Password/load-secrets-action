@@ -92,6 +92,9 @@ jobs:
       OP_CONNECT_CREDENTIALS: ${{ secrets.OP_CONNECT_CREDENTIALS }}
       OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
       OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+      OP_WORKLOAD_ID: ${{ secrets.OP_WORKLOAD_ID }}
+      OP_ENVIRONMENT_ID: ${{ secrets.OP_ENVIRONMENT_ID }}
+      OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
       VAULT: ${{ secrets.VAULT }}
 
   # Post comment on fork PRs after /ok-to-test
