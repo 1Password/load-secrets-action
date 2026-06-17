@@ -93,14 +93,14 @@ describe("loadSecretsFromSDK", () => {
 			);
 
 			expect(core.setOutput).toHaveBeenCalledWith("EMPTY_SECRET", "");
-			expect(core.setSecret).not.toHaveBeenCalled();
+			expect(core.setSecret).not.toHaveBeenCalledWith("");
 		});
 
 		it("sets empty string as environment variable", async () => {
 			await loadSecretsFromSDK(workloadId, environmentId, integrationKey, true);
 
 			expect(core.exportVariable).toHaveBeenCalledWith("EMPTY_SECRET", "");
-			expect(core.setSecret).not.toHaveBeenCalled();
+			expect(core.setSecret).not.toHaveBeenCalledWith("");
 		});
 	});
 

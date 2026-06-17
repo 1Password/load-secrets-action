@@ -38310,7 +38310,7 @@ const installCliOnGithubActionRunner = async (version) => {
 
 
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"rE":"4.0.1"};
+const package_namespaceObject = /*#__PURE__*/JSON.parse('{"rE":"5.0.0-beta.1"}');
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
@@ -38392,11 +38392,12 @@ const extractSecret = (envName, shouldExportEnv) => {
     }
 };
 const loadSecrets = async (shouldExportEnv) => {
-    // Pass User-Agent Information to the 1Password CLI
+    // Strip any prerelease suffix; semverToInt only accepts MAJOR.MINOR.PATCH.
+    const [releaseVersion] = package_namespaceObject.rE.split("-");
     (0,dist.setClientInfo)({
         name: "1Password GitHub Action",
         id: "GHA",
-        build: (0,dist.semverToInt)(package_namespaceObject.rE),
+        build: (0,dist.semverToInt)(releaseVersion ?? package_namespaceObject.rE),
     });
     // Load secrets from environment variables using 1Password CLI.
     // Iterate over them to find 1Password references, extract the secret values,
@@ -38437,6 +38438,7 @@ const getOIDCToken = async (audience) => getIDToken(audience);
 const loadSecretsFromSDK = async (workloadId, environmentId, integrationKey, shouldExportEnv) => {
     // Temporary fix: strip base64 padding from integrationKey — this will eventually be handled by the SDK core itself
     const customerManagedSecret = integrationKey.replace(/=+$/, "");
+    setSecret(customerManagedSecret);
     const client = await (0,sdk.createClient)({
         integrationName: "1Password GitHub Action",
         integrationVersion: package_namespaceObject.rE,
