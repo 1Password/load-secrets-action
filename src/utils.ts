@@ -32,6 +32,7 @@ export const validateAuth = (): void => {
 export const extractSecret = (
 	envName: string,
 	shouldExportEnv: boolean,
+	unmaskValues: string[] = [],
 ): void => {
 	core.info(`Populating variable: ${envName}`);
 
@@ -52,12 +53,15 @@ export const extractSecret = (
 	}
 	// Skip setSecret for empty strings to avoid the warning:
 	// "Can't add secret mask for empty string in ##[add-mask] command."
-	if (secretValue) {
+	if (secretValue && !unmaskValues.includes(secretValue)) {
 		core.setSecret(secretValue);
 	}
 };
 
-export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
+export const loadSecrets = async (
+	shouldExportEnv: boolean,
+	unmaskValues: string[] = [],
+): Promise<void> => {
 	// Pass User-Agent Information to the 1Password CLI
 	setClientInfo({
 		name: "1Password GitHub Action",
@@ -76,7 +80,7 @@ export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
 
 	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
 	for (const envName of envs) {
-		extractSecret(envName, shouldExportEnv);
+		extractSecret(envName, shouldExportEnv, unmaskValues);
 	}
 	if (shouldExportEnv) {
 		core.exportVariable(envManagedVariables, envs.join());

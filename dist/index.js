@@ -35515,7 +35515,7 @@ const validateAuth = () => {
     const authType = isConnect ? "Connect" : "Service account";
     info(`Authenticated with ${authType}.`);
 };
-const extractSecret = (envName, shouldExportEnv) => {
+const extractSecret = (envName, shouldExportEnv, unmaskValues = []) => {
     info(`Populating variable: ${envName}`);
     const ref = process.env[envName];
     if (!ref) {
@@ -35533,11 +35533,11 @@ const extractSecret = (envName, shouldExportEnv) => {
     }
     // Skip setSecret for empty strings to avoid the warning:
     // "Can't add secret mask for empty string in ##[add-mask] command."
-    if (secretValue) {
+    if (secretValue && !unmaskValues.includes(secretValue)) {
         core_setSecret(secretValue);
     }
 };
-const loadSecrets = async (shouldExportEnv) => {
+const loadSecrets = async (shouldExportEnv, unmaskValues = []) => {
     // Pass User-Agent Information to the 1Password CLI
     (0,dist.setClientInfo)({
         name: "1Password GitHub Action",
@@ -35553,7 +35553,7 @@ const loadSecrets = async (shouldExportEnv) => {
     }
     const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
     for (const envName of envs) {
-        extractSecret(envName, shouldExportEnv);
+        extractSecret(envName, shouldExportEnv, unmaskValues);
     }
     if (shouldExportEnv) {
         exportVariable(envManagedVariables, envs.join());
@@ -35582,6 +35582,11 @@ const loadSecretsAction = async () => {
         // Get action inputs
         const shouldUnsetPrevious = getBooleanInput("unset-previous");
         const shouldExportEnv = getBooleanInput("export-env");
+        const unmaskValues = JSON.parse(getInput("unmask-values"));
+        if (!(unmaskValues instanceof Array) ||
+            !unmaskValues.every((tag) => typeof tag === "string")) {
+            throw new Error("Invalid unmask-values input");
+        }
         // Unset all secrets managed by 1Password if `unset-previous` is set.
         if (shouldUnsetPrevious) {
             unsetPrevious();
@@ -35597,7 +35602,7 @@ const loadSecretsAction = async () => {
         // Download and install the CLI
         await installCLI();
         // Load secrets
-        await loadSecrets(shouldExportEnv);
+        await loadSecrets(shouldExportEnv, unmaskValues);
     }
     catch (error) {
         // It's possible for the Error constructor to be modified to be anything
