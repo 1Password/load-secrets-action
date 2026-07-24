@@ -135,6 +135,27 @@ describe("extractSecret", () => {
 			expect(core.setSecret).not.toHaveBeenCalled();
 		});
 	});
+
+	describe("when secret value is configured to be unmasked", () => {
+		const unmaskedTestSecretValue = "unmasked";
+
+		beforeEach(() => {
+			(read.parse as jest.Mock).mockReturnValue(unmaskedTestSecretValue);
+		});
+
+		afterEach(() => {
+			(read.parse as jest.Mock).mockReturnValue(testSecretValue);
+		});
+
+		it("should not call setSecret for configured unmasked string", () => {
+			extractSecret(envTestSecretEnv, false, [unmaskedTestSecretValue]);
+			expect(core.setOutput).toHaveBeenCalledWith(
+				envTestSecretEnv,
+				unmaskedTestSecretValue,
+			);
+			expect(core.setSecret).not.toHaveBeenCalled();
+		});
+	});
 });
 
 describe("loadSecrets", () => {

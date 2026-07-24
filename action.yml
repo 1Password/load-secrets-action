@@ -14,6 +14,9 @@ inputs:
   version:
     description: Specify which 1Password CLI version to install. Defaults to "latest".
     default: "latest"
+  unmask-values:
+    description: Specify an array of strings that should not be masked.
+    default: "[]"
 runs:
   using: "node24"
   main: "dist/index.js"

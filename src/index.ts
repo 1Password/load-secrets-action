@@ -10,6 +10,13 @@ const loadSecretsAction = async () => {
 		// Get action inputs
 		const shouldUnsetPrevious = core.getBooleanInput("unset-previous");
 		const shouldExportEnv = core.getBooleanInput("export-env");
+		const unmaskValues: unknown = JSON.parse(core.getInput("unmask-values"));
+		if (
+			!(unmaskValues instanceof Array) ||
+			!unmaskValues.every((tag) => typeof tag === "string")
+		) {
+			throw new Error("Invalid unmask-values input");
+		}
 
 		// Unset all secrets managed by 1Password if `unset-previous` is set.
 		if (shouldUnsetPrevious) {
@@ -30,7 +37,7 @@ const loadSecretsAction = async () => {
 		await installCLI();
 
 		// Load secrets
-		await loadSecrets(shouldExportEnv);
+		await loadSecrets(shouldExportEnv, unmaskValues);
 	} catch (error) {
 		// It's possible for the Error constructor to be modified to be anything
 		// in JavaScript, so the following code accounts for this possibility.
