@@ -2,7 +2,12 @@ import dotenv from "dotenv";
 import * as core from "@actions/core";
 import { validateCli } from "@1password/op-js";
 import { installCliOnGithubActionRunner } from "./op-cli-installer";
-import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
+import {
+	loadSecrets,
+	loadSecretsFromEnvFileBatched,
+	unsetPrevious,
+	validateAuth,
+} from "./utils";
 import { envFilePath } from "./constants";
 
 const loadSecretsAction = async () => {
@@ -30,7 +35,11 @@ const loadSecretsAction = async () => {
 		await installCLI();
 
 		// Load secrets
-		await loadSecrets(shouldExportEnv);
+		if (file) {
+			await loadSecretsFromEnvFileBatched(file, shouldExportEnv);
+		} else {
+			await loadSecrets(shouldExportEnv);
+		}
 	} catch (error) {
 		// It's possible for the Error constructor to be modified to be anything
 		// in JavaScript, so the following code accounts for this possibility.
@@ -39,7 +48,7 @@ const loadSecretsAction = async () => {
 		if (error instanceof Error) {
 			message = error.message;
 		} else {
-			String(error);
+			message = String(error);
 		}
 		core.setFailed(message);
 	}

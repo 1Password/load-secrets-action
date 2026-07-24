@@ -1,9 +1,11 @@
+import fs from "node:fs";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
 import {
 	extractSecret,
 	loadSecrets,
+	loadSecretsFromEnvFileBatched,
 	unsetPrevious,
 	validateAuth,
 } from "./utils";
@@ -16,6 +18,13 @@ import {
 } from "./constants";
 
 jest.mock("@1password/op-js");
+jest.mock("node:fs", () => ({
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	__esModule: true,
+	default: {
+		readFileSync: jest.fn(),
+	},
+}));
 
 beforeEach(() => {
 	jest.clearAllMocks();
@@ -141,11 +150,13 @@ describe("loadSecrets", () => {
 	it("sets the client info and gets the executed output", async () => {
 		await loadSecrets(true);
 
-		expect(setClientInfo).toHaveBeenCalledWith({
-			name: "1Password GitHub Action",
-			id: "GHA",
-		});
-		expect(exec.getExecOutput).toHaveBeenCalledWith('sh -c "op env ls"');
+		expect(setClientInfo).toHaveBeenCalledWith(
+			expect.objectContaining({
+				name: "1Password GitHub Action",
+				id: "GHA",
+			}),
+		);
+		expect(exec.getExecOutput).toHaveBeenCalledWith("op", ["env", "ls"]);
 		expect(core.exportVariable).toHaveBeenCalledWith(
 			"OP_MANAGED_VARIABLES",
 			"MOCK_SECRET",
@@ -156,7 +167,7 @@ describe("loadSecrets", () => {
 		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({ stdout: "" });
 		await loadSecrets(true);
 
-		expect(exec.getExecOutput).toHaveBeenCalledWith('sh -c "op env ls"');
+		expect(exec.getExecOutput).toHaveBeenCalledWith("op", ["env", "ls"]);
 		expect(core.exportVariable).not.toHaveBeenCalled();
 	});
 
@@ -172,6 +183,61 @@ describe("loadSecrets", () => {
 
 			expect(core.exportVariable).not.toHaveBeenCalled();
 		});
+	});
+});
+
+describe("loadSecretsFromEnvFileBatched", () => {
+	const envFilePath = "/tmp/test.env";
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
+	it("loads secrets from env file and sets them as outputs", async () => {
+		(fs.readFileSync as unknown as jest.Mock).mockReturnValue(
+			Buffer.from("FOO=op://vault/item/foo\nBAR=op://vault/item/bar\n"),
+		);
+		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({
+			stdout: JSON.stringify({ FOO: "foo-value", BAR: "bar-value" }),
+		});
+
+		await loadSecretsFromEnvFileBatched(envFilePath, false);
+
+		expect(exec.getExecOutput).toHaveBeenCalledWith(
+			"op",
+			expect.arrayContaining([
+				"run",
+				`--env-file=${envFilePath}`,
+				"--no-masking",
+			]),
+			expect.anything(),
+		);
+		expect(core.setOutput).toHaveBeenCalledWith("FOO", "foo-value");
+		expect(core.setOutput).toHaveBeenCalledWith("BAR", "bar-value");
+		expect(core.exportVariable).not.toHaveBeenCalledWith(
+			"OP_MANAGED_VARIABLES",
+			expect.anything(),
+		);
+		expect(core.setSecret).toHaveBeenCalledWith("foo-value");
+		expect(core.setSecret).toHaveBeenCalledWith("bar-value");
+	});
+
+	it("loads secrets from env file and exports them as env vars (including managed list)", async () => {
+		(fs.readFileSync as unknown as jest.Mock).mockReturnValue(
+			Buffer.from("FOO=op://vault/item/foo\nBAR=op://vault/item/bar\n"),
+		);
+		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({
+			stdout: JSON.stringify({ FOO: "foo-value", BAR: "bar-value" }),
+		});
+
+		await loadSecretsFromEnvFileBatched(envFilePath, true);
+
+		expect(core.exportVariable).toHaveBeenCalledWith("FOO", "foo-value");
+		expect(core.exportVariable).toHaveBeenCalledWith("BAR", "bar-value");
+		expect(core.exportVariable).toHaveBeenCalledWith(
+			envManagedVariables,
+			"FOO,BAR",
+		);
 	});
 });
 
