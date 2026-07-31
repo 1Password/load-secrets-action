@@ -11,7 +11,7 @@
 
 ---
 
-`load-secrets-action` loads secrets from 1Password into GitHub Actions using [Service Accounts](https://developer.1password.com/docs/service-accounts) or [1Password Connect](https://developer.1password.com/docs/connect).
+`load-secrets-action` loads secrets from 1Password into GitHub Actions using [Service Accounts](https://developer.1password.com/docs/service-accounts), [1Password Connect](https://developer.1password.com/docs/connect), or [Workload Identity](https://www.1password.dev/environments/credential-broker).
 
 Specify in your workflow YAML file which secrets from 1Password should be loaded into your job, and the action will make them available as environment variables for the next steps.
 
@@ -37,7 +37,7 @@ jobs:
 
       - name: Load secret
         id: load_secrets
-        uses: 1password/load-secrets-action@v4
+        uses: 1password/load-secrets-action@v5
         env:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
           SECRET: op://app-cicd/hello-world/secret
@@ -59,7 +59,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Load secret
-        uses: 1password/load-secrets-action@v4
+        uses: 1password/load-secrets-action@v5
         with:
           # Export loaded secrets as environment variables
           export-env: true
@@ -79,7 +79,7 @@ When loading SSH keys, you can specify the format using the `ssh-format` query p
 
 ```yml
 - name: Load SSH key
-  uses: 1password/load-secrets-action@v4
+  uses: 1password/load-secrets-action@v5
   env:
     OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     # Load SSH private key in OpenSSH format
@@ -87,6 +87,35 @@ When loading SSH keys, you can specify the format using the `ssh-format` query p
 ```
 
 For more details on secret reference syntax, see the [1Password CLI documentation](https://developer.1password.com/docs/cli/secret-reference-syntax/#ssh-format-parameter).
+
+## 🪪 Workload Identity (public preview)
+
+> [!NOTE]
+> Workload Identity is in **public preview**. [Contact 1Password](https://developer.1password.com/joinslack) if you have questions or feedback.
+
+Instead of a Service Account token or Connect credentials, you can authenticate using Workload Identity, which exchanges your GitHub Actions OIDC token for short-lived 1Password access. To use it, set all three of the following environment variables (and do not set the Service Account token or the Connect variables):
+
+```yml
+on: push
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for the action to request a GitHub OIDC token
+      contents: read
+    steps:
+      - name: Load secret
+        id: load_secrets
+        uses: 1password/load-secrets-action@v5
+        env:
+          OP_WORKLOAD_ID: ${{ vars.OP_WORKLOAD_ID }}
+          OP_ENVIRONMENT_ID: ${{ vars.OP_ENVIRONMENT_ID }}
+          OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
+```
+
+Unlike the Service Account and Connect flows, you don't select secrets with individual `op://` references. Instead, **all variables defined in the configured 1Password environment are loaded** and each one is exported as an environment variable (or set as a step output). Scope your environment to only the variables you want available to the job.
+
+If only some of the three variables are set, or if they're combined with another authentication method, the action fails with a configuration error.
 
 ## 💙 Community & Support
 

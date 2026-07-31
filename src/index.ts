@@ -2,7 +2,14 @@ import dotenv from "dotenv";
 import * as core from "@actions/core";
 import { validateCli } from "@1password/op-js";
 import { installCliOnGithubActionRunner } from "./op-cli-installer";
-import { loadSecrets, unsetPrevious, validateAuth } from "./utils";
+import {
+	getWorkloadIdentityConfig,
+	hasCliAuth,
+	loadSecrets,
+	unsetPrevious,
+	validateAuth,
+} from "./utils";
+import { loadSecretsFromSDK } from "./sdk-client";
 import { envFilePath } from "./constants";
 
 const loadSecretsAction = async () => {
@@ -16,21 +23,42 @@ const loadSecretsAction = async () => {
 			unsetPrevious();
 		}
 
-		// Validate that a proper authentication configuration is set for the CLI
-		validateAuth();
+		const workloadConfig = getWorkloadIdentityConfig();
 
-		// Set environment variables from OP_ENV_FILE
-		const file = process.env[envFilePath];
-		if (file) {
-			core.info(`Loading environment variables from file: ${file}`);
-			dotenv.config({ path: file });
+		// `unset-previous` can run with no credentials present: Workload Identity creds
+		// are inline per-step and intentionally not persisted (persisting them would make
+		// every later step re-load all variables). Nothing to auth or load, we're done.
+		if (shouldUnsetPrevious && !workloadConfig && !hasCliAuth()) {
+			core.info(
+				"No authentication configured; unset previously managed variables. No secrets were loaded.",
+			);
+			return;
 		}
 
-		// Download and install the CLI
-		await installCLI();
+		if (workloadConfig) {
+			await loadSecretsFromSDK(
+				workloadConfig.workloadId,
+				workloadConfig.environmentId,
+				workloadConfig.integrationKey,
+				shouldExportEnv,
+			);
+		} else {
+			// Validate that a proper authentication configuration is set for the CLI
+			validateAuth();
 
-		// Load secrets
-		await loadSecrets(shouldExportEnv);
+			// Set environment variables from OP_ENV_FILE
+			const file = process.env[envFilePath];
+			if (file) {
+				core.info(`Loading environment variables from file: ${file}`);
+				dotenv.config({ path: file });
+			}
+
+			// Download and install the CLI
+			await installCLI();
+
+			// Load secrets
+			await loadSecrets(shouldExportEnv);
+		}
 	} catch (error) {
 		// It's possible for the Error constructor to be modified to be anything
 		// in JavaScript, so the following code accounts for this possibility.
