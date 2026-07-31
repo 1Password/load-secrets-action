@@ -4,6 +4,6 @@
 import { ReleaseChannel } from "./constants";
 
 export const FALLBACK_VERSIONS: Record<ReleaseChannel, string> = {
-	[ReleaseChannel.latest]: "2.35.0",
-	[ReleaseChannel.latestBeta]: "2.38.0-beta.01",
+	[ReleaseChannel.latest]: "2.38.1",
+	[ReleaseChannel.latestBeta]: "2.38.1-beta.02",
 };

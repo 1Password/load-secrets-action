@@ -3,6 +3,8 @@ import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
 import {
 	extractSecret,
+	getWorkloadIdentityConfig,
+	hasCliAuth,
 	loadSecrets,
 	unsetPrevious,
 	validateAuth,
@@ -11,8 +13,11 @@ import {
 	authErr,
 	envConnectHost,
 	envConnectToken,
+	envEnvironmentId,
+	envIntegrationKey,
 	envManagedVariables,
 	envServiceAccountToken,
+	envWorkloadId,
 } from "./constants";
 
 jest.mock("@1password/op-js");
@@ -63,6 +68,96 @@ describe("validateAuth", () => {
 		expect(validateAuth).not.toThrow(authErr);
 		expect(core.warning).toHaveBeenCalled();
 		expect(core.info).toHaveBeenCalledWith("Authenticated with Connect.");
+	});
+});
+
+describe("getWorkloadIdentityConfig", () => {
+	const testWorkloadId = "workload-id";
+	const testEnvironmentId = "environment-id";
+	const testIntegrationKey = "integration-key";
+
+	beforeEach(() => {
+		process.env[envWorkloadId] = "";
+		process.env[envEnvironmentId] = "";
+		process.env[envIntegrationKey] = "";
+		process.env[envConnectHost] = "";
+		process.env[envConnectToken] = "";
+		process.env[envServiceAccountToken] = "";
+	});
+
+	it("should return null when no variables are set", () => {
+		expect(getWorkloadIdentityConfig()).toBeNull();
+	});
+
+	it("should return the config when all variables are set", () => {
+		process.env[envWorkloadId] = testWorkloadId;
+		process.env[envEnvironmentId] = testEnvironmentId;
+		process.env[envIntegrationKey] = testIntegrationKey;
+
+		expect(getWorkloadIdentityConfig()).toEqual({
+			workloadId: testWorkloadId,
+			environmentId: testEnvironmentId,
+			integrationKey: testIntegrationKey,
+		});
+	});
+
+	it("should throw an error when only some variables are set", () => {
+		process.env[envWorkloadId] = testWorkloadId;
+
+		expect(getWorkloadIdentityConfig).toThrow(
+			/Incomplete Workload Identity configuration/,
+		);
+	});
+
+	it("should throw an error when combined with Connect credentials", () => {
+		process.env[envWorkloadId] = testWorkloadId;
+		process.env[envEnvironmentId] = testEnvironmentId;
+		process.env[envIntegrationKey] = testIntegrationKey;
+		process.env[envConnectHost] = "https://localhost:8000";
+		process.env[envConnectToken] = "token";
+
+		expect(getWorkloadIdentityConfig).toThrow(
+			/Conflicting authentication configuration/,
+		);
+	});
+
+	it("should throw an error when combined with a service account token", () => {
+		process.env[envWorkloadId] = testWorkloadId;
+		process.env[envEnvironmentId] = testEnvironmentId;
+		process.env[envIntegrationKey] = testIntegrationKey;
+		process.env[envServiceAccountToken] = "ops_token";
+
+		expect(getWorkloadIdentityConfig).toThrow(
+			/Conflicting authentication configuration/,
+		);
+	});
+});
+
+describe("hasCliAuth", () => {
+	beforeEach(() => {
+		process.env[envConnectHost] = "";
+		process.env[envConnectToken] = "";
+		process.env[envServiceAccountToken] = "";
+	});
+
+	it("returns false when no CLI auth is configured", () => {
+		expect(hasCliAuth()).toBe(false);
+	});
+
+	it("returns false when only the Connect host is set", () => {
+		process.env[envConnectHost] = "https://localhost:8000";
+		expect(hasCliAuth()).toBe(false);
+	});
+
+	it("returns true with both Connect host and token", () => {
+		process.env[envConnectHost] = "https://localhost:8000";
+		process.env[envConnectToken] = "token";
+		expect(hasCliAuth()).toBe(true);
+	});
+
+	it("returns true with a service account token", () => {
+		process.env[envServiceAccountToken] = "ops_token";
+		expect(hasCliAuth()).toBe(true);
 	});
 });
 
@@ -189,5 +284,25 @@ describe("unsetPrevious", () => {
 		expect(core.info).toHaveBeenCalledWith("Unsetting previous values ...");
 		expect(core.info).toHaveBeenCalledWith("Unsetting TEST_SECRET");
 		expect(core.exportVariable).toHaveBeenCalledWith("TEST_SECRET", "");
+	});
+
+	it("should unset every variable listed in OP_MANAGED_VARIABLES", () => {
+		process.env[envManagedVariables] = "TEST_SECRET,ANOTHER_TEST,SUPER_SECRET";
+
+		unsetPrevious();
+
+		expect(core.exportVariable).toHaveBeenCalledWith("TEST_SECRET", "");
+		expect(core.exportVariable).toHaveBeenCalledWith("ANOTHER_TEST", "");
+		expect(core.exportVariable).toHaveBeenCalledWith("SUPER_SECRET", "");
+		expect(core.exportVariable).toHaveBeenCalledTimes(3);
+	});
+
+	it("should do nothing when no variables are managed", () => {
+		process.env[envManagedVariables] = "";
+
+		unsetPrevious();
+
+		expect(core.exportVariable).not.toHaveBeenCalled();
+		expect(core.info).not.toHaveBeenCalledWith("Unsetting previous values ...");
 	});
 });

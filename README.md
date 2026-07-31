@@ -88,6 +88,35 @@ When loading SSH keys, you can specify the format using the `ssh-format` query p
 
 For more details on secret reference syntax, see the [1Password CLI documentation](https://developer.1password.com/docs/cli/secret-reference-syntax/#ssh-format-parameter).
 
+## 🧪 Workload Identity (private beta)
+
+> [!NOTE]
+> Workload Identity is in **private beta**. It's available to invited participants only. [Contact 1Password](https://developer.1password.com/joinslack) if you're interested in joining the beta.
+
+Instead of a Service Account token or Connect credentials, you can authenticate using Workload Identity, which exchanges your GitHub Actions OIDC token for short-lived 1Password access. To use it, set all three of the following environment variables (and do not set the Service Account token or the Connect variables):
+
+```yml
+on: push
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for the action to request a GitHub OIDC token
+      contents: read
+    steps:
+      - name: Load secret
+        id: load_secrets
+        uses: 1password/load-secrets-action@v5beta
+        env:
+          OP_WORKLOAD_ID: ${{ vars.OP_WORKLOAD_ID }}
+          OP_ENVIRONMENT_ID: ${{ vars.OP_ENVIRONMENT_ID }}
+          OP_INTEGRATION_KEY: ${{ secrets.OP_INTEGRATION_KEY }}
+```
+
+Unlike the Service Account and Connect flows, you don't select secrets with individual `op://` references. Instead, **all variables defined in the configured 1Password environment are loaded** and each one is exported as an environment variable (or set as a step output). Scope your environment to only the variables you want available to the job.
+
+If only some of the three variables are set, or if they're combined with another authentication method, the action fails with a configuration error.
+
 ## 💙 Community & Support
 
 - File an [issue](https://github.com/1Password/load-secrets-action/issues) for bugs and feature requests.

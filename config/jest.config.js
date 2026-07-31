@@ -14,6 +14,7 @@ const jestConfig = {
 		"^@actions/core$": "<rootDir>/__mocks__/actions-core.ts",
 		"^@actions/tool-cache$": "<rootDir>/__mocks__/actions-tool-cache.ts",
 		"^@actions/exec$": "<rootDir>/__mocks__/actions-exec.ts",
+		"^@1password/sdk$": "<rootDir>/__mocks__/1password-sdk.ts",
 	},
 	transform: {
 		".ts": [
