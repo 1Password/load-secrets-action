@@ -4,13 +4,21 @@ on:
 name: Check fallback versions are fresh
 
 # Runs when a release branch is created/updated to check pinned CLI version
+permissions:
+  contents: read
+
 jobs:
   check-fallback-versions:
     name: "Check baked-in fallback versions are up to date"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
       - run: npm ci
