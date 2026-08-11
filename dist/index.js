@@ -35568,11 +35568,18 @@ const loadSecretsFromEnvFileBatched = async (envFile, shouldExportEnv) => {
         nodeScript,
     ], {
         silent: true,
+        ignoreReturnCode: true,
         env: {
             ...process.env,
             [envFileKeysEnvVar]: JSON.stringify(envNames),
         },
     });
+    if (res.exitCode !== 0) {
+        // Only stderr is safe to surface: stdout carries the resolved secret values,
+        // while the CLI reports failures (e.g. an unknown item or field) on stderr.
+        const details = res.stderr.trim();
+        throw new Error(`1Password CLI failed to resolve secrets from ${envFile} (exit code ${res.exitCode})${details ? `:\n${details}` : "."}`);
+    }
     let resolved = {};
     try {
         resolved = JSON.parse(res.stdout);

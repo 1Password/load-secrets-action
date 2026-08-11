@@ -198,7 +198,9 @@ describe("loadSecretsFromEnvFileBatched", () => {
 			Buffer.from("FOO=op://vault/item/foo\nBAR=op://vault/item/bar\n"),
 		);
 		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({
+			exitCode: 0,
 			stdout: JSON.stringify({ FOO: "foo-value", BAR: "bar-value" }),
+			stderr: "",
 		});
 
 		await loadSecretsFromEnvFileBatched(envFilePath, false);
@@ -227,7 +229,9 @@ describe("loadSecretsFromEnvFileBatched", () => {
 			Buffer.from("FOO=op://vault/item/foo\nBAR=op://vault/item/bar\n"),
 		);
 		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({
+			exitCode: 0,
 			stdout: JSON.stringify({ FOO: "foo-value", BAR: "bar-value" }),
+			stderr: "",
 		});
 
 		await loadSecretsFromEnvFileBatched(envFilePath, true);
@@ -238,6 +242,41 @@ describe("loadSecretsFromEnvFileBatched", () => {
 			envManagedVariables,
 			"FOO,BAR",
 		);
+	});
+
+	it("throws with the CLI stderr when the CLI exits non-zero", async () => {
+		(fs.readFileSync as unknown as jest.Mock).mockReturnValue(
+			Buffer.from("FOO=op://vault/item/foo\n"),
+		);
+		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({
+			exitCode: 1,
+			stdout: "",
+			stderr: "[ERROR] item 'vault/item' does not have a field 'foo'\n",
+		});
+
+		await expect(
+			loadSecretsFromEnvFileBatched(envFilePath, true),
+		).rejects.toThrow("does not have a field 'foo'");
+
+		expect(core.exportVariable).not.toHaveBeenCalled();
+	});
+
+	it("does not leak resolved secrets into the error when the CLI fails", async () => {
+		(fs.readFileSync as unknown as jest.Mock).mockReturnValue(
+			Buffer.from("FOO=op://vault/item/foo\n"),
+		);
+		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({
+			exitCode: 1,
+			stdout: JSON.stringify({ FOO: "foo-value" }),
+			stderr: "[ERROR] something went wrong\n",
+		});
+
+		const error = await loadSecretsFromEnvFileBatched(envFilePath, true).catch(
+			(caught: unknown) => caught,
+		);
+
+		expect(error).toBeInstanceOf(Error);
+		expect((error as Error).message).not.toContain("foo-value");
 	});
 });
 
