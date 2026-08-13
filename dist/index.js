@@ -37169,7 +37169,7 @@ var semver_default = /*#__PURE__*/__nccwpck_require__.n(node_modules_semver);
 
 const FALLBACK_VERSIONS = {
     [ReleaseChannel.latest]: "2.38.1",
-    [ReleaseChannel.latestBeta]: "2.38.1-beta.02",
+    [ReleaseChannel.latestBeta]: "2.39.0-beta.02",
 };
 
 ;// CONCATENATED MODULE: ./src/op-cli-installer/version/validate.ts
@@ -38277,7 +38277,7 @@ const installCliOnGithubActionRunner = async (version) => {
 
 
 ;// CONCATENATED MODULE: ./package.json
-const package_namespaceObject = {"rE":"5.0.0"};
+const package_namespaceObject = {"rE":"5.0.1"};
 ;// CONCATENATED MODULE: ./src/constants.ts
 const envConnectHost = "OP_CONNECT_HOST";
 const envConnectToken = "OP_CONNECT_TOKEN";
