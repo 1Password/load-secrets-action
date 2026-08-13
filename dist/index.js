@@ -74,13 +74,13 @@ function handleError(f, args) {
     }
 }
 
-function isLikeNone(x) {
-    return x === undefined || x === null;
-}
-
 function getArrayU8FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
+}
+
+function isLikeNone(x) {
+    return x === undefined || x === null;
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -244,38 +244,6 @@ function debugString(val) {
     return className;
 }
 /**
- * Initializes an SDK client with an OIDC token fetcher.
- * The `fetcher` parameter is a JS function `(string) => Promise<string>`.
- * @param {string} config
- * @param {Function} fetcher
- * @returns {Promise<string>}
- */
-module.exports.init_client_oidc = function(config, fetcher) {
-    const ptr0 = passStringToWasm0(config, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.init_client_oidc(ptr0, len0, fetcher);
-    return ret;
-};
-
-function takeFromExternrefTable0(idx) {
-    const value = wasm.__wbindgen_export_2.get(idx);
-    wasm.__externref_table_dealloc(idx);
-    return value;
-}
-/**
- * Drops a client, releasing the memory allocated for it.
- * @param {string} client_id
- */
-module.exports.release_client = function(client_id) {
-    const ptr0 = passStringToWasm0(client_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.release_client(ptr0, len0);
-    if (ret[1]) {
-        throw takeFromExternrefTable0(ret[0]);
-    }
-};
-
-/**
  * Initializes an SDK client with a given configuration.
  * @param {string} config
  * @returns {Promise<string>}
@@ -287,18 +255,11 @@ module.exports.init_client = function(config) {
     return ret;
 };
 
-/**
- * Handles all asynchronous invocations to the SDK core received from the SDK.
- * @param {string} parameters
- * @returns {Promise<string>}
- */
-module.exports.invoke = function(parameters) {
-    const ptr0 = passStringToWasm0(parameters, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.invoke(ptr0, len0);
-    return ret;
-};
-
+function takeFromExternrefTable0(idx) {
+    const value = wasm.__wbindgen_export_2.get(idx);
+    wasm.__externref_table_dealloc(idx);
+    return value;
+}
 /**
  * Handles all synchronous invocations to the SDK core received from the SDK.
  * @param {string} parameters
@@ -325,154 +286,62 @@ module.exports.invoke_sync = function(parameters) {
     }
 };
 
+/**
+ * Initializes an SDK client with an OIDC token fetcher.
+ * The `fetcher` parameter is a JS function `(string) => Promise<string>`.
+ * @param {string} config
+ * @param {Function} fetcher
+ * @returns {Promise<string>}
+ */
+module.exports.init_client_oidc = function(config, fetcher) {
+    const ptr0 = passStringToWasm0(config, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.init_client_oidc(ptr0, len0, fetcher);
+    return ret;
+};
+
+/**
+ * Drops a client, releasing the memory allocated for it.
+ * @param {string} client_id
+ */
+module.exports.release_client = function(client_id) {
+    const ptr0 = passStringToWasm0(client_id, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.release_client(ptr0, len0);
+    if (ret[1]) {
+        throw takeFromExternrefTable0(ret[0]);
+    }
+};
+
+/**
+ * Handles all asynchronous invocations to the SDK core received from the SDK.
+ * @param {string} parameters
+ * @returns {Promise<string>}
+ */
+module.exports.invoke = function(parameters) {
+    const ptr0 = passStringToWasm0(parameters, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.invoke(ptr0, len0);
+    return ret;
+};
+
 function __wbg_adapter_30(arg0, arg1) {
-    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__h1136cde1298a28e3(arg0, arg1);
+    wasm._dyn_core__ops__function__FnMut_____Output___R_as_wasm_bindgen__closure__WasmClosure___describe__invoke__ha87580c8ddcf1766(arg0, arg1);
 }
 
 function __wbg_adapter_33(arg0, arg1, arg2) {
-    wasm.closure3886_externref_shim(arg0, arg1, arg2);
+    wasm.closure3862_externref_shim(arg0, arg1, arg2);
 }
 
-function __wbg_adapter_185(arg0, arg1, arg2, arg3) {
-    wasm.closure3998_externref_shim(arg0, arg1, arg2, arg3);
+function __wbg_adapter_147(arg0, arg1, arg2, arg3) {
+    wasm.closure3973_externref_shim(arg0, arg1, arg2, arg3);
 }
-
-const __wbindgen_enum_ReadableStreamType = ["bytes"];
 
 const __wbindgen_enum_RequestCache = ["default", "no-store", "reload", "no-cache", "force-cache", "only-if-cached"];
 
 const __wbindgen_enum_RequestCredentials = ["omit", "same-origin", "include"];
 
 const __wbindgen_enum_RequestMode = ["same-origin", "no-cors", "cors", "navigate"];
-
-const IntoUnderlyingByteSourceFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_intounderlyingbytesource_free(ptr >>> 0, 1));
-
-class IntoUnderlyingByteSource {
-
-    __destroy_into_raw() {
-        const ptr = this.__wbg_ptr;
-        this.__wbg_ptr = 0;
-        IntoUnderlyingByteSourceFinalization.unregister(this);
-        return ptr;
-    }
-
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_intounderlyingbytesource_free(ptr, 0);
-    }
-    /**
-     * @returns {number}
-     */
-    get autoAllocateChunkSize() {
-        const ret = wasm.intounderlyingbytesource_autoAllocateChunkSize(this.__wbg_ptr);
-        return ret >>> 0;
-    }
-    /**
-     * @param {ReadableByteStreamController} controller
-     * @returns {Promise<any>}
-     */
-    pull(controller) {
-        const ret = wasm.intounderlyingbytesource_pull(this.__wbg_ptr, controller);
-        return ret;
-    }
-    /**
-     * @param {ReadableByteStreamController} controller
-     */
-    start(controller) {
-        wasm.intounderlyingbytesource_start(this.__wbg_ptr, controller);
-    }
-    /**
-     * @returns {ReadableStreamType}
-     */
-    get type() {
-        const ret = wasm.intounderlyingbytesource_type(this.__wbg_ptr);
-        return __wbindgen_enum_ReadableStreamType[ret];
-    }
-    cancel() {
-        const ptr = this.__destroy_into_raw();
-        wasm.intounderlyingbytesource_cancel(ptr);
-    }
-}
-module.exports.IntoUnderlyingByteSource = IntoUnderlyingByteSource;
-
-const IntoUnderlyingSinkFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_intounderlyingsink_free(ptr >>> 0, 1));
-
-class IntoUnderlyingSink {
-
-    __destroy_into_raw() {
-        const ptr = this.__wbg_ptr;
-        this.__wbg_ptr = 0;
-        IntoUnderlyingSinkFinalization.unregister(this);
-        return ptr;
-    }
-
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_intounderlyingsink_free(ptr, 0);
-    }
-    /**
-     * @param {any} reason
-     * @returns {Promise<any>}
-     */
-    abort(reason) {
-        const ptr = this.__destroy_into_raw();
-        const ret = wasm.intounderlyingsink_abort(ptr, reason);
-        return ret;
-    }
-    /**
-     * @returns {Promise<any>}
-     */
-    close() {
-        const ptr = this.__destroy_into_raw();
-        const ret = wasm.intounderlyingsink_close(ptr);
-        return ret;
-    }
-    /**
-     * @param {any} chunk
-     * @returns {Promise<any>}
-     */
-    write(chunk) {
-        const ret = wasm.intounderlyingsink_write(this.__wbg_ptr, chunk);
-        return ret;
-    }
-}
-module.exports.IntoUnderlyingSink = IntoUnderlyingSink;
-
-const IntoUnderlyingSourceFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_intounderlyingsource_free(ptr >>> 0, 1));
-
-class IntoUnderlyingSource {
-
-    __destroy_into_raw() {
-        const ptr = this.__wbg_ptr;
-        this.__wbg_ptr = 0;
-        IntoUnderlyingSourceFinalization.unregister(this);
-        return ptr;
-    }
-
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_intounderlyingsource_free(ptr, 0);
-    }
-    /**
-     * @param {ReadableStreamDefaultController} controller
-     * @returns {Promise<any>}
-     */
-    pull(controller) {
-        const ret = wasm.intounderlyingsource_pull(this.__wbg_ptr, controller);
-        return ret;
-    }
-    cancel() {
-        const ptr = this.__destroy_into_raw();
-        wasm.intounderlyingsource_cancel(ptr);
-    }
-}
-module.exports.IntoUnderlyingSource = IntoUnderlyingSource;
 
 module.exports.__wbg_abort_410ec47a64ac6117 = function(arg0, arg1) {
     arg0.abort(arg1);
@@ -482,20 +351,8 @@ module.exports.__wbg_abort_775ef1d17fc65868 = function(arg0) {
     arg0.abort();
 };
 
-module.exports.__wbg_append_299d5d48292c0495 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
-    arg0.append(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
-}, arguments) };
-
 module.exports.__wbg_append_8c7dd8d641a5f01b = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4) {
     arg0.append(getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4));
-}, arguments) };
-
-module.exports.__wbg_append_b2d1fc16de2a0e81 = function() { return handleError(function (arg0, arg1, arg2, arg3, arg4, arg5) {
-    arg0.append(getStringFromWasm0(arg1, arg2), arg3, getStringFromWasm0(arg4, arg5));
-}, arguments) };
-
-module.exports.__wbg_append_b44785ebeb668479 = function() { return handleError(function (arg0, arg1, arg2, arg3) {
-    arg0.append(getStringFromWasm0(arg1, arg2), arg3);
 }, arguments) };
 
 module.exports.__wbg_arrayBuffer_d1b44c4390db422f = function() { return handleError(function (arg0) {
@@ -503,28 +360,8 @@ module.exports.__wbg_arrayBuffer_d1b44c4390db422f = function() { return handleEr
     return ret;
 }, arguments) };
 
-module.exports.__wbg_buffer_09165b52af8c5237 = function(arg0) {
-    const ret = arg0.buffer;
-    return ret;
-};
-
 module.exports.__wbg_buffer_609cc3eee51ed158 = function(arg0) {
     const ret = arg0.buffer;
-    return ret;
-};
-
-module.exports.__wbg_byobRequest_77d9adf63337edfb = function(arg0) {
-    const ret = arg0.byobRequest;
-    return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
-};
-
-module.exports.__wbg_byteLength_e674b853d9c77e1d = function(arg0) {
-    const ret = arg0.byteLength;
-    return ret;
-};
-
-module.exports.__wbg_byteOffset_fd862df290ef848d = function(arg0) {
-    const ret = arg0.byteOffset;
     return ret;
 };
 
@@ -543,14 +380,6 @@ module.exports.__wbg_clearTimeout_42d9ccd50822fd3a = function(arg0) {
     return ret;
 };
 
-module.exports.__wbg_close_304cc1fef3466669 = function() { return handleError(function (arg0) {
-    arg0.close();
-}, arguments) };
-
-module.exports.__wbg_close_5ce03e29be453811 = function() { return handleError(function (arg0) {
-    arg0.close();
-}, arguments) };
-
 module.exports.__wbg_crypto_86f2631e91b51511 = function(arg0) {
     const ret = arg0.crypto;
     return ret;
@@ -560,10 +389,6 @@ module.exports.__wbg_done_769e5ede4b31c67b = function(arg0) {
     const ret = arg0.done;
     return ret;
 };
-
-module.exports.__wbg_enqueue_bb16ba72f537dc9e = function() { return handleError(function (arg0, arg1) {
-    arg0.enqueue(arg1);
-}, arguments) };
 
 module.exports.__wbg_fetch_509096533071c657 = function(arg0, arg1) {
     const ret = arg0.fetch(arg1);
@@ -693,7 +518,7 @@ module.exports.__wbg_new_23a2665fac83c611 = function(arg0, arg1) {
             const a = state0.a;
             state0.a = 0;
             try {
-                return __wbg_adapter_185(a, state0.b, arg0, arg1);
+                return __wbg_adapter_147(a, state0.b, arg0, arg1);
             } finally {
                 state0.a = a;
             }
@@ -715,23 +540,8 @@ module.exports.__wbg_new_405e22f390576ce2 = function() {
     return ret;
 };
 
-module.exports.__wbg_new_78feb108b6472713 = function() {
-    const ret = new Array();
-    return ret;
-};
-
-module.exports.__wbg_new_9fd39a253424609a = function() { return handleError(function () {
-    const ret = new FormData();
-    return ret;
-}, arguments) };
-
 module.exports.__wbg_new_a12002a7f91c75be = function(arg0) {
     const ret = new Uint8Array(arg0);
-    return ret;
-};
-
-module.exports.__wbg_new_c68d7209be747379 = function(arg0, arg1) {
-    const ret = new Error(getStringFromWasm0(arg0, arg1));
     return ret;
 };
 
@@ -757,11 +567,6 @@ module.exports.__wbg_newwithlength_a381634e90c276d4 = function(arg0) {
 
 module.exports.__wbg_newwithstrandinit_06c535e0a867c635 = function() { return handleError(function (arg0, arg1, arg2) {
     const ret = new Request(getStringFromWasm0(arg0, arg1), arg2);
-    return ret;
-}, arguments) };
-
-module.exports.__wbg_newwithu8arraysequenceandoptions_068570c487f69127 = function() { return handleError(function (arg0, arg1) {
-    const ret = new Blob(arg0, arg1);
     return ret;
 }, arguments) };
 
@@ -800,11 +605,6 @@ module.exports.__wbg_process_3975fd6c72f520aa = function(arg0) {
     return ret;
 };
 
-module.exports.__wbg_push_737cfc8c1432c2c6 = function(arg0, arg1) {
-    const ret = arg0.push(arg1);
-    return ret;
-};
-
 module.exports.__wbg_queueMicrotask_97d92b4fcc8a61c5 = function(arg0) {
     queueMicrotask(arg0);
 };
@@ -827,10 +627,6 @@ module.exports.__wbg_resolve_4851785c9c5f573d = function(arg0) {
     const ret = Promise.resolve(arg0);
     return ret;
 };
-
-module.exports.__wbg_respond_1f279fa9f8edcb1c = function() { return handleError(function (arg0, arg1) {
-    arg0.respond(arg1 >>> 0);
-}, arguments) };
 
 module.exports.__wbg_self_b29ea9f89ecb0567 = function() { return handleError(function () {
     const ret = self.self;
@@ -872,10 +668,6 @@ module.exports.__wbg_setmode_5dc300b865044b65 = function(arg0, arg1) {
 
 module.exports.__wbg_setsignal_75b21ef3a81de905 = function(arg0, arg1) {
     arg0.signal = arg1;
-};
-
-module.exports.__wbg_settype_39ed370d3edd403c = function(arg0, arg1, arg2) {
-    arg0.type = getStringFromWasm0(arg1, arg2);
 };
 
 module.exports.__wbg_signal_aaf9ad74119f20a4 = function(arg0) {
@@ -961,11 +753,6 @@ module.exports.__wbg_versions_4e31226f5e8dc909 = function(arg0) {
     return ret;
 };
 
-module.exports.__wbg_view_fd8a56e8983f448d = function(arg0) {
-    const ret = arg0.view;
-    return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
-};
-
 module.exports.__wbg_window_aa5515e600e96252 = function() { return handleError(function () {
     const ret = window.window;
     return ret;
@@ -981,13 +768,13 @@ module.exports.__wbindgen_cb_drop = function(arg0) {
     return ret;
 };
 
-module.exports.__wbindgen_closure_wrapper13728 = function(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 3822, __wbg_adapter_30);
+module.exports.__wbindgen_closure_wrapper13816 = function(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 3841, __wbg_adapter_30);
     return ret;
 };
 
-module.exports.__wbindgen_closure_wrapper13881 = function(arg0, arg1, arg2) {
-    const ret = makeMutClosure(arg0, arg1, 3887, __wbg_adapter_33);
+module.exports.__wbindgen_closure_wrapper13863 = function(arg0, arg1, arg2) {
+    const ret = makeMutClosure(arg0, arg1, 3863, __wbg_adapter_33);
     return ret;
 };
 
@@ -1430,7 +1217,7 @@ _Environments_inner = new WeakMap();
 
 // Code generated by op-codegen - DO NOT EDIT MANUALLY
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.throwError = exports.RateLimitExceededError = exports.DesktopSessionExpiredError = void 0;
+exports.throwError = exports.AuthExpiredError = exports.RateLimitExceededError = exports.DesktopSessionExpiredError = void 0;
 class DesktopSessionExpiredError extends Error {
     constructor(message) {
         super();
@@ -1445,6 +1232,13 @@ class RateLimitExceededError extends Error {
     }
 }
 exports.RateLimitExceededError = RateLimitExceededError;
+class AuthExpiredError extends Error {
+    constructor(message) {
+        super();
+        this.message = message;
+    }
+}
+exports.AuthExpiredError = AuthExpiredError;
 const throwError = (errString) => {
     let err;
     try {
@@ -1458,6 +1252,8 @@ const throwError = (errString) => {
             throw new DesktopSessionExpiredError(err.message);
         case "RateLimitExceeded":
             throw new RateLimitExceededError(err.message);
+        case "AuthExpired":
+            throw new AuthExpiredError(err.message);
         default:
             throw new Error(err.message);
     }
@@ -2832,9 +2628,9 @@ _Vaults_inner = new WeakMap();
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SDK_BUILD_NUMBER = exports.SDK_VERSION = void 0;
-exports.SDK_VERSION = "0.5.0-beta.1";
-exports.SDK_BUILD_NUMBER = "0050001";
-const SDK_CORE_VERSION = "0.5.0-beta.1";
+exports.SDK_VERSION = "0.5.0";
+exports.SDK_BUILD_NUMBER = "0050002";
+const SDK_CORE_VERSION = "0.5.0";
 
 
 /***/ }),
@@ -38491,7 +38287,7 @@ const envFilePath = "OP_ENV_FILE";
 const envWorkloadId = "OP_WORKLOAD_ID";
 const envEnvironmentId = "OP_ENVIRONMENT_ID";
 const envIntegrationKey = "OP_INTEGRATION_KEY";
-const authErr = `Authentication error with environment variables: you must set either 1) ${envServiceAccountToken}, or 2) both ${envConnectHost} and ${envConnectToken}.`;
+const authErr = `Authentication error with environment variables: you must set one of 1) ${envServiceAccountToken}, 2) both ${envConnectHost} and ${envConnectToken}, or 3) all of ${envWorkloadId}, ${envEnvironmentId}, and ${envIntegrationKey} to use Workload Identity.`;
 
 ;// CONCATENATED MODULE: ./src/utils.ts
 
