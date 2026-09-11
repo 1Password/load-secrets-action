@@ -12,6 +12,7 @@ import {
 	type SupportedPlatform,
 } from "./cli-installer";
 import { type Installer } from "./installer";
+import { verifyMacOsPackageSignature } from "./macos-signature";
 
 const execFileAsync = promisify(execFile);
 
@@ -33,6 +34,10 @@ export class MacOsInstaller extends CliInstaller implements Installer {
 		const pkgPath = await tc.downloadTool(downloadUrl);
 		const pkgWithExtension = `${pkgPath}.pkg`;
 		fs.renameSync(pkgPath, pkgWithExtension);
+
+		core.info("Verifying 1Password CLI signature");
+		await verifyMacOsPackageSignature(pkgWithExtension);
+		core.info("1Password CLI signature verified");
 
 		const expandDir = "temp-pkg";
 		await execFileAsync("pkgutil", ["--expand", pkgWithExtension, expandDir]);
