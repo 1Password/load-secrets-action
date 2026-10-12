@@ -196,6 +196,16 @@ describe("extractSecret", () => {
 		expect(core.setSecret).toHaveBeenCalledWith(testSecretValue);
 	});
 
+	it("should trim whitespace from the reference before reading it", () => {
+		process.env[envTestSecretEnv] = ` ${testSecretRef}\n`;
+
+		extractSecret(envTestSecretEnv, false);
+
+		expect(read.parse).toHaveBeenCalledWith(testSecretRef);
+
+		process.env[envTestSecretEnv] = testSecretRef;
+	});
+
 	describe("when secret value is empty string", () => {
 		const emptySecretValue = "";
 
@@ -304,29 +314,40 @@ describe("loadSecrets", () => {
 
 describe("getSecretReferenceEnvNames", () => {
 	it.each([
-		["op://vault/item/field"],
-		["op://vault/item/section/field"],
-		["op://vault/item/field?attribute=otp"],
-		["op://my vault/my item/private key"],
-		[" op://vault/item/field "],
-	])("includes %j", (value) => {
+		// Valid references
+		["op://vault/item/field", true],
+		["op://vault/item/section/field", true],
+		["op://vault/item//field", true],
+		["op://my-vault/my_item/field.name", true],
+		["op://my vault/my item/private key", true],
+		["op://vault/item/field?attribute=otp", true],
+		["op://vault/item/section/field?ssh-format=openssh", true],
+		[" op://vault/item/field ", true],
+		// Characters outside the secret reference syntax
+		["op://My Vault/item (old)/pw", false],
+		["op://vault/item@x/field", false],
+		["op://vault/item/field#1", false],
+		["op://vault/it\tem/field", false],
+		["op://Café/item/field", false],
+		// Malformed structure
+		["", false],
+		["not-a-reference", false],
+		["OP://vault/item/field", false],
+		["prefix op://vault/item/field", false],
+		["op://", false],
+		["op://vault/item", false],
+		["op://vault//field", false],
+		["op://vault/item/section/field/extra", false],
+		["op://vault/item/field\nmore", false],
+		// Malformed query
+		["op://vault/item/field?", false],
+		["op://vault/item/field?attribute", false],
+		["op://vault/item/field?attribute=otp&ssh-format=openssh", false],
+	])("%j is a secret reference: %s", (value, expected) => {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
-		expect(getSecretReferenceEnvNames({ TEST: value })).toEqual(["TEST"]);
-	});
-
-	it.each([
-		[""],
-		["not-a-reference"],
-		["OP://vault/item/field"],
-		["prefix op://vault/item/field"],
-		["op://"],
-		["op://vault/item"],
-		["op://vault//field"],
-		["op://vault/item/section/field/extra"],
-		["op://vault/item/field\nmore"],
-	])("excludes %j", (value) => {
-		// eslint-disable-next-line @typescript-eslint/naming-convention
-		expect(getSecretReferenceEnvNames({ TEST: value })).toEqual([]);
+		expect(getSecretReferenceEnvNames({ TEST: value })).toEqual(
+			expected ? ["TEST"] : [],
+		);
 	});
 });
 

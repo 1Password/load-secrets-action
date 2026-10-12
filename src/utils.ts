@@ -87,7 +87,7 @@ export const extractSecret = (
 ): void => {
 	core.info(`Populating variable: ${envName}`);
 
-	const ref = process.env[envName];
+	const ref = process.env[envName]?.trim();
 	if (!ref) {
 		return;
 	}
@@ -110,7 +110,7 @@ export const extractSecret = (
 };
 
 const secretReferencePattern =
-	/^op:\/\/[^/\n\u0080-\uffff]+\/[^/\n\u0080-\uffff]+(?:\/[^/\n\u0080-\uffff]+)?\/[^/\n\u0080-\uffff]+$/;
+	/^op:\/\/[\w .-]+\/[\w .-]+(?:\/[\w .-]*)?\/[\w .-]+(?:\?[\w .-]*=[\w .-]*)?$/;
 
 export const getSecretReferenceEnvNames = (
 	env: NodeJS.ProcessEnv = process.env,
