@@ -112,7 +112,6 @@ export const extractSecret = (
 const secretReferencePattern =
 	/^op:\/\/[^/\n\u0080-\uffff]+\/[^/\n\u0080-\uffff]+(?:\/[^/\n\u0080-\uffff]+)?\/[^/\n\u0080-\uffff]+$/;
 
-
 export const getSecretReferenceEnvNames = (
 	env: NodeJS.ProcessEnv = process.env,
 ): string[] =>
