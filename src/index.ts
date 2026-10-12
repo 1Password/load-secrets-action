@@ -57,7 +57,7 @@ const loadSecretsAction = async () => {
 			await installCLI();
 
 			// Load secrets
-			await loadSecrets(shouldExportEnv);
+			loadSecrets(shouldExportEnv);
 		}
 	} catch (error) {
 		// It's possible for the Error constructor to be modified to be anything

@@ -1,5 +1,4 @@
 import * as core from "@actions/core";
-import * as exec from "@actions/exec";
 import { read, setClientInfo } from "@1password/op-js";
 import {
 	extractSecret,
@@ -8,6 +7,7 @@ import {
 	loadSecrets,
 	unsetPrevious,
 	validateAuth,
+	getSecretReferenceEnvNames,
 } from "./utils";
 import {
 	authErr,
@@ -233,40 +233,100 @@ describe("extractSecret", () => {
 });
 
 describe("loadSecrets", () => {
-	it("sets the client info and gets the executed output", async () => {
-		await loadSecrets(true);
+	const originalEnv = process.env;
+	const testSecretRef = "op://vault/item/field";
+	const testSecretValue = "Secret1@3$";
+
+	beforeEach(() => {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		process.env = { MOCK_SECRET: testSecretRef };
+		read.parse = jest.fn().mockReturnValue(testSecretValue);
+	});
+
+	afterEach(() => {
+		process.env = originalEnv;
+	});
+
+	it("sets the client info and resolves secret references", () => {
+		loadSecrets(true);
 
 		expect(setClientInfo).toHaveBeenCalledWith({
 			name: "1Password GitHub Action",
 			id: "GHA",
 		});
-		expect(exec.getExecOutput).toHaveBeenCalledWith('sh -c "op env ls"');
+		expect(read.parse).toHaveBeenCalledWith(testSecretRef);
 		expect(core.exportVariable).toHaveBeenCalledWith(
-			"OP_MANAGED_VARIABLES",
+			envManagedVariables,
 			"MOCK_SECRET",
 		);
 	});
 
-	it("return early if no env vars with secrets found", async () => {
-		(exec.getExecOutput as jest.Mock).mockReturnValueOnce({ stdout: "" });
-		await loadSecrets(true);
+	it("returns early if no env vars contain secret references", () => {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		process.env = { PATH: "/usr/bin" };
 
-		expect(exec.getExecOutput).toHaveBeenCalledWith('sh -c "op env ls"');
+		loadSecrets(true);
+
+		expect(read.parse).not.toHaveBeenCalled();
 		expect(core.exportVariable).not.toHaveBeenCalled();
 	});
 
-	describe("core.exportVariable", () => {
-		it("is called when shouldExportEnv is true", async () => {
-			await loadSecrets(true);
-
-			expect(core.exportVariable).toHaveBeenCalledTimes(1);
+	it("throws when a secret reference cannot be read", () => {
+		(read.parse as jest.Mock).mockImplementation(() => {
+			throw new Error("item not found");
 		});
 
-		it("is not called when shouldExportEnv is false", async () => {
-			await loadSecrets(false);
+		expect(() => loadSecrets(true)).toThrow("item not found");
+	});
 
+	describe("core.exportVariable", () => {
+		it("is called when shouldExportEnv is true", () => {
+			loadSecrets(true);
+
+			expect(core.exportVariable).toHaveBeenCalledWith(
+				"MOCK_SECRET",
+				testSecretValue,
+			);
+			expect(core.exportVariable).toHaveBeenCalledTimes(2);
+		});
+
+		it("is not called when shouldExportEnv is false", () => {
+			loadSecrets(false);
+
+			expect(core.setOutput).toHaveBeenCalledWith(
+				"MOCK_SECRET",
+				testSecretValue,
+			);
 			expect(core.exportVariable).not.toHaveBeenCalled();
 		});
+	});
+});
+
+describe("getSecretReferenceEnvNames", () => {
+	it.each([
+		["op://vault/item/field"],
+		["op://vault/item/section/field"],
+		["op://vault/item/field?attribute=otp"],
+		["op://my vault/my item/private key"],
+		[" op://vault/item/field "],
+	])("includes %j", (value) => {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		expect(getSecretReferenceEnvNames({ TEST: value })).toEqual(["TEST"]);
+	});
+
+	it.each([
+		[""],
+		["not-a-reference"],
+		["OP://vault/item/field"],
+		["prefix op://vault/item/field"],
+		["op://"],
+		["op://vault/item"],
+		["op://vault//field"],
+		["op://vault/item/section/field/extra"],
+		["op://vault/item/field\nmore"],
+	])("excludes %j", (value) => {
+		// eslint-disable-next-line @typescript-eslint/naming-convention
+		expect(getSecretReferenceEnvNames({ TEST: value })).toEqual([]);
 	});
 });
 

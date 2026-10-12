@@ -1,5 +1,4 @@
 import * as core from "@actions/core";
-import * as exec from "@actions/exec";
 import { read, setClientInfo, semverToInt } from "@1password/op-js";
 import { version } from "../package.json";
 import {
@@ -110,7 +109,17 @@ export const extractSecret = (
 	}
 };
 
-export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
+const secretReferencePattern =
+	/^op:\/\/[^/\n]+\/[^/\n]+(?:\/[^/\n]+)?\/[^/\n]+$/;
+
+export const getSecretReferenceEnvNames = (
+	env: NodeJS.ProcessEnv = process.env,
+): string[] =>
+	Object.entries(env)
+		.filter(([, value]) => value && secretReferencePattern.test(value.trim()))
+		.map(([name]) => name);
+
+export const loadSecrets = (shouldExportEnv: boolean): void => {
 	// Strip any prerelease suffix; semverToInt only accepts MAJOR.MINOR.PATCH.
 	const [releaseVersion] = version.split("-");
 	setClientInfo({
@@ -119,16 +128,15 @@ export const loadSecrets = async (shouldExportEnv: boolean): Promise<void> => {
 		build: semverToInt(releaseVersion ?? version),
 	});
 
-	// Load secrets from environment variables using 1Password CLI.
+	// Load secrets from environment variables using process.env.
 	// Iterate over them to find 1Password references, extract the secret values,
 	// and make them available in the next steps either as step outputs or as environment variables.
-	const res = await exec.getExecOutput(`sh -c "op env ls"`);
+	const envs = getSecretReferenceEnvNames();
 
-	if (res.stdout === "") {
+	if (envs.length === 0) {
 		return;
 	}
 
-	const envs = res.stdout.replace(/\n+$/g, "").split(/\r?\n/);
 	for (const envName of envs) {
 		extractSecret(envName, shouldExportEnv);
 	}
