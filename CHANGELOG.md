@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Update the action runtime from Node 20 to Node 24 for GitHub Actions compatibility. ([#148](https://github.com/1Password/load-secrets-action/pull/148))
+- Update the action runtime from Node 20 to Node 24 for GitHub Actions compatibility. ([#149](https://github.com/1Password/load-secrets-action/pull/149))
 
 ### Security
 
