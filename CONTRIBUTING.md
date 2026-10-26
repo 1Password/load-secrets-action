@@ -27,6 +27,10 @@ After following the steps below for signing commits, you can test against your P
 
 If applicable, update the [README.md](./README.md) to reflect any changes introduced by the new code.
 
+## Changelog
+
+If your PR includes a user-facing change, add an entry under `[Unreleased]` in [CHANGELOG.md](./CHANGELOG.md). Use the matching category (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed` or `Security`) and link your PR. Internal changes like CI updates, refactors with no behavior change, or dev dependency bumps don't need an entry.
+
 ## Sign your commits
 
 To get your PR merged, we require you to sign your commits.

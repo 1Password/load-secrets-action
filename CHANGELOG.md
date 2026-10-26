@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Secret references are now detected by reading environment variables directly instead of running `op env ls`. Variables are matched against the documented secret reference syntax. ([#196](https://github.com/1Password/load-secrets-action/pull/196))
+
 ## [5.0.1] - 2026-08-18
 
 ### Changed
