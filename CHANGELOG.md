@@ -84,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support loading secrets from env files. ([#93](https://github.com/1Password/load-secrets-action/pull/93))
+- Support loading secrets from env files. ([#118](https://github.com/1Password/load-secrets-action/pull/118))
 
 ### Removed
 
