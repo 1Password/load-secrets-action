@@ -2,7 +2,6 @@ import os from "os";
 
 import {
 	archMap,
-	CliInstaller,
 	cliUrlBuilder,
 	type SupportedPlatform,
 } from "./cli-installer";
@@ -25,9 +24,7 @@ describe("LinuxInstaller", () => {
 
 	it("should call install with correct URL", async () => {
 		const installer = new LinuxInstaller(version);
-		const installMock = jest
-			.spyOn(CliInstaller.prototype, "install")
-			.mockResolvedValue();
+		const installMock = jest.spyOn(installer, "install").mockResolvedValue();
 
 		await installer.installCli();
 
