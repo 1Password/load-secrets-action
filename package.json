@@ -52,7 +52,7 @@
 		"minimatch": "^9.0.7"
 	},
 	"devDependencies": {
-		"@1password/eslint-config": "^4.3.1",
+		"@1password/eslint-config": "^9.2.0",
 		"@1password/prettier-config": "^1.2.0",
 		"@types/jest": "^29.5.12",
 		"@types/node": "^20.11.30",
